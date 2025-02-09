@@ -55,7 +55,7 @@ public class ElevatorIOTalon implements ElevatorIO {
         ElevatorConstants.kLeftInverted
             ? InvertedValue.CounterClockwise_Positive
             : InvertedValue.Clockwise_Positive;
-    configuration.Feedback.SensorToMechanismRatio = 1 / ElevatorConstants.kPositionConversionFactor;
+    configuration.Feedback.SensorToMechanismRatio = ElevatorConstants.kElevatorGearing;
 
     elevatorMotorLeft.getConfigurator().apply(configuration);
     elevatorMotorRight.getConfigurator().apply(configuration);

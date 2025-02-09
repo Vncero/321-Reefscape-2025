@@ -22,6 +22,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.commands.ReefAlign;
 import frc.robot.util.SelfControlledSwerveDriveSimulationWrapper;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -298,5 +299,20 @@ public class DrivetrainSim implements SwerveDrive {
     // send simulation data to dashboard for testing
     field2d.setRobotPose(simulatedDrive.getActualPoseInSimulationWorld());
     field2d.getObject("odometry").setPose(getPose());
+  }
+
+  @Logged(name = "RobotLeftAligned")
+  public Pose2d robotLeftAligned() {
+    return ReefAlign.leftAlignPoses.get(ReefAlign.getNearestReefID(getPose()));
+  }
+
+  @Logged(name = "RobotRightAligned")
+  public Pose2d robotRightAligned() {
+    return ReefAlign.rightAlignPoses.get(ReefAlign.getNearestReefID(getPose()));
+  }
+
+  @Logged(name = "ClosestAprilTag")
+  public Pose2d closestAprilTag() {
+    return ReefAlign.getNearestReefPose(getPose());
   }
 }

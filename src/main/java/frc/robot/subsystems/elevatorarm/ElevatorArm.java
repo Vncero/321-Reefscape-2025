@@ -159,4 +159,8 @@ public class ElevatorArm extends SubsystemBase {
   public void periodic() {
     io.updateInputs(this.inputs);
   }
+
+  public boolean atSetpoint() {
+    return pidController.atSetpoint();
+  }
 }

@@ -30,6 +30,8 @@ public class ElevatorConstants {
   public static final Distance kElevatorMaximumHeight = Inches.of(56);
   public static final Distance kElevatorStartingHeight = kElevatorMinimumHeight;
 
+  public static final Distance kElevatorDangerHeight = Meters.of(0.8);
+
   // Elevator Motor Configs
   public static final boolean kLeftInverted = false;
   public static final boolean kRightInverted = false;
