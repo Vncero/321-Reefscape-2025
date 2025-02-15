@@ -11,7 +11,6 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -53,11 +52,7 @@ public class ElevatorArmIOSpark implements ElevatorArmIO {
             .apply(
                 new EncoderConfig() // config for relative encoder
                     .positionConversionFactor(ElevatorArmConstants.kPositionConversionFactor)
-                    .velocityConversionFactor(ElevatorArmConstants.kVelocityConversionFactor))
-            .apply(
-                new AbsoluteEncoderConfig() // config for absolute encoder
-                    .positionConversionFactor(ElevatorArmConstants.kAbsPositionConversionFactor)
-                    .velocityConversionFactor(ElevatorArmConstants.kAbsVelocityConversionFactor)),
+                    .velocityConversionFactor(ElevatorArmConstants.kVelocityConversionFactor)),
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 

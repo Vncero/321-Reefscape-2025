@@ -1,8 +1,10 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.algaeIntakePivot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
@@ -15,12 +17,12 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 public class AlgaeIntakePivotIOSim implements AlgaeIntakePivotIO {
 
   public static final AlgaeIntakePivotConfig config =
-      new AlgaeIntakePivotConfig(0.2, 0, 0.01, 1.13);
+      new AlgaeIntakePivotConfig(0.2, 0, 0.01, 1.483);
 
   private SingleJointedArmSim pivotSim;
 
-  public
-  AlgaeIntakePivotIOSim() { // configures a simulated arm with two pivot motors controlling one
+  public AlgaeIntakePivotIOSim() {
+    // configures a simulated arm with two pivot motors controlling one
     // pivot point
     pivotSim =
         new SingleJointedArmSim(
@@ -44,5 +46,7 @@ public class AlgaeIntakePivotIOSim implements AlgaeIntakePivotIO {
   public void updateInputs(AlgaeIntakePivotInputs inputs) { // gets info to update inputs
     pivotSim.update(0.02);
     inputs.pivotAngle = Radians.of(pivotSim.getAngleRads());
+    inputs.pivotVelocity = RadiansPerSecond.of(pivotSim.getVelocityRadPerSec());
+    inputs.pivotCurrent = Amps.of(pivotSim.getCurrentDrawAmps());
   }
 }

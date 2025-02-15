@@ -198,58 +198,40 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
   }
 
   @Override
-  public Command driveToFieldPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  var targetSpeeds =
-                      ChassisSpeeds.discretize(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          thetaController.calculate(
-                                  getPose().getRotation().getRadians(),
-                                  pose.get().getRotation().getRadians())
-                              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
-                          DrivetrainConstants.kLoopDt.in(Seconds));
+  public void driveToFieldPose(Pose2d pose) {
+    var targetSpeeds =
+        ChassisSpeeds.discretize(
+            xPoseController.calculate(getPose().getX(), pose.getX())
+                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            yPoseController.calculate(getPose().getY(), pose.getY())
+                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            thetaController.calculate(
+                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
+            DrivetrainConstants.kLoopDt.in(Seconds));
 
-                  setControl(
-                      fieldCentricRequest
-                          .withDriveRequestType(DriveRequestType.Velocity)
-                          .withVelocityX(targetSpeeds.vxMetersPerSecond)
-                          .withVelocityY(targetSpeeds.vyMetersPerSecond)
-                          .withRotationalRate(targetSpeeds.omegaRadiansPerSecond));
-                }));
+    setControl(
+        fieldCentricRequest
+            .withDriveRequestType(DriveRequestType.Velocity)
+            .withVelocityX(targetSpeeds.vxMetersPerSecond)
+            .withVelocityY(targetSpeeds.vyMetersPerSecond)
+            .withRotationalRate(targetSpeeds.omegaRadiansPerSecond));
   }
 
   // drive with absolute heading control
   @Override
-  public Command driveFixedHeading(
-      DoubleSupplier translationX, DoubleSupplier translationY, Supplier<Rotation2d> rotation) {
-    return run(
-        () -> {
-          var speeds =
-              ChassisSpeeds.discretize(
-                  translationX.getAsDouble(),
-                  translationY.getAsDouble(),
-                  0,
-                  DrivetrainConstants.kLoopDt.in(Seconds));
+  public void driveFixedHeading(double translationX, double translationY, Rotation2d rotation) {
+    var speeds =
+        ChassisSpeeds.discretize(
+            translationX, translationY, 0, DrivetrainConstants.kLoopDt.in(Seconds));
 
-          setControl(
-              fieldCentricFacingAngleRequest
-                  .withDriveRequestType(DriveRequestType.Velocity)
-                  .withVelocityX(speeds.vxMetersPerSecond)
-                  .withVelocityY(speeds.vyMetersPerSecond)
-                  .withTargetDirection(rotation.get())
-                  .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
-        });
+    setControl(
+        fieldCentricFacingAngleRequest
+            .withDriveRequestType(DriveRequestType.Velocity)
+            .withVelocityX(speeds.vxMetersPerSecond)
+            .withVelocityY(speeds.vyMetersPerSecond)
+            .withTargetDirection(rotation)
+            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
   }
 
   @Override

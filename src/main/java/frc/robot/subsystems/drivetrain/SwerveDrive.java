@@ -128,15 +128,32 @@ public interface SwerveDrive extends Subsystem {
   void driveRobotCentric(
       double translationX, double translationY, double rotation, DriveFeedforwards feedforwards);
 
+  void driveFixedHeading(double translationX, double translationY, Rotation2d rotation);
+
   // drive with heading controlled by PID
-  Command driveFixedHeading(
-      DoubleSupplier translationX, DoubleSupplier translationY, Supplier<Rotation2d> rotation);
+  default Command driveFixedHeading(
+      DoubleSupplier translationX, DoubleSupplier translationY, Supplier<Rotation2d> rotation) {
+    return run(
+        () ->
+            driveFixedHeading(
+                translationX.getAsDouble(), translationY.getAsDouble(), rotation.get()));
+  }
 
   // robot relative auto drive w/ external pid controllers
   Command driveToRobotPose(Supplier<Pose2d> pose);
 
   // field relative auto drive w/ external pid controllers
-  Command driveToFieldPose(Supplier<Pose2d> pose);
+  void driveToFieldPose(Pose2d pose);
+
+  default Command driveToFieldPose(Supplier<Pose2d> pose) {
+    return runOnce(
+            () -> {
+              xPoseController.reset();
+              yPoseController.reset();
+              thetaController.reset();
+            })
+        .andThen(run(() -> driveToFieldPose(pose.get())));
+  }
 
   void resetPose(Pose2d pose);
 

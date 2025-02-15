@@ -67,6 +67,8 @@ public class ElevatorArm extends SubsystemBase {
     this.inputs = new ElevatorArmInputs();
     this.pidController = new PIDController(config.kP(), config.kI(), config.kD());
     this.feedforward = new ArmFeedforward(0, config.kG(), 0);
+
+    this.pidController.setTolerance(ElevatorArmConstants.kAngleTolerance.in(Degrees));
   }
 
   /**
@@ -92,7 +94,7 @@ public class ElevatorArm extends SubsystemBase {
   public void goToAngle(Angle angle) {
     double volts =
         pidController.calculate(inputs.angle.in(Degrees), angle.in(Degrees))
-            + feedforward.calculate(angle.in(Radians), 0)
+            + feedforward.calculate(angle.plus(ElevatorArmConstants.kCMOffset).in(Radians), 0)
             + calculateGamepieceFeedforward(angle);
     io.setVoltage(Volts.of(volts));
   }
@@ -158,5 +160,13 @@ public class ElevatorArm extends SubsystemBase {
   /** periodic method of the ElevatorArm Just updates the inputs from the sensors for now */
   public void periodic() {
     io.updateInputs(this.inputs);
+  }
+
+  public boolean atSetpoint() {
+    return pidController.atSetpoint();
+  }
+
+  public Angle getAngle() {
+    return inputs.angle;
   }
 }

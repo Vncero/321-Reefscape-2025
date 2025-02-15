@@ -8,6 +8,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -80,6 +81,14 @@ public class CoralEndEffector extends SubsystemBase {
         () -> {
           io.setVoltage(CoralEndEffectorConstants.kOuttakeVoltage);
         });
+  }
+
+  public Command runVolts(Supplier<Voltage> voltage) {
+    return run(() -> io.setVoltage(voltage.get()));
+  }
+
+  public boolean hasCoral() {
+    return inputs.hasCoral;
   }
 
   // stalls coral if we have a coral; this should be the default command

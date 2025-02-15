@@ -26,6 +26,8 @@ public class Elevator extends SubsystemBase {
   private ElevatorFeedforward feedForward;
   private ElevatorConfig config;
 
+  private boolean isHomed = false;
+
   // Method that creates the Elevator object as the real/sim io by checking if we're running a sim
   // or not
   public static Elevator create() {
@@ -47,8 +49,9 @@ public class Elevator extends SubsystemBase {
     this.pidController = new PIDController(config.kP(), config.kI(), config.kD());
     this.feedForward = new ElevatorFeedforward(config.kS(), config.kG(), 0);
 
+    this.pidController.setTolerance(ElevatorConstants.kHeightTolerance.in(Meters));
+
     // set position to starting position
-    // TODO: automatically home on robot start and disable movement if robot isn't homed
     io.setEncoderPosition(ElevatorConstants.kElevatorStartingHeight);
   }
 
@@ -70,6 +73,7 @@ public class Elevator extends SubsystemBase {
 
   // Goes to height
   public void goToHeight(Distance targetHeight) {
+
     double motorOutput = pidController.calculate(inputs.height.in(Meters), targetHeight.in(Meters));
 
     double ff = feedForward.calculate(motorOutput);
@@ -101,6 +105,7 @@ public class Elevator extends SubsystemBase {
                 () -> {
                   io.setEncoderPosition(
                       Meters.of(ElevatorConstants.kElevatorStartingHeight.in(Meters)));
+                  isHomed = true;
                 }));
   }
 
@@ -126,5 +131,22 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     // Constantly updates inputs
     io.updateInputs(inputs);
+  }
+
+  public Distance getHeight() {
+    return inputs.height;
+  }
+
+  public boolean elevatorIsHomed() {
+    return isHomed;
+  }
+
+  public boolean inCollisionZone() {
+    if (getHeight() == null) return false;
+    return getHeight().compareTo(ElevatorConstants.kElevatorDangerHeight) < 0;
+  }
+
+  public boolean atSetpoint() {
+    return pidController.atSetpoint();
   }
 }

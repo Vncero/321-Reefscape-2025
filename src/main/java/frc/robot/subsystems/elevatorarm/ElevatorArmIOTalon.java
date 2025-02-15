@@ -63,7 +63,7 @@ public class ElevatorArmIOTalon implements ElevatorArmIO {
         .getConfigurator()
         .apply(
             new FeedbackConfigs()
-                .withSensorToMechanismRatio(ElevatorArmConstants.kPositionConversionFactor));
+                .withSensorToMechanismRatio(ElevatorArmConstants.kElevatorArmGearing));
 
     // setup encoder
     encoderCandi

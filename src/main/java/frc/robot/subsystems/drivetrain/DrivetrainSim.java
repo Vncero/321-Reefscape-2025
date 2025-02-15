@@ -22,6 +22,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.commands.ReefAlign;
 import frc.robot.util.SelfControlledSwerveDriveSimulationWrapper;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -185,46 +186,34 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public Command driveToFieldPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  ChassisSpeeds targetSpeeds =
-                      new ChassisSpeeds(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          thetaController.calculate(
-                                  getPose().getRotation().getRadians(),
-                                  pose.get().getRotation().getRadians())
-                              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond));
+  public void driveToFieldPose(Pose2d pose) {
 
-                  simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, true, false);
-                }));
+    if (pose == null) return;
+
+    ChassisSpeeds targetSpeeds =
+        new ChassisSpeeds(
+            xPoseController.calculate(getPose().getX(), pose.getX())
+                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            yPoseController.calculate(getPose().getY(), pose.getY())
+                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            thetaController.calculate(
+                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond));
+
+    simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, true, false);
   }
 
   @Override
-  public Command driveFixedHeading(
-      DoubleSupplier translationX, DoubleSupplier translationY, Supplier<Rotation2d> rotation) {
-    return run(
-        () -> {
-          ChassisSpeeds speeds =
-              flipFieldSpeeds(
-                  new ChassisSpeeds(
-                      translationX.getAsDouble(),
-                      translationY.getAsDouble(),
-                      headingController.calculate(
-                          getPose().getRotation().getRadians(), rotation.get().getRadians())));
+  public void driveFixedHeading(double translationX, double translationY, Rotation2d rotation) {
+    ChassisSpeeds speeds =
+        flipFieldSpeeds(
+            new ChassisSpeeds(
+                translationX,
+                translationY,
+                headingController.calculate(
+                    getPose().getRotation().getRadians(), rotation.getRadians())));
 
-          simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), true, false);
-        });
+    simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), true, false);
   }
 
   @Override
@@ -298,5 +287,20 @@ public class DrivetrainSim implements SwerveDrive {
     // send simulation data to dashboard for testing
     field2d.setRobotPose(simulatedDrive.getActualPoseInSimulationWorld());
     field2d.getObject("odometry").setPose(getPose());
+  }
+
+  @Logged(name = "RobotLeftAligned")
+  public Pose2d robotLeftAligned() {
+    return ReefAlign.leftAlignPoses.get(ReefAlign.getNearestReefID(getPose()));
+  }
+
+  @Logged(name = "RobotRightAligned")
+  public Pose2d robotRightAligned() {
+    return ReefAlign.rightAlignPoses.get(ReefAlign.getNearestReefID(getPose()));
+  }
+
+  @Logged(name = "ClosestAprilTag")
+  public Pose2d closestAprilTag() {
+    return ReefAlign.getNearestReefPose(getPose());
   }
 }

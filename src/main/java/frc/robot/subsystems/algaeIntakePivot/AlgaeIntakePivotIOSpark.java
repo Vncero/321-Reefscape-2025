@@ -1,7 +1,9 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.algaeIntakePivot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -11,8 +13,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 
 // spark implementation of real mechanism
 
@@ -28,12 +30,6 @@ public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
           MotorType.kBrushless); // corresponds to left and right motors for pivot
   private SparkMax pivotMotorRight =
       new SparkMax(AlgaeIntakePivotConstants.kPivotMotorRightId, MotorType.kBrushless);
-
-  private DutyCycleEncoder pivotEncoder =
-      new DutyCycleEncoder(
-          AlgaeIntakePivotConstants.kEncoderId,
-          360,
-          AlgaeIntakePivotConstants.kPivotZeroOffsetAngle.in(Degrees));
 
   public AlgaeIntakePivotIOSpark() {
     configureMotors(); // configures motors once algae spark object
@@ -59,6 +55,12 @@ public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
             .inverted(AlgaeIntakePivotConstants.kRightInverted)
             .voltageCompensation(AlgaeIntakePivotConstants.kNominalVoltage.in(Volts))
             .smartCurrentLimit(AlgaeIntakePivotConstants.kSmartCurrentLimit)
+            .apply(
+                new EncoderConfig()
+                    .velocityConversionFactor(
+                        AlgaeIntakePivotConstants.kPivotVelocityConversionFactor)
+                    .positionConversionFactor(
+                        AlgaeIntakePivotConstants.kPivotPositionConversionFactor))
             .follow(
                 AlgaeIntakePivotConstants.kPivotMotorLeftId,
                 AlgaeIntakePivotConstants.kRightInverted),
@@ -71,6 +73,12 @@ public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
   }
 
   public void updateInputs(AlgaeIntakePivotInputs inputs) {
-    inputs.pivotAngle = Degrees.of(pivotEncoder.get());
+    inputs.pivotAngle = Degrees.of(pivotMotorLeft.getEncoder().getPosition());
+    inputs.pivotVelocity = DegreesPerSecond.of(pivotMotorLeft.getEncoder().getVelocity());
+    inputs.pivotCurrent = Amps.of(pivotMotorLeft.getOutputCurrent());
+  }
+
+  public void resetEncoder(Angle angle) {
+    pivotMotorLeft.getEncoder().setPosition(angle.in(Degrees));
   }
 }
