@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
@@ -18,6 +19,7 @@ import java.util.function.DoubleSupplier;
  * steps in the scoring cycle). - Vincent Z
  */
 
+ @Logged
 public class LedsConstants {
   public static final int kPort = 0;
   public static final int kLength = 30;
@@ -38,7 +40,7 @@ public class LedsConstants {
   public static final LEDPattern kReadyToAlign = LEDPattern.solid(Color.kYellow);
 
   // when the robot is aligning to a pose - strobe yellow
-  public static final LEDPattern kPoseAligning = kReadyToAlign.blink(kBlinkSpeed);
+  public static final LEDPattern kReefAligning = kReadyToAlign.blink(kBlinkSpeed);
 
   // when the driver interrupts the aligning process
   public static final LEDPattern kAlignOverride = LEDPattern.solid(Color.kPurple);

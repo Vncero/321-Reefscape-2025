@@ -1,6 +1,7 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.leds;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,6 +13,7 @@ import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+@Logged
 public class Leds extends SubsystemBase {
   // priority (greater # means more important), condition for pattern to apply, pattern to apply
   public record Signal(int priority, BooleanSupplier condition, Supplier<LEDPattern> pattern) {}
@@ -21,6 +23,9 @@ public class Leds extends SubsystemBase {
   private final AddressableLEDBuffer buffer;
   private static TreeSet<Signal> signals;
   private LEDPattern currentPattern = LedsConstants.kDefault;
+  public boolean isAligning = false;
+  public boolean isRotateAlign = false;
+  public boolean isReefAlign = false;
 
   public Leds() {
     this.strip = new AddressableLED(LedsConstants.kPort);
@@ -73,4 +78,13 @@ public class Leds extends SubsystemBase {
           strip.setData(buffer);
         });
   }
-}
+
+  public Command resetAlignStates(){
+    return runOnce(() -> {
+      isAligning = false;
+      isRotateAlign = false;
+      isReefAlign = false;
+      });
+    };
+  }
+

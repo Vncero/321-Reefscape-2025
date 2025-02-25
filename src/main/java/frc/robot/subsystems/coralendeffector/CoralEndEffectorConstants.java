@@ -28,5 +28,5 @@ public class CoralEndEffectorConstants {
   public static final Distance kDetectionRange = Meters.of(0);
 
   // for detecting if the end effector is intaking
-  public static final double kVoltageTolerance = 1;
+  public static final double kVoltageTolerance = 0.05;
 }
