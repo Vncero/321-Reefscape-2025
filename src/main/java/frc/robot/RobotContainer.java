@@ -34,6 +34,7 @@ import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
 import frc.robot.subsystems.elevatorarm.ElevatorArmConstants;
 import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.leds.LedsConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.ReefPosition;
 import java.util.function.DoubleSupplier;
@@ -134,6 +135,18 @@ public class RobotContainer {
                 .until(new Trigger(algaePivot::inCollisionZone).negate()));
 
     configureBindings();
+  }
+
+  private void configureLeds() {
+    leds.registerSignal(0, () -> true, () -> LedsConstants.kDefault);
+    leds.registerSignal(1, () -> algaeSuperstructure.hasAlgae(), () -> LedsConstants.kHasAlgae);
+    leds.registerSignal(2, () -> coralSuperstructure.hasCoral(), () -> LedsConstants.kHasCoral);
+    leds.registerSignal(
+        3,
+        () -> algaeSuperstructure.hasAlgae() && coralSuperstructure.hasCoral(),
+        () -> LedsConstants.kHasCoralAndAlgae);
+    leds.registerSignal(4, () -> coralEndEffector.isIntaking(), () -> LedsConstants.kIntaking);
+    leds.registerSignal(4, () -> coralEndEffector.isOuttaking(), () -> LedsConstants.kOuttaking);
   }
 
   private void configureBindings() {
