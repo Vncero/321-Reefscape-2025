@@ -143,6 +143,7 @@ public class RobotContainer {
   }
 
   private void configureLeds() {
+    // Driving LED signals
     leds.registerSignal(0, () -> true, () -> LedsConstants.kDefault);
     leds.registerSignal(1, () -> algaeSuperstructure.hasAlgae(), () -> LedsConstants.kHasAlgae);
     leds.registerSignal(2, () -> coralSuperstructure.hasCoral(), () -> LedsConstants.kHasCoral);
@@ -180,10 +181,12 @@ public class RobotContainer {
 
     // when we are aligned, also works when manually aligning
     leds.registerSignal(9, () -> drivetrain.atPoseSetpoint(), () -> LedsConstants.kAligned);
-
     leds.registerSignal(10, () -> isDriverOverride, () -> LedsConstants.kAlignOverride);
-
     leds.registerSignal(11, () -> isClimbing, () -> LedsConstants.kClimbing);
+
+    // Error State LED Signals
+    leds.registerSignal(
+        99, () -> vision.areCamerasConnected(), () -> LedsConstants.kVisionDisconnect);
   }
 
   private void configureBindings() {

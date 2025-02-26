@@ -55,4 +55,9 @@ public class VisionIOSim implements VisionIO {
         .filter(Objects::nonNull)
         .toArray(VisionEstimate[]::new);
   }
+
+  @Override
+  public List<Camera> getCameras() {
+    return cameras;
+  }
 }

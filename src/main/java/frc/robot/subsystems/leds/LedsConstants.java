@@ -79,4 +79,9 @@ public class LedsConstants {
   public static LEDPattern kAlignProgress(DoubleSupplier supp) {
     return progressSteps.mask(progressBar(supp));
   }
+
+  // ERROR STATE Patterns
+  private static final LEDPattern visionDisconnectPattern = LEDPattern.rainbow(255, 255);
+  public static final LEDPattern kVisionDisconnect =
+      visionDisconnectPattern.scrollAtAbsoluteSpeed(MetersPerSecond.of(1), Meters.of(1));
 }
