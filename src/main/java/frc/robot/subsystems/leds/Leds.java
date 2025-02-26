@@ -23,9 +23,6 @@ public class Leds extends SubsystemBase {
   private final AddressableLEDBuffer buffer;
   private static TreeSet<Signal> signals;
   private LEDPattern currentPattern = LedsConstants.kDefault;
-  public boolean isAligning = false;
-  public boolean isRotateAlign = false;
-  public boolean isReefAlign = false;
 
   public Leds() {
     this.strip = new AddressableLED(LedsConstants.kPort);
@@ -78,13 +75,4 @@ public class Leds extends SubsystemBase {
           strip.setData(buffer);
         });
   }
-
-  public Command resetAlignStates(){
-    return runOnce(() -> {
-      isAligning = false;
-      isRotateAlign = false;
-      isReefAlign = false;
-      });
-    };
-  }
-
+}
