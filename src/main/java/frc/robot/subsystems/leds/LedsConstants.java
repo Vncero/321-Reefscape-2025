@@ -19,7 +19,7 @@ import java.util.function.DoubleSupplier;
  * steps in the scoring cycle). - Vincent Z
  */
 
- @Logged
+@Logged
 public class LedsConstants {
   public static final int kPort = 0;
   public static final int kLength = 30;
@@ -28,7 +28,7 @@ public class LedsConstants {
 
   // DRIVING PATTERNS
   // default mode - meteor yellow. TODO: add meteor pattern or something cool like that
-  public static final LEDPattern kDefault = LEDPattern.solid(Color.kCyan);
+  public static final LEDPattern kDefault = LEDPattern.kOff;
 
   // climb mode - solid blue
   public static final LEDPattern kClimbing = LEDPattern.solid(Color.kBlue);
@@ -59,7 +59,7 @@ public class LedsConstants {
       LEDPattern.gradient(
           LEDPattern.GradientType.kContinuous, Color.kHotPink, new Color(172, 220, 65));
   public static final LEDPattern kHasCoralAndAlgae =
-      hasCoralAndAlgaePattern.scrollAtAbsoluteSpeed(MetersPerSecond.of(1), Meters.of(1));
+      hasCoralAndAlgaePattern.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.75), Meters.of(1.5));
 
   // Intaking - solid orange
   public static final LEDPattern kIntaking = LEDPattern.solid(Color.kOrange);
