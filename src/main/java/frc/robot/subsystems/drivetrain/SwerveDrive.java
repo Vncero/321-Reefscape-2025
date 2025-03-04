@@ -161,11 +161,15 @@ public interface SwerveDrive extends Subsystem {
   default Command driveToFieldPose(Supplier<Pose2d> pose) {
     return runOnce(
             () -> {
-              xPoseController.reset(
-                  getPose().getTranslation().getX(), getChassisSpeeds().vxMetersPerSecond);
+              ChassisSpeeds speeds =
+                  ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), getHeading());
 
-              yPoseController.reset(
-                  getPose().getTranslation().getX(), getChassisSpeeds().vxMetersPerSecond);
+              xPoseController.reset(getPose().getTranslation().getX(), speeds.vxMetersPerSecond);
+
+              yPoseController.reset(getPose().getTranslation().getY(), speeds.vyMetersPerSecond);
+
+              thetaController.reset(
+                  getPose().getRotation().getRadians(), speeds.omegaRadiansPerSecond);
 
               setAlignmentSetpoint(pose.get());
             })
