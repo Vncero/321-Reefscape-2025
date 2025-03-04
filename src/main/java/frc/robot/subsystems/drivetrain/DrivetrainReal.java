@@ -199,33 +199,26 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
 
   @Override
   public Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  var targetSpeeds =
-                      ChassisSpeeds.discretize(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          thetaController.calculate(
-                                  getPose().getRotation().getRadians(),
-                                  pose.get().getRotation().getRadians())
-                              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
-                          DrivetrainConstants.kLoopDt.in(Seconds));
+    return run(
+        () -> {
+          var targetSpeeds =
+              ChassisSpeeds.discretize(
+                  xPoseController.calculate(getPose().getX(), pose.get().getX())
+                      * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+                  yPoseController.calculate(getPose().getY(), pose.get().getY())
+                      * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+                  thetaController.calculate(
+                          getPose().getRotation().getRadians(),
+                          pose.get().getRotation().getRadians())
+                      * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
+                  DrivetrainConstants.kLoopDt.in(Seconds));
 
-                  driveRobotCentric(
-                      targetSpeeds.vxMetersPerSecond,
-                      targetSpeeds.vyMetersPerSecond,
-                      targetSpeeds.omegaRadiansPerSecond,
-                      DriveFeedforwards.zeros(4));
-                }));
+          driveRobotCentric(
+              targetSpeeds.vxMetersPerSecond,
+              targetSpeeds.vyMetersPerSecond,
+              targetSpeeds.omegaRadiansPerSecond,
+              DriveFeedforwards.zeros(4));
+        });
   }
 
   @Override

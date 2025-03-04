@@ -14,6 +14,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.util.AprilTagUtil;
@@ -175,6 +176,13 @@ public class ReefAlign {
     Pose2d resultPose = aprilTagPose.plus(kRightAlignTransform);
 
     return resultPose;
+  }
+
+  public static Command alignToTag() {
+
+    // distance variable as hypo from center of tag
+    // drive to it until you're at it
+    return Commands.none();
   }
 
   public static Command alignToReef(

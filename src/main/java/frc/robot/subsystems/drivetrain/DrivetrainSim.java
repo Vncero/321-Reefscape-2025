@@ -165,29 +165,21 @@ public class DrivetrainSim implements SwerveDrive {
 
   @Override
   public Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  ChassisSpeeds targetSpeeds =
-                      new ChassisSpeeds(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX()),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY()),
-                          thetaController.calculate(
-                              getPose().getRotation().getRadians(),
-                              pose.get().getRotation().getRadians()));
+    return run(
+        () -> {
+          ChassisSpeeds targetSpeeds =
+              new ChassisSpeeds(
+                  xPoseController.calculate(getPose().getX(), pose.get().getX()),
+                  yPoseController.calculate(getPose().getY(), pose.get().getY()),
+                  thetaController.calculate(
+                      getPose().getRotation().getRadians(), pose.get().getRotation().getRadians()));
 
-                  driveRobotCentric(
-                      targetSpeeds.vxMetersPerSecond,
-                      targetSpeeds.vyMetersPerSecond,
-                      targetSpeeds.omegaRadiansPerSecond,
-                      DriveFeedforwards.zeros(4));
-                }));
+          driveRobotCentric(
+              targetSpeeds.vxMetersPerSecond,
+              targetSpeeds.vyMetersPerSecond,
+              targetSpeeds.omegaRadiansPerSecond,
+              DriveFeedforwards.zeros(4));
+        });
   }
 
   @Override
