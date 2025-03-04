@@ -39,7 +39,7 @@ public class ReefAlign {
   private static final Distance kLeftAlignDistance = Inches.of(-9.5);
   private static final Distance kReefDistance = Inches.of(17.5);
   private static final Distance kRightAlignDistance = Inches.of(3.4);
-  private static final Distance kIntermediateDistance = Inches.of(8);
+  private static final Distance kIntermediateDistance = Inches.of(36);
 
   private static final Rotation2d kReefAlignmentRotation = Rotation2d.k180deg;
   private static final Transform2d kLeftAlignTransform =
@@ -183,8 +183,8 @@ public class ReefAlign {
         () -> {
           Pose2d target =
               getNearestReefPose(swerveDrive.getPose())
-                  .transformBy(
-                      new Transform2d(kIntermediateDistance.in(Inches), 0, kReefAlignmentRotation));
+                  .plus(
+                      new Transform2d(kIntermediateDistance.in(Meters), 0, kReefAlignmentRotation));
           swerveDrive.setAlignmentSetpoint(target);
           return target;
         });

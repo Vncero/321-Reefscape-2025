@@ -158,8 +158,129 @@ public class RobotContainer {
     //             .goToHeight(() -> ElevatorConstants.kElevatorDangerHeight.plus(Meters.of(0.1)))
     //             .until(new Trigger(algaePivot::inCollisionZone).negate()));
 
-    configureBindings();
+    // configureBindings();
     // configureTuningBindings();
+
+    driver
+        .b()
+        .and(isCoralSetpoint)
+        .whileTrue( // while right trigger is pressed:
+            Commands.runOnce(() -> isDriverOverride = false)
+                .andThen(
+                    ReefAlign.alignToTag(drivetrain)
+                        .until(() -> drivetrain.atPoseSetpoint())
+                        // either align to reef or coral based on how far we are away rotate to reef
+                        // until we're close enough
+                        // ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)
+                        //     .until(
+                        //         () ->
+                        //             ReefAlign.isWithinReefRange(
+                        //                     drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                        //                 // use mechanism threshold cuz we wanna be close before
+                        // aligning
+                        //                 // in this case
+                        //                 && Math.hypot(
+                        //                         driverForward.getAsDouble(),
+                        // driverStrafe.getAsDouble())
+                        //                     <= 0.05
+                        //                 && !isDriverOverride)
+                        .andThen(
+                            // when we get close enough, align to reef, but only while we're
+                            // close enough
+                            ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
+                                // .until(drivetrain::atPoseSetpoint)
+                                // .andThen(
+                                //     ReefAlign.rotateToNearestReefTag(drivetrain, driverForward,
+                                // driverStrafe))
+                                .onlyWhile(
+                                    () ->
+                                        ReefAlign.isWithinReefRange(
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                            && Math.hypot(
+                                                    driverForward.getAsDouble(),
+                                                    driverStrafe.getAsDouble())
+                                                <= 0.05
+                                            &&
+                                            // allow driver control to be taken back when
+                                            // driverOverride becomes true
+                                            !isDriverOverride))
+                        // when we get far away, repeat the command
+                        .repeatedly()
+                        .alongWith( // and run the mechanism to where we need to go
+                            coralSuperstructure
+                                .goToSetpoint(
+                                    // move arm up to avoid hitting reef until we get close to reef
+                                    () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                                    () -> ElevatorArmConstants.kPreAlignAngle)
+                                .until(
+                                    () ->
+                                        coralSuperstructure
+                                                .getElevator()
+                                                .atHeight(
+                                                    CoralScorerSetpoint.NEUTRAL.getElevatorHeight())
+                                            && ReefAlign.isWithinReefRange(
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold))
+                                .andThen(
+                                    // move the elevator up but keep arm up
+                                    coralSuperstructure
+                                        .goToSetpoint(
+                                            () -> queuedSetpoint.getElevatorHeight(),
+                                            () -> ElevatorArmConstants.kPreAlignAngle)
+                                        .until(
+                                            () ->
+                                                coralSuperstructure
+                                                    .getElevator()
+                                                    .atHeight(queuedSetpoint.getElevatorHeight()))
+                                        // then move arm down to setpoint
+                                        .andThen(
+                                            coralSuperstructure.goToSetpoint(() -> queuedSetpoint)))
+                                // and only do this while we're in the zone (when we're not, we will
+                                // stay in the pre-alignment position)
+                                .onlyWhile(
+                                    () ->
+                                        ReefAlign.isWithinReefRange(
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                            && queuedSetpoint != CoralScorerSetpoint.NEUTRAL)
+                                .repeatedly())));
+
+    driver
+        .rightTrigger()
+        .onFalse( // for coral scoring
+            coralSuperstructure
+                .goToSetpoint(() -> queuedSetpoint) // ensure we're at the setpoint
+                .alongWith(coralSuperstructure.outtakeCoral())
+                .onlyIf(
+                    () ->
+                        coralSuperstructure.atTargetState(queuedSetpoint)
+                            && queuedSetpoint != CoralScorerSetpoint.NEUTRAL
+                            && !driver.povLeft().getAsBoolean()
+                            && ReefAlign.isWithinReefRange(
+                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                            && isCoralSetpoint.getAsBoolean()) // and outtake coral
+                // .until(() -> !coralSuperstructure.hasCoral()) // until we don't have coral
+                .withTimeout(0.5) // timeout at 1 second
+                .andThen(
+                    // move arm up and go back down (only if we're already at the scoring setpoint
+                    // state)
+                    coralSuperstructure
+                        .goToSetpoint(
+                            () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                            () -> ElevatorArmConstants.kPreAlignAngle)
+                        .until(
+                            () ->
+                                coralSuperstructure
+                                    .getElevator()
+                                    .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight()))
+                        .onlyIf(
+                            () ->
+                                !coralSuperstructure
+                                    .getElevator()
+                                    .atHeight(
+                                        CoralScorerSetpoint.NEUTRAL
+                                            .getElevatorHeight()))) // and then resume default
+                // command
+                // only if we're at the target state and are ready to score
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
   }
 
   private double volts = 0;
@@ -251,19 +372,23 @@ public class RobotContainer {
         .whileTrue( // while right trigger is pressed:
             Commands.runOnce(() -> isDriverOverride = false)
                 .andThen(
-                    // either align to reef or coral based on how far we are away rotate to reef
-                    // until we're close enough
-                    ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)
-                        .until(
-                            () ->
-                                ReefAlign.isWithinReefRange(
-                                        drivetrain, ReefAlign.kMechanismDeadbandThreshold)
-                                    // use mechanism threshold cuz we wanna be close before aligning
-                                    // in this case
-                                    && Math.hypot(
-                                            driverForward.getAsDouble(), driverStrafe.getAsDouble())
-                                        <= 0.05
-                                    && !isDriverOverride)
+                    ReefAlign.alignToTag(drivetrain)
+                        .until(() -> drivetrain.atPoseSetpoint())
+                        // either align to reef or coral based on how far we are away rotate to reef
+                        // until we're close enough
+                        // ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)
+                        //     .until(
+                        //         () ->
+                        //             ReefAlign.isWithinReefRange(
+                        //                     drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                        //                 // use mechanism threshold cuz we wanna be close before
+                        // aligning
+                        //                 // in this case
+                        //                 && Math.hypot(
+                        //                         driverForward.getAsDouble(),
+                        // driverStrafe.getAsDouble())
+                        //                     <= 0.05
+                        //                 && !isDriverOverride)
                         .andThen(
                             // when we get close enough, align to reef, but only while we're
                             // close enough
