@@ -8,8 +8,8 @@ import static edu.wpi.first.units.Units.Seconds;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.util.Color;
-import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 /*
@@ -39,8 +39,19 @@ public class LedsConstants {
   // when the robot has a pose to align to - solid yellow
   public static final LEDPattern kReadyToAlign = LEDPattern.solid(Color.kYellow);
 
-  // when the robot is aligning to a pose - strobe yellow
-  public static final LEDPattern kReefAligning = kReadyToAlign.blink(kBlinkSpeed);
+  // when the robot is aligning to a pose - progress bar
+  private static final LEDPattern progressBarPattern =
+      LEDPattern.gradient(
+          GradientType.kDiscontinuous,
+          Color.kRed,
+          Color.kOrange,
+          Color.kYellow,
+          Color.kGreenYellow,
+          Color.kGreen);
+
+  public static final LEDPattern kReefAligning(DoubleSupplier supp) {
+    return progressBarPattern.mask(LEDPattern.progressMaskLayer(supp));
+  }
 
   // when the driver interrupts the aligning process
   public static final LEDPattern kAlignOverride = LEDPattern.solid(Color.kPurple);
@@ -68,17 +79,6 @@ public class LedsConstants {
   public static final LEDPattern kOuttaking = kIntaking.blink(kBlinkSpeed);
 
   // progress bar for aligning w/ aligning colors
-  private static final Map<Number, Color> progressMap =
-      Map.of(0, Color.kRed, 0.25, Color.kOrange, 0.5, Color.kYellow, 0.75, Color.kGreen);
-  private static final LEDPattern progressSteps = LEDPattern.steps(progressMap);
-
-  private static LEDPattern progressBar(DoubleSupplier supp) {
-    return LEDPattern.progressMaskLayer(supp);
-  }
-
-  public static LEDPattern kAlignProgress(DoubleSupplier supp) {
-    return progressSteps.mask(progressBar(supp));
-  }
 
   // ERROR STATE Patterns
   private static final LEDPattern visionDisconnectPattern = LEDPattern.rainbow(255, 255);

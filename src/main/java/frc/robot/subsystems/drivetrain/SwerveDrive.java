@@ -183,6 +183,8 @@ public interface SwerveDrive extends Subsystem {
 
   Rotation2d getHeading();
 
+  Pose2d getAlignmentSetpoint();
+
   void addVisionMeasurement(Pose2d visionRobotPose, double timeStampSeconds);
 
   void addVisionMeasurement(
