@@ -162,7 +162,8 @@ public interface SwerveDrive extends Subsystem {
     return runOnce(
             () -> {
               ChassisSpeeds speeds =
-                  ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), getHeading());
+                  ChassisSpeeds.fromRobotRelativeSpeeds(
+                      getChassisSpeeds(), getPose().getRotation());
 
               xPoseController.reset(getPose().getTranslation().getX(), speeds.vxMetersPerSecond);
 
