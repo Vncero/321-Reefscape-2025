@@ -133,10 +133,11 @@ public class ElevatorArm extends SubsystemBase {
    * @return a command that runs the arm to the desired angle supplied by the Supplier<Angle>
    */
   public Command goToAngle(Supplier<Angle> angleSup) {
-    return run(() -> {
+    return run(
+        () -> {
+          goalAngle = angleSup.get().in(Degrees);
           goToAngle(angleSup.get());
-        })
-        .beforeStarting(() -> goalAngle = angleSup.get().in(Degrees));
+        });
   }
 
   /**
