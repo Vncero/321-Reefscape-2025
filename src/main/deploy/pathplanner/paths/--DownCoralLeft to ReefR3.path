@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.0549180327868852,
-        "y": 1.0940061475409835
+        "x": 0.6952868852459017,
+        "y": 1.3457479508196706
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.9607377049180315,
-        "y": 1.0475737704918038
+        "x": 1.4557868852459022,
+        "y": 1.3067479508196709
       },
       "isLocked": false,
-      "linkedName": "DownCoralMiddle"
+      "linkedName": "DownCoralLeft"
     },
     {
       "anchor": {
-        "x": 5.358504098360656,
-        "y": 5.433555327868853
+        "x": 5.3105532786885234,
+        "y": 2.62843237704918
       },
       "prevControl": {
-        "x": 8.47530737704918,
-        "y": 3.6713627049180326
+        "x": 4.832803278688523,
+        "y": 2.131182377049181
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "ReefR1"
+      "linkedName": "ReefR3"
     }
   ],
   "rotationTargets": [],
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "ArmCoralOuttake",
-      "waypointRelativePos": 0.17086330935251798,
+      "waypointRelativePos": 0.3727445394112041,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 1.5,
-    "rotation": -119.99999999999999
+    "rotation": 119.99999999999999
   },
   "reversed": false,
   "folder": "Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 52.13213956943584
+    "rotation": 55.0
   },
   "useDefaultConstraints": true
 }

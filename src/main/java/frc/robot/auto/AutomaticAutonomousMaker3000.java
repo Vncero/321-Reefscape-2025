@@ -39,11 +39,11 @@ public class AutomaticAutonomousMaker3000 {
           StartingPosition.TOP,
           List.of(
               new ScoringGroup(
-                  FeedLocation.UPCORAL, ReefSide.REEFR1, Pole.RIGHTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.UPCORALRIGHT, ReefSide.REEFR1, Pole.RIGHTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.UPCORAL, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.UPCORAL,
+                  FeedLocation.UPCORALRIGHT,
                   ReefSide.REEFL1,
                   Pole.RIGHTPOLE,
                   Level.L4,
@@ -54,11 +54,11 @@ public class AutomaticAutonomousMaker3000 {
           StartingPosition.MIDDLE,
           List.of(
               new ScoringGroup(
-                  FeedLocation.UPCORAL, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.UPCORALLEFT, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.UPCORAL, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.UPCORAL,
+                  FeedLocation.UPCORALLEFT,
                   ReefSide.REEFL1,
                   Pole.RIGHTPOLE,
                   Level.L4,
@@ -69,11 +69,11 @@ public class AutomaticAutonomousMaker3000 {
           StartingPosition.MIDDLE,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL, ReefSide.REEFR2, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR2, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL,
+                  FeedLocation.DOWNCORALRIGHT,
                   ReefSide.REEFL3,
                   Pole.RIGHTPOLE,
                   Level.L4,
@@ -84,7 +84,7 @@ public class AutomaticAutonomousMaker3000 {
           StartingPosition.MIDDLE,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL,
+                  FeedLocation.DOWNCORALRIGHT,
                   ReefSide.REEFR2,
                   Pole.RIGHTPOLE,
                   Level.L4,
@@ -95,9 +95,9 @@ public class AutomaticAutonomousMaker3000 {
           StartingPosition.MIDDLE,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL, ReefSide.REEFL2, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.UPCORALLEFT, ReefSide.REEFL2, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL,
+                  FeedLocation.UPCORALLEFT,
                   ReefSide.REEFL3,
                   Pole.LEFTPOLE,
                   Level.L4,
@@ -108,11 +108,11 @@ public class AutomaticAutonomousMaker3000 {
           StartingPosition.BOTTOM,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL, ReefSide.REEFR3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
               new ScoringGroup(
-                  FeedLocation.DOWNCORAL,
+                  FeedLocation.DOWNCORALRIGHT,
                   ReefSide.REEFL3,
                   Pole.RIGHTPOLE,
                   Level.L4,
@@ -408,8 +408,12 @@ public class AutomaticAutonomousMaker3000 {
 
   enum FeedLocation {
     NOCHOICE("Brake"),
-    UPCORAL("UpCoral"),
-    DOWNCORAL("DownCoral");
+    UPCORALRIGHT("UpCoralRight"),
+    UPCORALMIDDLE("UpCoralMiddle"),
+    UPCORALLEFT("UpCoralLeft"),
+    DOWNCORALRIGHT("DownCoralRight"),
+    DOWNCORALMIDDLE("DownCoralMiddle"),
+    DOWNCORALLEFT("DownCoralLeft");
 
     private String pathID = "";
 
@@ -468,8 +472,12 @@ public class AutomaticAutonomousMaker3000 {
       pole.addOption("Left", Pole.LEFTPOLE);
 
       feedLocation.setDefaultOption("No Choice", FeedLocation.NOCHOICE);
-      feedLocation.addOption("Down Coral", FeedLocation.DOWNCORAL);
-      feedLocation.addOption("Up Coral", FeedLocation.UPCORAL);
+      feedLocation.addOption("Down Coral Left", FeedLocation.DOWNCORALLEFT);
+      feedLocation.addOption("Down Coral Middle", FeedLocation.DOWNCORALMIDDLE);
+      feedLocation.addOption("Down Coral Right", FeedLocation.DOWNCORALRIGHT);
+      feedLocation.addOption("Up Coral Left", FeedLocation.UPCORALLEFT);
+      feedLocation.addOption("Up Coral Middle", FeedLocation.UPCORALMIDDLE);
+      feedLocation.addOption("Up Coral Right", FeedLocation.UPCORALRIGHT);
 
       coralSide.setDefaultOption("Middle", CoralSide.MIDDLE);
       coralSide.addOption("Right", CoralSide.RIGHT);
