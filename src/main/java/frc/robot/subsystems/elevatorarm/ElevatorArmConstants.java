@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 
@@ -56,4 +57,6 @@ public class ElevatorArmConstants {
   public static final Angle kCMOffset = Degrees.of(-19.6848);
   // the starting angle of the arm
   public static final Angle kStartAngle = Degrees.of(-64.53);
+
+  public static final Constraints kArmConstraints = new Constraints(100, 1000); // deg
 }
