@@ -57,7 +57,14 @@ public class VisionIOSim implements VisionIO {
   }
 
   @Override
-  public List<Camera> getCameras() {
-    return cameras;
+  public boolean areCamerasConnected() {
+    boolean isConnected = false;
+
+    for (Camera camera : cameras) {
+      isConnected = camera.isConnected();
+      if (!isConnected) break;
+    }
+
+    return isConnected;
   }
 }
