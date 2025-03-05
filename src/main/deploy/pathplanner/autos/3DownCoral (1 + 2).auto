@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "--ReefR3 to DownCoralMiddle"
+            "pathName": "ReefR3 to DownCoralMiddle"
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "--DownCoralMiddle to ReefL3"
+            "pathName": "DownCoralMiddle to ReefL3"
           }
         },
         {
@@ -43,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "--ReefL3 to DownCoralMiddle"
+            "pathName": "ReefL3 to DownCoralMiddle"
           }
         },
         {
@@ -55,7 +55,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "--DownCoralMiddle to ReefL3"
+            "pathName": "DownCoralMiddle to ReefL3"
           }
         },
         {
