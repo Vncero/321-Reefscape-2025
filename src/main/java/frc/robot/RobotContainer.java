@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.simulation.AddressableLEDSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -156,6 +157,8 @@ public class RobotContainer {
     //             .goToHeight(() -> ElevatorConstants.kElevatorDangerHeight.plus(Meters.of(0.1)))
     //             .until(new Trigger(algaePivot::inCollisionZone).negate()));
 
+   
+
     configureBindings();
     // configureTuningBindings();
   }
@@ -221,6 +224,12 @@ public class RobotContainer {
     // driver.a().whileTrue(algaeSuperstructure.outtakeAlgae());
   }
 
+  private void controllerRumble() {
+    if (coralSuperstructure.hasCoral()) {
+      driver.setRumble(RumbleType.kBothRumble, 1);
+    }
+  }
+
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
@@ -240,7 +249,9 @@ public class RobotContainer {
                 .andThen(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn))
                 .until(() -> StationAlign.getStationDistance(drivetrain) < 2)
                 .repeatedly()
-                .alongWith(coralSuperstructure.feedCoral().asProxy().repeatedly()));
+                .alongWith(coralSuperstructure.feedCoral().asProxy().repeatedly())
+                .until(() -> coralEndEffector.hasCoral())
+                .andThen(() -> controllerRumble()));
 
     // coral outtake
     driver
