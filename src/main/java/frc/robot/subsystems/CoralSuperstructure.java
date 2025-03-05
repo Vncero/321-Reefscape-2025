@@ -55,7 +55,7 @@ public class CoralSuperstructure {
   }
 
   public boolean atTargetState() {
-    return elevator.atSetpoint() && arm.atSetpoint();
+    return elevator.atSetpoint() && arm.atGoal();
   }
 
   public boolean atTargetState(Distance height, Angle angle) {
