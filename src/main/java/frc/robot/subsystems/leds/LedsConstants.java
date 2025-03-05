@@ -12,13 +12,6 @@ import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.util.Color;
 import java.util.function.DoubleSupplier;
 
-/*
- * There is also potential for LED patterns to indicate error states e.g. gyro disconnect/motor burnout,
- * which was part of the original intent of the priority system but has not been leveraged. Consider adding such
- * LED signals (otherwise the priority system is arbitrarily applied to the current patterns, which mostly reflect
- * steps in the scoring cycle). - Vincent Z
- */
-
 @Logged
 public class LedsConstants {
   public static final int kPort = 0;
@@ -83,5 +76,5 @@ public class LedsConstants {
   // ERROR STATE Patterns
   private static final LEDPattern visionDisconnectPattern = LEDPattern.rainbow(255, 255);
   public static final LEDPattern kVisionDisconnect =
-      visionDisconnectPattern.scrollAtAbsoluteSpeed(MetersPerSecond.of(1), Meters.of(1));
+      visionDisconnectPattern.scrollAtAbsoluteSpeed(MetersPerSecond.one(), Meters.one());
 }

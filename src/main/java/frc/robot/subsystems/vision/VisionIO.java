@@ -9,4 +9,15 @@ public interface VisionIO {
   VisionEstimate[] getLatestEstimates();
 
   List<Camera> getCameras();
+
+  default boolean areCamerasConnected() {
+    boolean isConnected = false;
+
+    for (Camera camera : getCameras()) {
+      isConnected = camera.isConnected();
+      if (!isConnected) break;
+    }
+
+    return isConnected;
+  }
 }
