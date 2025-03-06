@@ -5,11 +5,14 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
+import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -24,27 +27,43 @@ public class Camera {
 
   private final PhotonCamera camera;
 
-  private final PhotonPoseEstimator poseEstimator;
+  private final Supplier<Rotation2d> robotHeadingSupplier;
+
+  private final PhotonPoseEstimator multiTagEstimator;
+
+  private final PhotonPoseEstimator singleTagEstimator;
 
   // for logging
   private VisionEstimate latestValidEstimate;
 
-  public Camera(CameraConfig config, PhotonCamera camera) {
+  public Camera(
+      CameraConfig config, PhotonCamera camera, Supplier<Rotation2d> robotHeadingSupplier) {
     this.name = config.cameraName();
 
     this.usage = config.usage();
 
     this.camera = camera;
 
-    this.poseEstimator =
+    this.robotHeadingSupplier = robotHeadingSupplier;
+
+    this.multiTagEstimator =
         new PhotonPoseEstimator(
             RobotConstants.kAprilTagFieldLayout,
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            config.robotToCamera());
+
+    this.singleTagEstimator =
+        new PhotonPoseEstimator(
+            RobotConstants.kAprilTagFieldLayout,
+            PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
             config.robotToCamera());
   }
 
   @NotLogged
   public VisionEstimate tryLatestEstimate() {
+    // TODO: still some confusion with exactly what time base to use, should be NT time?
+    singleTagEstimator.addHeadingData(Timer.getFPGATimestamp(), robotHeadingSupplier.get());
+
     if (!camera.isConnected()) return null;
 
     final var unreadResults = camera.getAllUnreadResults();
@@ -55,7 +74,17 @@ public class Camera {
 
     if (!latestResult.hasTargets()) return null;
 
-    final var estimate = poseEstimator.update(latestResult);
+    final var estimateType =
+        switch (latestResult.targets.size()) {
+          case 1 -> EstimateType.SINGLE_TAG;
+          default -> EstimateType.MULTI_TAG;
+        };
+
+    final var estimate =
+        switch (estimateType) {
+          case SINGLE_TAG -> singleTagEstimator.update(latestResult);
+          case MULTI_TAG -> multiTagEstimator.update(latestResult);
+        };
 
     return estimate
         .filter(
@@ -65,7 +94,8 @@ public class Camera {
         .map(
             photonEst -> {
               final var visionEst =
-                  new VisionEstimate(photonEst, calculateStdDevs(photonEst), name, usage);
+                  new VisionEstimate(
+                      photonEst, calculateStdDevs(photonEst), name, usage, estimateType);
               latestValidEstimate = visionEst;
               return visionEst;
             })

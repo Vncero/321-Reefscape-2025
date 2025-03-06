@@ -3,6 +3,7 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.util.VirtualSubsystem;
 import java.util.function.Consumer;
@@ -17,11 +18,12 @@ public class Vision extends VirtualSubsystem {
 
   public static Vision create(
       Supplier<Pose2d> robotPoseSupplier,
+      Supplier<Rotation2d> robotHeadingSupplier,
       Consumer<VisionEstimate> visionDataConsumer,
       Consumer<VisionEstimate> reefVisionDataConsumer) {
     return RobotBase.isReal()
         ? new Vision(
-            new VisionIOReal(VisionConstants.kCameraConfigs),
+            new VisionIOReal(robotHeadingSupplier, VisionConstants.kCameraConfigs),
             visionDataConsumer,
             reefVisionDataConsumer)
         : new Vision(
