@@ -27,16 +27,14 @@ public class AlgaeIntakePivotIOSim implements AlgaeIntakePivotIO {
     pivotSim =
         new SingleJointedArmSim(
             LinearSystemId.createSingleJointedArmSystem(
-                DCMotor.getNEO(2),
-                AlgaeIntakePivotConstants.kPivotMOI,
-                AlgaeIntakePivotConstants.kPivotGearing),
+                DCMotor.getNEO(2), ClimberConstants.kPivotMOI, ClimberConstants.kPivotGearing),
             DCMotor.getNEO(2),
-            AlgaeIntakePivotConstants.kPivotGearing,
-            AlgaeIntakePivotConstants.kPivotLength.in(Meters),
-            AlgaeIntakePivotConstants.kPivotMinAngle.in(Radians),
-            AlgaeIntakePivotConstants.kPivotMaxAngle.in(Radians),
+            ClimberConstants.kPivotGearing,
+            ClimberConstants.kPivotLength.in(Meters),
+            ClimberConstants.kPivotMinAngle.in(Radians),
+            ClimberConstants.kPivotMaxAngle.in(Radians),
             true,
-            AlgaeIntakePivotConstants.kPivotStartingAngle.in(Radians));
+            ClimberConstants.kPivotStartingAngle.in(Radians));
   }
 
   public void setPivotVoltage(Voltage volts) {

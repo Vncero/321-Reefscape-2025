@@ -1,14 +1,20 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.climber;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
 // spark implementation of the climb subsystem
@@ -30,9 +36,25 @@ public class ClimberIOSpark implements ClimberIO {
         PersistMode.kPersistParameters);
   }
 
-  public void regulateClimbCurrent() {
-    
+  public ClimberIOSpark() {
+    configureMotors();
   }
 
-}
+  public void setClimbCurrent(Current current) {
+    climbMotor.getClosedLoopController().setReference(current.in(Amps), ControlType.kCurrent);
+  }
 
+  public void setClimbVoltage(Voltage volts) {
+    climbMotor.setVoltage(volts);
+  }
+
+  public void updateInputs(ClimberInputs inputs) {
+    inputs.climbAngle = Degrees.of(climbMotor.getEncoder().getPosition());
+    inputs.climbVelocity = DegreesPerSecond.of(climbMotor.getEncoder().getVelocity());
+    inputs.climbCurrent = Amps.of(climbMotor.getOutputCurrent());
+  }
+
+  public void resetEncoder(Angle angle) {
+    climbMotor.getEncoder().setPosition(angle.in(Degrees));
+  }
+}

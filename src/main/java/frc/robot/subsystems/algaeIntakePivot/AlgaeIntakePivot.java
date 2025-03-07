@@ -48,10 +48,9 @@ public class AlgaeIntakePivot extends SubsystemBase {
     algaeIntakeClimbController = new PIDController(config.kP(), config.kI(), config.kD());
     feedForward = new ArmFeedforward(0, config.kG(), 0); // creates pid controller and feed forward
 
-    algaeIntakeClimbController.setTolerance(
-        AlgaeIntakePivotConstants.kControllerTolerance.in(Degrees));
+    algaeIntakeClimbController.setTolerance(ClimberConstants.kControllerTolerance.in(Degrees));
 
-    io.resetEncoder(AlgaeIntakePivotConstants.kPivotStartingAngle);
+    io.resetEncoder(ClimberConstants.kPivotStartingAngle);
   }
 
   // Tune PID and feed forward constants(kP, kI, kD, kG) live on smart dashboard / ascope
@@ -128,9 +127,8 @@ public class AlgaeIntakePivot extends SubsystemBase {
   public Command climb() {
     return run(
         () -> {
-          if (inputs.pivotAngle.in(Degrees)
-              > AlgaeIntakePivotConstants.kPivotClimbThreshold.in(Degrees)) {
-            io.setPivotVoltage(AlgaeIntakePivotConstants.kPivotClimbVoltage);
+          if (inputs.pivotAngle.in(Degrees) > ClimberConstants.kPivotClimbThreshold.in(Degrees)) {
+            io.setPivotVoltage(ClimberConstants.kPivotClimbVoltage);
           } else {
             io.setPivotVoltage(Volts.of(0));
           }
@@ -162,7 +160,7 @@ public class AlgaeIntakePivot extends SubsystemBase {
                   }
                   if (mode.get() == ClimbMode.CLIMBING
                       && inputs.pivotAngle.in(Degree)
-                          < AlgaeIntakePivotConstants.kPivotClimbThreshold.in(Degree)) {
+                          < ClimberConstants.kPivotClimbThreshold.in(Degree)) {
                     mode.set(ClimbMode.CLIMBED);
                     timer.stop();
                   }
@@ -178,16 +176,15 @@ public class AlgaeIntakePivot extends SubsystemBase {
   }
 
   public Command homeMechanism() {
-    return setMechanismVoltage(() -> AlgaeIntakePivotConstants.kHomingVoltage)
+    return setMechanismVoltage(() -> ClimberConstants.kHomingVoltage)
         .until(
             () ->
                 homingDebouncer.calculate(
-                    inputs.pivotCurrent.in(Amp)
-                        > AlgaeIntakePivotConstants.kHomingCurrentThreshold.in(Amp)))
+                    inputs.pivotCurrent.in(Amp) > ClimberConstants.kHomingCurrentThreshold.in(Amp)))
         .andThen(
             runOnce(
                 () -> {
-                  io.resetEncoder(AlgaeIntakePivotConstants.kPivotStartingAngle);
+                  io.resetEncoder(ClimberConstants.kPivotStartingAngle);
                   isHomed = true;
                 }));
   }
@@ -226,8 +223,8 @@ public class AlgaeIntakePivot extends SubsystemBase {
                     2))); // angle after looking forward in time n loops based on current arm
     // velocity
 
-    return effectiveAngle.compareTo(AlgaeIntakePivotConstants.kMinBlockedAngle) >= 0
-        && effectiveAngle.compareTo(AlgaeIntakePivotConstants.kMaxBlockedAngle) <= 0;
+    return effectiveAngle.compareTo(ClimberConstants.kMinBlockedAngle) >= 0
+        && effectiveAngle.compareTo(ClimberConstants.kMaxBlockedAngle) <= 0;
   }
 
   public enum ClimbMode {
