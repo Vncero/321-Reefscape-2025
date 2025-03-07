@@ -39,84 +39,56 @@ public class AutomaticAutonomousMaker3000 {
           StartingPosition.TOP,
           List.of(
               new ScoringGroup(
-                  FeedLocation.UPCORALRIGHT, ReefSide.REEFR1, Pole.RIGHTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.UPCORALRIGHT, ReefSide.REEFR1, Pole.RIGHTPOLE, Level.L4),
+              new ScoringGroup(FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
-              new ScoringGroup(
-                  FeedLocation.UPCORALRIGHT,
-                  ReefSide.REEFL1,
-                  Pole.RIGHTPOLE,
-                  Level.L4,
-                  CoralSide.LEFT)));
+                  FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneTopAuto =
       new CycleAutoConfig(
           StartingPosition.MIDDLE,
           List.of(
+              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4),
+              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.UPCORALLEFT, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4, CoralSide.LEFT),
-              new ScoringGroup(
-                  FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
-              new ScoringGroup(
-                  FeedLocation.UPCORALLEFT,
-                  ReefSide.REEFL1,
-                  Pole.RIGHTPOLE,
-                  Level.L4,
-                  CoralSide.LEFT)));
+                  FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneBotAuto =
       new CycleAutoConfig(
           StartingPosition.MIDDLE,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR2, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR2, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT,
-                  ReefSide.REEFL3,
-                  Pole.RIGHTPOLE,
-                  Level.L4,
-                  CoralSide.LEFT)));
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneBotPreloadAuto =
       new CycleAutoConfig(
           StartingPosition.MIDDLE,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT,
-                  ReefSide.REEFR2,
-                  Pole.RIGHTPOLE,
-                  Level.L4,
-                  CoralSide.LEFT)));
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneOppositeSideAuto =
       new CycleAutoConfig(
           StartingPosition.MIDDLE,
           List.of(
+              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFL2, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.UPCORALLEFT, ReefSide.REEFL2, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
-              new ScoringGroup(
-                  FeedLocation.UPCORALLEFT,
-                  ReefSide.REEFL3,
-                  Pole.LEFTPOLE,
-                  Level.L4,
-                  CoralSide.LEFT)));
+                  FeedLocation.UPCORALLEFT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4)));
 
   private static CycleAutoConfig kBotLaneAuto =
       new CycleAutoConfig(
           StartingPosition.BOTTOM,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR3, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4, CoralSide.LEFT),
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT,
-                  ReefSide.REEFL3,
-                  Pole.RIGHTPOLE,
-                  Level.L4,
-                  CoralSide.LEFT)));
+                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.RIGHTPOLE, Level.L4)));
 
   private SwerveDrive drive;
   private CoralSuperstructure coralSuperstructure;
@@ -256,7 +228,7 @@ public class AutomaticAutonomousMaker3000 {
               auto.andThen(
                       withIntaking(
                           toPathCommand(intakePath).asProxy(),
-                          config.scoringGroup.get(i).coralSide))
+                          config.scoringGroup.get(i).feedLocation))
                   .andThen(
                       withScoring(
                           toPathCommand(scorePath).asProxy(),
@@ -275,14 +247,15 @@ public class AutomaticAutonomousMaker3000 {
     }
   }
 
-  public Command withIntaking(Command path, CoralSide side) {
+  public Command withIntaking(Command path, FeedLocation location) {
     Command pathCmd =
-        switch (side) {
+        switch (location) {
           default -> StationAlign.goToNearestLeftAlign(drive);
-          case LEFT -> StationAlign.goToNearestLeftAlign(drive);
-          case MIDDLE -> StationAlign.goToNearestCenterAlign(drive);
-          case RIGHT -> StationAlign.goToNearestRightAlign(drive);
+          case UPCORALLEFT, DOWNCORALLEFT -> StationAlign.goToNearestLeftAlign(drive);
+          case UPCORALMIDDLE, DOWNCORALMIDDLE -> StationAlign.goToNearestCenterAlign(drive);
+          case UPCORALRIGHT, DOWNCORALRIGHT -> StationAlign.goToNearestRightAlign(drive);
         };
+
     return path.deadlineFor(
             coralSuperstructure
                 .goToSetpoint(
@@ -479,15 +452,10 @@ public class AutomaticAutonomousMaker3000 {
       feedLocation.addOption("Up Coral Middle", FeedLocation.UPCORALMIDDLE);
       feedLocation.addOption("Up Coral Right", FeedLocation.UPCORALRIGHT);
 
-      coralSide.setDefaultOption("Middle", CoralSide.MIDDLE);
-      coralSide.addOption("Right", CoralSide.RIGHT);
-      coralSide.addOption("Left", CoralSide.LEFT);
-
       SmartDashboard.putData("Autos/Reef Side" + index, reefSide);
       SmartDashboard.putData("Autos/Level" + index, level);
       SmartDashboard.putData("Autos/Pole" + index, pole);
       SmartDashboard.putData("Autos/FeedLocation" + index, feedLocation);
-      SmartDashboard.putData("Autos/CoralSide" + index, coralSide);
     }
 
     public ScoringGroup build() {
@@ -495,8 +463,7 @@ public class AutomaticAutonomousMaker3000 {
           feedLocation.getSelected(),
           reefSide.getSelected(),
           pole.getSelected(),
-          level.getSelected(),
-          coralSide.getSelected());
+          level.getSelected());
     }
   }
 
@@ -505,15 +472,12 @@ public class AutomaticAutonomousMaker3000 {
     private ReefSide reefSide;
     private Pole pole;
     private Level level;
-    private CoralSide coralSide;
 
-    public ScoringGroup(
-        FeedLocation feedLocation, ReefSide reefSide, Pole pole, Level level, CoralSide coralSide) {
+    public ScoringGroup(FeedLocation feedLocation, ReefSide reefSide, Pole pole, Level level) {
       this.feedLocation = feedLocation;
       this.reefSide = reefSide;
       this.pole = pole;
       this.level = level;
-      this.coralSide = coralSide;
     }
   }
 
