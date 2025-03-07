@@ -101,13 +101,11 @@ public class RobotContainer {
       new SuperstructureVisualizer(
           () -> elevator.getHeight(), () -> elevatorArm.getAngle(), () -> algaePivot.getAngle());
 
-  private Leds leds = new Leds();
+  private Leds leds = Leds.getInstance();
   private AddressableLEDSim ledSim = new AddressableLEDSim(leds.strip);
   private boolean isDriverOverride = false;
   private boolean isClimbing = false;
-  private boolean isAligning = false;
-  private boolean isRotateAligning = false;
-  private boolean isReefAligning = false;
+
   private DoubleSupplier elevatorErrorMeters =
       () ->
           Math.abs(
@@ -191,12 +189,12 @@ public class RobotContainer {
     leds.registerSignal(4, () -> coralEndEffector.isIntaking(), () -> LedsConstants.kIntaking);
     leds.registerSignal(5, () -> coralEndEffector.isOuttaking(), () -> LedsConstants.kOuttaking);
 
-    leds.registerSignal(6, () -> isRotateAligning, () -> LedsConstants.kRotationAligning);
+    leds.registerSignal(6, () -> leds.isRotateAligning, () -> LedsConstants.kRotationAligning);
 
     leds.registerSignal(
         7,
         () ->
-            isAligning
+            leds.isAligning
                 && ReefAlign.isWithinReefRange(drivetrain, ReefAlign.kMechanismDeadbandThreshold)
                 && Math.hypot(driverForward.getAsDouble(), driverStrafe.getAsDouble()) >= 0.05,
         () -> LedsConstants.kReadyToAlign);
@@ -204,7 +202,7 @@ public class RobotContainer {
     leds.registerSignal(
         8,
         () ->
-            isReefAligning
+            leds.isReefAligning
                 && Math.hypot(driverForward.getAsDouble(), driverStrafe.getAsDouble()) <= 0.05,
         () -> LedsConstants.kReefAligning(() -> reefAlignProgressPercent));
 
@@ -239,50 +237,41 @@ public class RobotContainer {
             Commands.runOnce(
                     () -> {
                       isDriverOverride = false;
-                      isAligning = true;
                     })
                 .andThen(
-                    Commands.runOnce(() -> isRotateAligning = true)
+                    // either align to reef or coral based on how far we are away
+                    // rotate to reef until we're close enough
+                    ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)
+                        .until(
+                            () ->
+                                ReefAlign.isWithinReefRange(
+                                        drivetrain,
+                                        ReefAlign.kMechanismDeadbandThreshold) // use mechanism
+                                    // threshold
+                                    // cuz we
+                                    // wanna be close before aligning
+                                    // in this case
+                                    && Math.hypot(
+                                            driverForward.getAsDouble(), driverStrafe.getAsDouble())
+                                        <= 0.05
+                                    && !isDriverOverride)
                         .andThen(
-                            // either align to reef or coral based on how far we are away
-                            // rotate to reef until we're close enough
-                            ReefAlign.rotateToNearestReefTag(
-                                    drivetrain, driverForward, driverStrafe)
-                                .until(
+                            // when we get close enough, align to reef, but only while we're
+                            // close
+                            // enough
+                            ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
+                                .onlyWhile(
                                     () ->
                                         ReefAlign.isWithinReefRange(
-                                                drivetrain,
-                                                ReefAlign
-                                                    .kMechanismDeadbandThreshold) // use mechanism
-                                            // threshold
-                                            // cuz we
-                                            // wanna be close before aligning
-                                            // in this case
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
                                             && Math.hypot(
                                                     driverForward.getAsDouble(),
                                                     driverStrafe.getAsDouble())
                                                 <= 0.05
-                                            && !isDriverOverride))
-                        .andThen(
-                            Commands.runOnce(() -> isReefAligning = true)
-                                .andThen(
-                                    // when we get close enough, align to reef, but only while we're
-                                    // close
-                                    // enough
-                                    ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
-                                        .onlyWhile(
-                                            () ->
-                                                ReefAlign.isWithinReefRange(
-                                                        drivetrain,
-                                                        ReefAlign.kMechanismDeadbandThreshold)
-                                                    && Math.hypot(
-                                                            driverForward.getAsDouble(),
-                                                            driverStrafe.getAsDouble())
-                                                        <= 0.05
-                                                    &&
-                                                    // allow driver control to be taken back when
-                                                    // driverOverride becomes true
-                                                    !isDriverOverride))
+                                            &&
+                                            // allow driver control to be taken back when
+                                            // driverOverride becomes true
+                                            !isDriverOverride)
                                 // when we get far away, repeat the command
                                 .repeatedly()
                                 .alongWith( // and run the mechanism to where we need to go
@@ -319,13 +308,7 @@ public class RobotContainer {
                                                         ReefAlign.kMechanismDeadbandThreshold)
                                                     && queuedSetpoint
                                                         != CoralScorerSetpoint.NEUTRAL)
-                                        .repeatedly()))
-                        .finallyDo(
-                            () -> {
-                              isAligning = false;
-                              isRotateAligning = false;
-                              isReefAligning = false;
-                            })));
+                                        .repeatedly()))));
 
     driver
         .rightTrigger()

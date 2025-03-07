@@ -18,11 +18,21 @@ public class Leds extends SubsystemBase {
   // priority (greater # means more important), condition for pattern to apply, pattern to apply
   public record Signal(int priority, BooleanSupplier condition, Supplier<LEDPattern> pattern) {}
 
+  private static Leds instance = new Leds();
+
+  public static Leds getInstance() {
+    return instance;
+  }
+
   // LED
   public final AddressableLED strip;
   private final AddressableLEDBuffer buffer;
   private static TreeSet<Signal> signals;
   private LEDPattern currentPattern = LedsConstants.kDefault;
+
+  public boolean isAligning = false;
+  public boolean isRotateAligning = false;
+  public boolean isReefAligning = false;
 
   public Leds() {
     this.strip = new AddressableLED(LedsConstants.kPort);
