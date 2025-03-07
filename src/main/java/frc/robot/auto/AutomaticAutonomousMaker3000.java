@@ -38,11 +38,10 @@ public class AutomaticAutonomousMaker3000 {
       new CycleAutoConfig(
           StartingPosition.TOP,
           List.of(
+              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFR1, Pole.RIGHTPOLE, Level.L4),
+              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.UPCORALRIGHT, ReefSide.REEFR1, Pole.RIGHTPOLE, Level.L4),
-              new ScoringGroup(FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4),
-              new ScoringGroup(
-                  FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.RIGHTPOLE, Level.L4)));
+                  FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneTopAuto =
       new CycleAutoConfig(
@@ -58,37 +57,38 @@ public class AutomaticAutonomousMaker3000 {
           StartingPosition.MIDDLE,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR2, Pole.LEFTPOLE, Level.L4),
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFR2, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4),
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.RIGHTPOLE, Level.L4)));
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFL3, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneBotPreloadAuto =
       new CycleAutoConfig(
           StartingPosition.MIDDLE,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4)));
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneOppositeSideAuto =
       new CycleAutoConfig(
           StartingPosition.MIDDLE,
           List.of(
-              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFL2, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.UPCORALLEFT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4)));
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFL2, Pole.LEFTPOLE, Level.L4),
+              new ScoringGroup(
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4)));
 
   private static CycleAutoConfig kBotLaneAuto =
       new CycleAutoConfig(
           StartingPosition.BOTTOM,
           List.of(
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFR3, Pole.LEFTPOLE, Level.L4),
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFR3, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4),
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFL3, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.DOWNCORALRIGHT, ReefSide.REEFL3, Pole.RIGHTPOLE, Level.L4)));
+                  FeedLocation.DOWNCORALLEFT, ReefSide.REEFL3, Pole.RIGHTPOLE, Level.L4)));
 
   private SwerveDrive drive;
   private CoralSuperstructure coralSuperstructure;
