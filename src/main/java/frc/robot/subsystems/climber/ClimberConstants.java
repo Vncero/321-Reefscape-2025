@@ -14,18 +14,22 @@ import edu.wpi.first.units.measure.Voltage;
 
 @Logged
 public class ClimberConstants {
-  // motor IDs
-  public static final int kMotorId = 0;
+  // climb motor IDs
+  public static final int kMotorId = 20; //placeholder id
 
-  // physical constants
+  // climb physical constants
   public static final double kClimbGearing = 100;
-  public static final double kClimbMOI = 0;
-  public static final Angle kStartingAngle = Degrees.of(90);
+  public static final double kClimbMOI = 1;
+  public static final Angle kStartingAngle = Degrees.of(0);
   public static final Distance kClimbLength = Inches.of(0.6);
   public static final Angle kClimbMinAngle = Degrees.of(0);
   public static final Angle kClimbMaxAngle = Degrees.of(180);
 
-  // motor config
+  // climb servo lock + unlock positions
+  public static final Angle kServoLockPosition = Degrees.of(90);
+  public static final Angle kServoUnlockPosition = Degrees.of(180);
+
+  // climb motor config
   public static final boolean kClimbInverted = true;
   public static final int kSmartCurrentLimit = 40;
   public static final double kClimbPositionConversionFactor = 360 / kClimbGearing;
@@ -34,8 +38,8 @@ public class ClimberConstants {
   public static final Voltage kNominalVoltage = Volts.of(12);
   public static final Angle kClimbThreshold = Degrees.of(35); // to be tuned
 
-  public static final Current kClimbCurrentRampRate = Amps.of(40);
-  public static final Current kClimbCurrent = Amps.of(40);
+  public static final Current kClimbCurrentRampRate = Amps.of(40); // placeholder
+  public static final Current kClimbCurrent = Amps.of(40);  // placeholder
 
   public static final Angle kControllerTolerance = Degrees.of(1);
 }

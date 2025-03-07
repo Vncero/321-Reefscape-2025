@@ -18,12 +18,10 @@ public class ClimberIOSim implements ClimberIO {
 
   private SingleJointedArmSim climbSim;
 
-  private SingleJointedArmSim pivotSim;
-
   public ClimberIOSim() {
     // configures a simulated arm with two pivot motors controlling one
     // pivot point
-    pivotSim =
+    climbSim =
         new SingleJointedArmSim(
             LinearSystemId.createSingleJointedArmSystem(
                 DCMotor.getNEO(1), ClimberConstants.kClimbMOI, ClimberConstants.kClimbGearing),

@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
+import edu.wpi.first.wpilibj.Servo;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -23,6 +24,7 @@ public class Climber extends SubsystemBase {
   private ClimberIO io;
   private ClimberInputs inputs;
 
+  private Servo climbServo;
   private PIDController climbController;
   private ArmFeedforward feedForward;
   private ClimberConfig config;
@@ -37,13 +39,15 @@ public class Climber extends SubsystemBase {
     climbController = new PIDController(config.kP(), config.kI(), config.kD());
     feedForward = new ArmFeedforward(0, config.kG(), 0);
 
+    climbServo = new Servo(2);
+
     climbController.setTolerance(ClimberConstants.kControllerTolerance.in(Degrees));
 
     io.resetEncoder(ClimberConstants.kStartingAngle);
   }
 
   public static Climber create() {
-    return RobotBase.isReal() // TODO: possibly change from spark to kraken
+    return RobotBase.isReal() 
         ? new Climber(
             new ClimberIOSpark(),
             ClimberIOSpark.config) // creates real mechanism if the code is running on a robot
@@ -53,11 +57,11 @@ public class Climber extends SubsystemBase {
   }
 
   public Command tune() {
-    TunableConstant kP = new TunableConstant("/ClimberPivos/kP", config.kP());
-    TunableConstant kI = new TunableConstant("/ClimberPivot/kI", config.kI());
-    TunableConstant kD = new TunableConstant("/ClimberPivot/kD", config.kD());
-    TunableConstant kV = new TunableConstant("/ClimberPivot/kG", config.kG());
-    TunableConstant desiredAngle = new TunableConstant("/ClimberPivot/desiredAngle", 0);
+    TunableConstant kP = new TunableConstant("/Climber/kP", config.kP());
+    TunableConstant kI = new TunableConstant("/Climber/kI", config.kI());
+    TunableConstant kD = new TunableConstant("/Climber/kD", config.kD());
+    TunableConstant kG = new TunableConstant("/Climber/kG", config.kG());
+    TunableConstant desiredAngle = new TunableConstant("/Climber/desiredAngle", 0);
 
     return run(
         () -> {
@@ -65,6 +69,12 @@ public class Climber extends SubsystemBase {
           this.feedForward = new ArmFeedforward(0, kG.get(), 0);
           goToAngle(Degrees.of(desiredAngle.get()));
         });
+  }
+
+  public Command tuneCurrentRampRate() {
+    return run(() -> {
+      // to-do: write this tune command
+    });
   }
 
   // creates placeholder implementation to disable robot
@@ -83,6 +93,20 @@ public class Climber extends SubsystemBase {
     io.setClimbVoltage(desiredVoltage);
   }
 
+  // locks the climb servo 
+  public Command lockServo() {
+    return run(() ->
+      climbServo.setAngle(ClimberConstants.kServoLockPosition.in(Degrees))
+    );
+  }
+
+  // unlocks the climb servo
+  public Command unlockServo() {
+    return run(() ->
+      climbServo.setAngle(ClimberConstants.kServoUnlockPosition.in(Degrees))
+    );
+  }
+
   /*
    * Sets the motor to a current control mode, ramping up current over time
    */
@@ -97,7 +121,11 @@ public class Climber extends SubsystemBase {
   public void stopClimbCurrent() {
     io.setClimbCurrent(Amps.of(0));
   }
-
+  
+  /*
+   * Climb command
+   * Courtesy of 6328's implementation <3
+   */
   public Command climb() {
     Timer timer = new Timer();
     return runOnce(timer::restart)
@@ -108,6 +136,7 @@ public class Climber extends SubsystemBase {
                         inputs.climbAngle.in(Degrees)
                                 >= ClimberConstants.kClimbThreshold.in(Degrees)
                             || inputs.climbCurrent.in(Amps) <= 0.0)) // Stop if cage slips
+                .andThen(lockServo())
         .finallyDo(() -> stopClimbCurrent());
   }
 
