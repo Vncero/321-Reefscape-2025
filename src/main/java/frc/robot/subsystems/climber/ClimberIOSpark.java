@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.units.measure.Voltage;
 
 // spark implementation of the climb subsystem
 
@@ -28,4 +29,10 @@ public class ClimberIOSpark implements ClimberIO {
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
   }
+
+  public void regulateClimbCurrent() {
+    
+  }
+
 }
+
