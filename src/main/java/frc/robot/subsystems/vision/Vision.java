@@ -47,11 +47,13 @@ public class Vision extends VirtualSubsystem {
     final var latestEstimates = io.getLatestEstimates();
 
     for (final var est : latestEstimates) {
-      visionDataConsumer.accept(est);
-
-      if (est.sourceType() == CameraUsage.REEF) {
-        reefVisionDataConsumer.accept(est);
+      switch (est.estimateType()) {
+        case MULTI_TAG -> visionDataConsumer.accept(est);
+        case SINGLE_TAG -> { // Java 21 when clauses would be nice
+          if (est.sourceType() == CameraUsage.REEF) reefVisionDataConsumer.accept(est);
+        }
       }
+      ;
     }
   }
 }

@@ -34,7 +34,9 @@ public class Camera {
   private final PhotonPoseEstimator singleTagEstimator;
 
   // for logging
-  private VisionEstimate latestValidEstimate;
+  private VisionEstimate latestMultiTagEstimate;
+
+  private VisionEstimate latestSingleTagEstimate;
 
   public Camera(
       CameraConfig config, PhotonCamera camera, Supplier<Rotation2d> robotHeadingSupplier) {
@@ -59,6 +61,14 @@ public class Camera {
             config.robotToCamera());
   }
 
+  public VisionEstimate getLatestMultiTagEstimate() {
+    return latestMultiTagEstimate;
+  }
+
+  public VisionEstimate getLatestSingleTagEstimate() {
+    return latestSingleTagEstimate;
+  }
+
   @NotLogged
   public VisionEstimate tryLatestEstimate() {
     singleTagEstimator.addHeadingData(Timer.getFPGATimestamp(), robotHeadingSupplier.get());
@@ -73,38 +83,63 @@ public class Camera {
 
     if (!latestResult.hasTargets()) return null;
 
-    final var estimateType =
-        switch (latestResult.targets.size()) {
-          case 1 -> EstimateType.SINGLE_TAG;
-          default -> EstimateType.MULTI_TAG;
-        };
+    final var multiTagEstimate =
+        multiTagEstimator
+            .update(latestResult)
+            .filter(
+                poseEst ->
+                    VisionConstants.kAllowedFieldArea.contains(
+                        poseEst.estimatedPose.getTranslation().toTranslation2d()))
+            .map(
+                photonEst -> {
+                  final var visionEst =
+                      new VisionEstimate(
+                          photonEst,
+                          calculateStdDevs(photonEst, EstimateType.MULTI_TAG),
+                          name,
+                          usage,
+                          EstimateType.MULTI_TAG);
 
-    final var estimate =
-        switch (estimateType) {
-          case SINGLE_TAG -> singleTagEstimator.update(latestResult);
-          case MULTI_TAG -> multiTagEstimator.update(latestResult);
-        };
+                  latestMultiTagEstimate = visionEst;
 
-    return estimate
-        .filter(
-            poseEst ->
-                VisionConstants.kAllowedFieldArea.contains(
-                    poseEst.estimatedPose.getTranslation().toTranslation2d()))
-        .map(
-            photonEst -> {
-              final var visionEst =
-                  new VisionEstimate(
-                      photonEst, calculateStdDevs(photonEst), name, usage, estimateType);
-              latestValidEstimate = visionEst;
-              return visionEst;
-            })
-        .orElse(null);
+                  return visionEst;
+                })
+            .orElse(null);
+
+    final var singleTagEstimate =
+        singleTagEstimator
+            .update(latestResult)
+            .filter(
+                poseEst ->
+                    VisionConstants.kAllowedFieldArea.contains(
+                        poseEst.estimatedPose.getTranslation().toTranslation2d()))
+            .map(
+                photonEst -> {
+                  final var visionEst =
+                      new VisionEstimate(
+                          photonEst,
+                          calculateStdDevs(photonEst, EstimateType.SINGLE_TAG),
+                          name,
+                          usage,
+                          EstimateType.SINGLE_TAG);
+
+                  latestSingleTagEstimate = visionEst;
+
+                  return visionEst;
+                })
+            .orElse(null);
+
+    return switch (latestResult.targets.size()) {
+      case 1 -> singleTagEstimate;
+      default -> multiTagEstimate;
+    };
   }
 
   // could be absolute nonsense, open to tuning constants for each robot camera config
   // assumes `result` has targets
   @NotLogged
-  private Matrix<N3, N1> calculateStdDevs(EstimatedRobotPose visionPoseEstimate) {
+  private Matrix<N3, N1> calculateStdDevs(
+      EstimatedRobotPose visionPoseEstimate, EstimateType estimateType) {
     // weighted average by ambiguity
     final double avgTargetDistance =
         visionPoseEstimate.targetsUsed.stream()
@@ -120,12 +155,17 @@ public class Camera {
                 .reduce(0.0, Double::sum)
             / (visionPoseEstimate.targetsUsed.size());
 
+    final double estimateTypeMultiplier =
+        (estimateType == EstimateType.SINGLE_TAG) ? VisionConstants.kSingleTagStdDevMultiplier : 1;
+
     final double translationStdDev =
-        VisionConstants.kTranslationStdDevCoeff
+        estimateTypeMultiplier
+            * VisionConstants.kTranslationStdDevCoeff
             * Math.pow(avgTargetDistance, 3)
             / Math.pow(visionPoseEstimate.targetsUsed.size(), 3);
     final double rotationStdDev =
-        VisionConstants.kRotationStdDevCoeff
+        estimateTypeMultiplier
+            * VisionConstants.kRotationStdDevCoeff
             * Math.pow(avgTargetDistance, 3)
             / Math.pow(visionPoseEstimate.targetsUsed.size(), 3);
 
