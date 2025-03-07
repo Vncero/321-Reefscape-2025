@@ -61,7 +61,6 @@ public class Camera {
 
   @NotLogged
   public VisionEstimate tryLatestEstimate() {
-    // TODO: still some confusion with exactly what time base to use, should be NT time?
     singleTagEstimator.addHeadingData(Timer.getFPGATimestamp(), robotHeadingSupplier.get());
 
     if (!camera.isConnected()) return null;

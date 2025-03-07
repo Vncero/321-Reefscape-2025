@@ -27,7 +27,8 @@ public class Vision extends VirtualSubsystem {
             visionDataConsumer,
             reefVisionDataConsumer)
         : new Vision(
-            new VisionIOSim(robotPoseSupplier, VisionConstants.kCameraConfigs),
+            new VisionIOSim(
+                robotPoseSupplier, robotHeadingSupplier, VisionConstants.kCameraConfigs),
             visionDataConsumer,
             reefVisionDataConsumer);
   }
