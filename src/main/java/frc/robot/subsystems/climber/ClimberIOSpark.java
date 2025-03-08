@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.wpilibj.Servo;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -20,7 +19,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
 /*
- * Spark implementation of the climber subsystem
+ * Spark implementation of the real climber subsystem
  */
 
 @Logged
@@ -37,11 +36,11 @@ public class ClimberIOSpark implements ClimberIO {
             .voltageCompensation(ClimberConstants.kNominalVoltage.in(Volts))
             .smartCurrentLimit(ClimberConstants.kSmartCurrentLimit)
             .apply(
-              new EncoderConfig()
-                .velocityConversionFactor(ClimberConstants.kClimbVelocityConversionFactor)
-                .positionConversionFactor(ClimberConstants.kClimbPositionConversionFactor)),
-                ResetMode.kResetSafeParameters,
-                PersistMode.kPersistParameters);
+                new EncoderConfig()
+                    .velocityConversionFactor(ClimberConstants.kClimbVelocityConversionFactor)
+                    .positionConversionFactor(ClimberConstants.kClimbPositionConversionFactor)),
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
   }
 
   public ClimberIOSpark() {

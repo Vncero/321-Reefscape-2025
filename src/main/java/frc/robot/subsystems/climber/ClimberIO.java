@@ -12,7 +12,7 @@ public interface ClimberIO {
 
   default void setClimbCurrent(Current Current) {} // sets roller current
 
-  default void setClimbVoltage(Voltage voltage) {}
+  default void setClimbVoltage(Voltage voltage) {} // sets climb voltage
 
-  default void resetEncoder(Angle angle) {}
+  default void resetEncoder(Angle angle) {} // resets climb encoder
 }

@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.robot.subsystems.algaeIntakePivot.ClimberConstants;
+import frc.robot.subsystems.algaeIntakePivot.AlgaeIntakePivotConstants;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArmConstants;
 import frc.robot.util.VirtualSubsystem;
@@ -33,7 +33,7 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
 
   Supplier<Distance> elevatorSetpoint = () -> ElevatorConstants.kElevatorMinimumHeight;
   Supplier<Angle> armSetpoint = () -> ElevatorArmConstants.kStartAngle;
-  Supplier<Angle> algaePivotSetpoint = () -> ClimberConstants.kPivotStartingAngle;
+  Supplier<Angle> algaePivotSetpoint = () -> AlgaeIntakePivotConstants.kPivotStartingAngle;
 
   Pose3d elevatorFirstStagePose = new Pose3d();
   Pose3d elevatorSecondStagePose = new Pose3d();
@@ -78,7 +78,7 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
     this.algaeIntakePose =
         new Pose3d(
             VisualizerConstants.algaeRoot3d,
-            new Rotation3d(0, ClimberConstants.kPivotStartingAngle.in(Radians), 0));
+            new Rotation3d(0, AlgaeIntakePivotConstants.kPivotStartingAngle.in(Radians), 0));
   }
 
   public void update() {

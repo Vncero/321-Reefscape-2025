@@ -15,7 +15,7 @@ import edu.wpi.first.units.measure.Voltage;
 @Logged
 public class ClimberConstants {
   // climb motor IDs
-  public static final int kMotorId = 20; //placeholder id
+  public static final int kMotorId = 20; // placeholder id
 
   // climb physical constants
   public static final double kClimbGearing = 100;
@@ -38,8 +38,9 @@ public class ClimberConstants {
   public static final Voltage kNominalVoltage = Volts.of(12);
   public static final Angle kClimbThreshold = Degrees.of(35); // to be tuned
 
-  public static final Current kClimbCurrentRampRate = Amps.of(40); // placeholder
-  public static final Current kClimbCurrent = Amps.of(40);  // placeholder
+  public static final Current kClimbCurrentRampRate =
+      Amps.of(20); // placeholder, will need to tune this
+  public static final Current kClimbCurrent = Amps.of(40); // placeholder
 
   public static final Angle kControllerTolerance = Degrees.of(1);
 }

@@ -19,13 +19,16 @@ public class AlgaeIntakePivotIOKraken implements AlgaeIntakePivotIO {
   public static final AlgaeIntakePivotConfig config = new AlgaeIntakePivotConfig(0, 0, 0, 0);
 
   TalonFX pivotMotorLeft =
-      new TalonFX(ClimberConstants.kPivotMotorLeftId); // corresponds to the left pivot motor
+      new TalonFX(
+          AlgaeIntakePivotConstants.kPivotMotorLeftId); // corresponds to the left pivot motor
   TalonFX pivotMotorRight =
-      new TalonFX(ClimberConstants.kPivotMotorRightId); // corresponds to the right pivot motor
+      new TalonFX(
+          AlgaeIntakePivotConstants.kPivotMotorRightId); // corresponds to the right pivot motor
 
   VoltageOut voltageRequest = new VoltageOut(0); // used to set voltage
   Follower followRequest =
-      new Follower(ClimberConstants.kPivotMotorLeftId, ClimberConstants.kRightInverted);
+      new Follower(
+          AlgaeIntakePivotConstants.kPivotMotorLeftId, AlgaeIntakePivotConstants.kRightInverted);
 
   public AlgaeIntakePivotIOKraken() {
     pivotMotorLeft // sets up and creates left pivot motor
@@ -33,38 +36,42 @@ public class AlgaeIntakePivotIOKraken implements AlgaeIntakePivotIO {
         .apply(
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimitEnable(true)
-                .withStatorCurrentLimit(ClimberConstants.kSmartCurrentLimit));
+                .withStatorCurrentLimit(AlgaeIntakePivotConstants.kSmartCurrentLimit));
     pivotMotorLeft
         .getConfigurator()
         .apply(
             new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(
-                    ClimberConstants.kLeftInverted
+                    AlgaeIntakePivotConstants.kLeftInverted
                         ? InvertedValue.CounterClockwise_Positive
                         : InvertedValue.Clockwise_Positive));
     pivotMotorLeft
         .getConfigurator()
-        .apply(new FeedbackConfigs().withSensorToMechanismRatio(ClimberConstants.kPivotGearing));
+        .apply(
+            new FeedbackConfigs()
+                .withSensorToMechanismRatio(AlgaeIntakePivotConstants.kPivotGearing));
 
     pivotMotorRight // same thing with right pivot motor
         .getConfigurator()
         .apply(
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimitEnable(true)
-                .withStatorCurrentLimit(ClimberConstants.kSmartCurrentLimit));
+                .withStatorCurrentLimit(AlgaeIntakePivotConstants.kSmartCurrentLimit));
     pivotMotorRight
         .getConfigurator()
         .apply(
             new MotorOutputConfigs()
                 .withNeutralMode(NeutralModeValue.Brake)
                 .withInverted(
-                    ClimberConstants.kRightInverted
+                    AlgaeIntakePivotConstants.kRightInverted
                         ? InvertedValue.CounterClockwise_Positive
                         : InvertedValue.Clockwise_Positive));
     pivotMotorRight
         .getConfigurator()
-        .apply(new FeedbackConfigs().withSensorToMechanismRatio(ClimberConstants.kPivotGearing));
+        .apply(
+            new FeedbackConfigs()
+                .withSensorToMechanismRatio(AlgaeIntakePivotConstants.kPivotGearing));
   }
 
   public void setPivotVoltage(Voltage volts) {

@@ -15,7 +15,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
 
 @Logged
-public class ClimberConstants {
+public class AlgaeIntakePivotConstants {
   // TODO: get all these constants
 
   // motor, encoder, sensor IDs

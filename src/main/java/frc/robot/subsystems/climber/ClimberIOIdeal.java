@@ -9,6 +9,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
+// implementation of ClimberIO when disabled
 @Logged
 public class ClimberIOIdeal implements ClimberIO {
 

@@ -26,10 +26,10 @@ public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
   // device ids are plcaeholders
   private SparkMax pivotMotorLeft =
       new SparkMax(
-          ClimberConstants.kPivotMotorLeftId,
+          AlgaeIntakePivotConstants.kPivotMotorLeftId,
           MotorType.kBrushless); // corresponds to left and right motors for pivot
   private SparkMax pivotMotorRight =
-      new SparkMax(ClimberConstants.kPivotMotorRightId, MotorType.kBrushless);
+      new SparkMax(AlgaeIntakePivotConstants.kPivotMotorRightId, MotorType.kBrushless);
 
   public AlgaeIntakePivotIOSpark() {
     configureMotors(); // configures motors once algae spark object
@@ -38,25 +38,31 @@ public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
   public void configureMotors() {
     pivotMotorLeft.configure( // configures two spark motors
         new SparkMaxConfig()
-            .inverted(ClimberConstants.kLeftInverted)
-            .voltageCompensation(ClimberConstants.kNominalVoltage.in(Volts))
-            .smartCurrentLimit(ClimberConstants.kSmartCurrentLimit)
+            .inverted(AlgaeIntakePivotConstants.kLeftInverted)
+            .voltageCompensation(AlgaeIntakePivotConstants.kNominalVoltage.in(Volts))
+            .smartCurrentLimit(AlgaeIntakePivotConstants.kSmartCurrentLimit)
             .apply(
                 new EncoderConfig()
-                    .velocityConversionFactor(ClimberConstants.kPivotVelocityConversionFactor)
-                    .positionConversionFactor(ClimberConstants.kPivotPositionConversionFactor)),
+                    .velocityConversionFactor(
+                        AlgaeIntakePivotConstants.kPivotVelocityConversionFactor)
+                    .positionConversionFactor(
+                        AlgaeIntakePivotConstants.kPivotPositionConversionFactor)),
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
     pivotMotorRight.configure(
         new SparkMaxConfig()
-            .voltageCompensation(ClimberConstants.kNominalVoltage.in(Volts))
-            .smartCurrentLimit(ClimberConstants.kSmartCurrentLimit)
+            .voltageCompensation(AlgaeIntakePivotConstants.kNominalVoltage.in(Volts))
+            .smartCurrentLimit(AlgaeIntakePivotConstants.kSmartCurrentLimit)
             .apply(
                 new EncoderConfig()
-                    .velocityConversionFactor(ClimberConstants.kPivotVelocityConversionFactor)
-                    .positionConversionFactor(ClimberConstants.kPivotPositionConversionFactor))
-            .follow(ClimberConstants.kPivotMotorLeftId, ClimberConstants.kRightInverted),
+                    .velocityConversionFactor(
+                        AlgaeIntakePivotConstants.kPivotVelocityConversionFactor)
+                    .positionConversionFactor(
+                        AlgaeIntakePivotConstants.kPivotPositionConversionFactor))
+            .follow(
+                AlgaeIntakePivotConstants.kPivotMotorLeftId,
+                AlgaeIntakePivotConstants.kRightInverted),
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
   }

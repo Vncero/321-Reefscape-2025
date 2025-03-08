@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
-import edu.wpi.first.wpilibj.Servo;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -13,11 +12,13 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableConstant;
 
+// deep climb mechanism
 @Logged
 public class Climber extends SubsystemBase {
 
@@ -47,7 +48,7 @@ public class Climber extends SubsystemBase {
   }
 
   public static Climber create() {
-    return RobotBase.isReal() 
+    return RobotBase.isReal()
         ? new Climber(
             new ClimberIOSpark(),
             ClimberIOSpark.config) // creates real mechanism if the code is running on a robot
@@ -71,10 +72,21 @@ public class Climber extends SubsystemBase {
         });
   }
 
+  // tunes kCurrentRampRate - how much should current be ramping per second
   public Command tuneCurrentRampRate() {
-    return run(() -> {
-      // to-do: write this tune command
-    });
+    TunableConstant climbCurrentRampRate =
+        new TunableConstant(
+            "/Climber/ClimbCurrentRampRate", ClimberConstants.kClimbCurrentRampRate.in(Amps));
+
+    return run(
+        () -> {
+          double newRampRate = climbCurrentRampRate.get();
+          io.setClimbCurrent(
+              Amps.of(
+                  // Ensures the current never exceeds the max
+                  // ramps up current over time as we tune
+                  Math.min(newRampRate * timer.get(), ClimberConstants.kClimbCurrent.in(Amps))));
+        });
   }
 
   // creates placeholder implementation to disable robot
@@ -93,18 +105,14 @@ public class Climber extends SubsystemBase {
     io.setClimbVoltage(desiredVoltage);
   }
 
-  // locks the climb servo 
+  // locks the climb servo
   public Command lockServo() {
-    return run(() ->
-      climbServo.setAngle(ClimberConstants.kServoLockPosition.in(Degrees))
-    );
+    return run(() -> climbServo.setAngle(ClimberConstants.kServoLockPosition.in(Degrees)));
   }
 
   // unlocks the climb servo
   public Command unlockServo() {
-    return run(() ->
-      climbServo.setAngle(ClimberConstants.kServoUnlockPosition.in(Degrees))
-    );
+    return run(() -> climbServo.setAngle(ClimberConstants.kServoUnlockPosition.in(Degrees)));
   }
 
   /*
@@ -121,7 +129,7 @@ public class Climber extends SubsystemBase {
   public void stopClimbCurrent() {
     io.setClimbCurrent(Amps.of(0));
   }
-  
+
   /*
    * Climb command
    * Courtesy of 6328's implementation <3
@@ -136,7 +144,7 @@ public class Climber extends SubsystemBase {
                         inputs.climbAngle.in(Degrees)
                                 >= ClimberConstants.kClimbThreshold.in(Degrees)
                             || inputs.climbCurrent.in(Amps) <= 0.0)) // Stop if cage slips
-                .andThen(lockServo())
+        .andThen(lockServo())
         .finallyDo(() -> stopClimbCurrent());
   }
 
