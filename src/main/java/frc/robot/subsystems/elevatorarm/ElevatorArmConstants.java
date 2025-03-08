@@ -10,7 +10,8 @@ import edu.wpi.first.units.measure.Distance;
 
 public class ElevatorArmConstants {
   // the CAN ID of the arm motor on the elevator
-  public static final int kElevatorArmId = 0;
+  public static final int kElevatorArmId = 15;
+
   public static final int kEncoderCANdiId = 0;
 
   // the gearing of the arm
@@ -22,7 +23,7 @@ public class ElevatorArmConstants {
   // motor characteristics
   public static final int kCurrentLimit = 40;
   public static final double kNominalVoltage = 12;
-  public static final boolean kInverted = false;
+  public static final boolean kInverted = true;
 
   // absolute encoder port on RoboRIO DIO if we need it
   public static final int kAbsoluteEncoderPort = 0;
@@ -46,13 +47,13 @@ public class ElevatorArmConstants {
   // the length of the arm (elbow to wrist)
   public static final Distance kElbowLength = Inches.of(10.98);
   // the fixed angle of the elbow (shoulder to elbow to wrist angle)
-  public static final Angle kElbowAngle = Degrees.of(80);
+  public static final Angle kElbowAngle = Degrees.of(53.932);
   // the maximum angle the arm can go in simulation
   public static final Angle kMaxAngle = Degrees.of(180);
   // the minimum angle the arm can go in simulation
   public static final Angle kMinAngle = Degrees.of(-180);
   // the angle from the encoder rotation axis to the center of mass
-  public static final Angle kCMOffset = Degrees.of(-10); // TODO: find
+  public static final Angle kCMOffset = Degrees.of(-19.6848);
   // the starting angle of the arm
   public static final Angle kStartAngle = Degrees.of(-64.53);
 }

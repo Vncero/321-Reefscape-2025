@@ -153,4 +153,9 @@ public class Elevator extends SubsystemBase {
   public Distance getTargetHeight() {
     return targetHeight;
   }
+
+  public boolean atHeight(Distance height) {
+    return Math.abs(inputs.height.in(Meters) - height.in(Meters))
+        < ElevatorConstants.kHeightTolerance.in(Meters);
+  }
 }

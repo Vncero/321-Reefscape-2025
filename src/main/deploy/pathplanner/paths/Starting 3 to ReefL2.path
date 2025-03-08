@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.267622950819672,
-        "y": 1.7892930327868846
+        "x": 4.315573770491803,
+        "y": 1.6574282786885255
       },
       "isLocked": false,
       "linkedName": "Starting 3"
@@ -20,8 +20,8 @@
         "y": 4.030993852459016
       },
       "prevControl": {
-        "x": 2.6372950819672134,
-        "y": 2.49656762295082
+        "x": 2.6253073770491806,
+        "y": 1.9930840163934418
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,16 +34,16 @@
   "eventMarkers": [
     {
       "name": "ArmCoralOuttake",
-      "waypointRelativePos": 0.443019943019943,
+      "waypointRelativePos": 0.1144349477682812,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 3.5,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 1200.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },

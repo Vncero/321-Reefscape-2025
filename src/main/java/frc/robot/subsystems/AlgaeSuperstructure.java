@@ -40,7 +40,7 @@ public class AlgaeSuperstructure {
   }
 
   public Command climb() {
-    return this.pivot.climb();
+    return this.pivot.alternateClimb();
   }
 
   public AlgaeSetpoint getTargetState() {
@@ -56,8 +56,8 @@ public class AlgaeSuperstructure {
   }
 
   public enum AlgaeSetpoint {
-    NEUTRAL(Degrees.of(0)),
-    INTAKE(Degrees.of(135)),
+    NEUTRAL(Degrees.of(10)),
+    INTAKE(Degrees.of(170)),
     OUTTAKE(Degrees.of(100)),
     CLIMB_PREP(Degrees.of(180));
 

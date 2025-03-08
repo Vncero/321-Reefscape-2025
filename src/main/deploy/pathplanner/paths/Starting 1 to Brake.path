@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 5.41844262295082,
-        "y": 5.493493852459016
+        "x": 5.358504098360656,
+        "y": 5.433555327868853
       },
       "prevControl": {
-        "x": 6.042442622950819,
-        "y": 5.893243852459016
+        "x": 5.982504098360656,
+        "y": 5.833305327868853
       },
       "nextControl": {
-        "x": 4.79444262295082,
-        "y": 5.093743852459016
+        "x": 4.734504098360657,
+        "y": 5.033805327868853
       },
       "isLocked": false,
       "linkedName": "ReefR1"
@@ -55,16 +55,16 @@
   "eventMarkers": [
     {
       "name": "ArmCoralOuttake",
-      "waypointRelativePos": 0.0,
+      "waypointRelativePos": 0.22127255460588802,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 3.5,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 1200.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },

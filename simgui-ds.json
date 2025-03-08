@@ -1,7 +1,7 @@
 {
-  "System Joysticks": {
+  "Keyboard 0 Settings": {
     "window": {
-      "enabled": false
+      "visible": true
     }
   },
   "keyboardJoysticks": [
@@ -22,9 +22,13 @@
         {
           "decKey": 45,
           "incKey": 61
+        },
+        {
+          "decKey": 263,
+          "incKey": 262
         }
       ],
-      "axisCount": 4,
+      "axisCount": 5,
       "buttonCount": 10,
       "buttonKeys": [
         90,
@@ -32,7 +36,7 @@
         80,
         48,
         77,
-        -1,
+        76,
         -1,
         56,
         44,
@@ -55,7 +59,6 @@
     {
       "axisConfig": [
         {
-          "decKey": 76,
           "incKey": 74
         },
         {
@@ -75,10 +78,7 @@
     },
     {
       "axisConfig": [
-        {
-          "decKey": 263,
-          "incKey": 262
-        },
+        {},
         {
           "decKey": 265,
           "incKey": 264

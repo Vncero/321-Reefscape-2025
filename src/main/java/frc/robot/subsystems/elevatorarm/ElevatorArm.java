@@ -135,6 +135,10 @@ public class ElevatorArm extends SubsystemBase {
         });
   }
 
+  public Command seedEncoder() {
+    return runOnce(() -> io.seedEncoderValues());
+  }
+
   /**
    * Creates a Command that allows the user to tune the ElevatorArm using SmartDashboard
    *
@@ -168,5 +172,10 @@ public class ElevatorArm extends SubsystemBase {
 
   public Angle getAngle() {
     return inputs.angle;
+  }
+
+  public boolean atAngle(Angle angle) {
+    return Math.abs(inputs.angle.in(Degrees) - angle.in(Degrees))
+        < ElevatorArmConstants.kAngleTolerance.in(Degrees);
   }
 }

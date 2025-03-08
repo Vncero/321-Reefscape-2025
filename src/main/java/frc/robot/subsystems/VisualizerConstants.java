@@ -11,19 +11,19 @@ import frc.robot.subsystems.elevator.ElevatorConstants;
 
 public class VisualizerConstants {
   // elevator base relative to front of the robot
-  public static final Translation2d elevatorRoot2d =
-      new Translation2d(Inches.of(15).in(Meters), Inches.of(1).in(Meters));
+  public static final Translation2d kElevatorRoot2d =
+      new Translation2d(Inches.of(15), Inches.of(1));
 
   // elevator base in 3d
-  public static final Translation3d elevatorRoot3d =
-      new Translation3d(Inches.of(0).in(Meters), 0, elevatorRoot2d.getY());
+  public static final Translation3d kElevatorRoot3d =
+      new Translation3d(0, 0, kElevatorRoot2d.getY());
 
   // middle of elevator (side view) to middle of shoulder joint
   public static final Distance shoulderToElevatorOffset = Inches.of(11.5);
 
   // arm shoulder joint, top of elevator
   public static final Translation2d armRoot2d =
-      elevatorRoot2d.plus(
+      kElevatorRoot2d.plus(
           new Translation2d(
               -shoulderToElevatorOffset.in(Meters),
               ElevatorConstants.kElevatorMinimumHeight.in(Meters)));

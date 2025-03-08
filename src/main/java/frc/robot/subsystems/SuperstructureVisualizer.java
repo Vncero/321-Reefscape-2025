@@ -54,8 +54,8 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
     MechanismRoot2d root =
         mechanism.getRoot(
             "Root",
-            VisualizerConstants.elevatorRoot2d.getX(),
-            VisualizerConstants.elevatorRoot2d.getY());
+            VisualizerConstants.kElevatorRoot2d.getX(),
+            VisualizerConstants.kElevatorRoot2d.getY());
 
     this.elevator =
         root.append(
@@ -95,12 +95,12 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
 
     this.elevatorFirstStagePose =
         new Pose3d(
-            VisualizerConstants.elevatorRoot3d.plus(new Translation3d(0, 0, firstStageHeight)),
+            VisualizerConstants.kElevatorRoot3d.plus(new Translation3d(0, 0, firstStageHeight)),
             new Rotation3d());
 
     this.elevatorSecondStagePose =
         new Pose3d(
-            VisualizerConstants.elevatorRoot3d.plus(new Translation3d(0, 0, secondStageHeight)),
+            VisualizerConstants.kElevatorRoot3d.plus(new Translation3d(0, 0, secondStageHeight)),
             new Rotation3d());
 
     this.shoulderPose =

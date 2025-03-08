@@ -25,5 +25,6 @@ public class SparkMaxLogger extends ClassSpecificLogger<SparkMax> {
     dataLogger.log("Motor Temperature (C)", object.getMotorTemperature());
     dataLogger.log("Encoder Position", object.getEncoder().getPosition());
     dataLogger.log("Encoder Velocity", object.getEncoder().getVelocity());
+    dataLogger.log("Analog Sensor Value", object.getAnalog().getPosition());
   }
 }

@@ -2,15 +2,15 @@
 package frc.robot.subsystems.elevatorarm;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.configs.PWM1Configs;
-import com.ctre.phoenix6.hardware.CANdi;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.AnalogSensorConfig;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -25,7 +25,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class ElevatorArmIOSpark implements ElevatorArmIO {
 
   // tuning config for the ElevatorArmIOReal
-  public static final ElevatorArmConfig config = new ElevatorArmConfig(0, 0, 0, 0, 0);
+  public static final ElevatorArmConfig config = new ElevatorArmConfig(0.25, 0, 0.002, 0.33, 0);
 
   // the motor that is controlling the arm (using a SparkMax controller)
   private SparkMax armMotor =
@@ -39,7 +39,7 @@ public class ElevatorArmIOSpark implements ElevatorArmIO {
   //         360,
   //         ElevatorArmConstants.kAbsoluteEncoderOffset.in(Degrees));
 
-  private CANdi encoderCandi = new CANdi(ElevatorArmConstants.kEncoderCANdiId);
+  // private CANdi encoderCandi = new CANdi(ElevatorArmConstants.kEncoderCANdiId);
 
   public ElevatorArmIOSpark() {
     // setup arm motor
@@ -52,21 +52,29 @@ public class ElevatorArmIOSpark implements ElevatorArmIO {
             .apply(
                 new EncoderConfig() // config for relative encoder
                     .positionConversionFactor(ElevatorArmConstants.kPositionConversionFactor)
-                    .velocityConversionFactor(ElevatorArmConstants.kVelocityConversionFactor)),
+                    .velocityConversionFactor(ElevatorArmConstants.kVelocityConversionFactor))
+            .apply(new AnalogSensorConfig().positionConversionFactor(360 / 3.3)),
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
+    // seed arm motor encoder position with lamprey encoder position
+    // TODO: if pid ends up being too messy, seed
+    seedEncoderValues();
+
     // setup encoder
-    encoderCandi
-        .getConfigurator()
-        .apply(
-            new PWM1Configs()
-                .withAbsoluteSensorOffset(ElevatorArmConstants.kAbsoluteEncoderOffset));
+    // encoderCandi
+    //     .getConfigurator()
+    //     .apply(
+    //         new PWM1Configs()
+    //             .withAbsoluteSensorOffset(ElevatorArmConstants.kAbsoluteEncoderOffset));
   }
 
   // update inputs from the arm motor
   public void updateInputs(ElevatorArmInputs inputs) {
-    inputs.angle = encoderCandi.getPWM1Position().getValue();
+    // inputs.angle = encoderCandi.getPWM1Position().getValue()
+    // TODO: if pid ends up being too messy, seed
+    // inputs.angle = Degrees.of(armMotor.getAnalog().getPosition() - 180);
+    inputs.angle = Degrees.of(armMotor.getEncoder().getPosition());
     inputs.velocity = DegreesPerSecond.of(armMotor.getEncoder().getVelocity());
     inputs.current = Amps.of(armMotor.getOutputCurrent());
   }
@@ -78,5 +86,9 @@ public class ElevatorArmIOSpark implements ElevatorArmIO {
     // if (armMotor.getOutputCurrent() > 40) voltsWithStall /= 60; // jank way to make the motor
     // essentially stop
     armMotor.setVoltage(voltsWithStall);
+  }
+
+  public void seedEncoderValues() {
+    armMotor.getEncoder().setPosition(armMotor.getAnalog().getPosition() - 180);
   }
 }

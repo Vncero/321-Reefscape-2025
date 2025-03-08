@@ -3,7 +3,9 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,7 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
-import frc.robot.util.AprilTagUtil;
+import frc.robot.util.MyAlliance;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,26 +30,29 @@ public class StationAlign {
   private static final Distance kStationDistance = Inches.of(17.875);
   private static final Rotation2d kStationAlignmentRotation = Rotation2d.kZero;
 
-  private static final Transform2d kStationAlignTransform =
-      new Transform2d(kStationDistance, Meter.zero(), kStationAlignmentRotation);
-
   private static final List<Integer> blueStationTagIDs = List.of(12, 13);
   private static final List<Integer> redStationTagIDs = List.of(1, 2);
 
-  private static final List<Pose2d> blueStationTags = AprilTagUtil.tagIDsToPoses(blueStationTagIDs);
-  private static final List<Pose2d> redStationTags = AprilTagUtil.tagIDsToPoses(redStationTagIDs);
+  private static final Distance kStationLeftAlignDistance = Meters.of(-0.52);
+  private static final Distance kStationRightAlignDistance = Meters.of(0.52);
+
+  private static final List<AprilTag> blueStationTags =
+      RobotConstants.kAprilTagFieldLayout.getTags().stream()
+          .filter(tag -> blueStationTagIDs.contains(tag.ID))
+          .toList();
+  private static final List<AprilTag> redStationTags =
+      RobotConstants.kAprilTagFieldLayout.getTags().stream()
+          .filter(tag -> redStationTagIDs.contains(tag.ID))
+          .toList();
 
   /**
-   * This method is run when DriverStation connects to save computations mid-match, only the station
-   * poses are loaded
+   * This method is run during Robot#autonomousInit() and Robot#teleopInit() to save computations,
+   * only the station poses are loaded
    */
   public static void loadStationAlignmentPoses() {
-    for (int i = 0; i < blueStationTagIDs.size(); i++) {
-      int blueStationID = blueStationTagIDs.get(i);
-      int redStationID = redStationTagIDs.get(i);
-
-      stationPoses.computeIfAbsent(blueStationID, StationAlign::getNearestCenterAlign);
-      stationPoses.computeIfAbsent(redStationID, StationAlign::getNearestCenterAlign);
+    List<Integer> stationTagIds = MyAlliance.isRed() ? redStationTagIDs : blueStationTagIDs;
+    for (Integer id : stationTagIds) {
+      stationPoses.computeIfAbsent(id, StationAlign::getNearestCenterAlign);
     }
   }
 
@@ -63,10 +68,10 @@ public class StationAlign {
 
     if (alliance.isEmpty()) return null;
 
-    List<Pose2d> stationTagPoses =
+    List<AprilTag> stationTags =
         alliance.get().equals(Alliance.Red) ? redStationTags : blueStationTags;
 
-    return robotPose.nearest(stationTagPoses);
+    return robotPose.nearest(stationTags.stream().map(tag -> tag.pose.toPose2d()).toList());
   }
 
   /**
@@ -103,7 +108,41 @@ public class StationAlign {
 
     Pose2d aprilTagPose = tagPose.get().toPose2d();
 
-    Pose2d resultPose = aprilTagPose.plus(kStationAlignTransform);
+    Pose2d resultPose =
+        aprilTagPose.plus(
+            new Transform2d(kStationDistance, Meter.zero(), kStationAlignmentRotation));
+
+    return resultPose;
+  }
+
+  private static Pose2d getNearestRightAlign(int stationTagID) {
+    // `Optional` here means there may not be a tag with the specified ID, again must be handled
+    Optional<Pose3d> tagPose = RobotConstants.kAprilTagFieldLayout.getTagPose(stationTagID);
+
+    if (tagPose.isEmpty()) return null;
+
+    Pose2d aprilTagPose = tagPose.get().toPose2d();
+
+    Pose2d resultPose =
+        aprilTagPose.plus(
+            new Transform2d(
+                kStationDistance, kStationRightAlignDistance, kStationAlignmentRotation));
+
+    return resultPose;
+  }
+
+  private static Pose2d getNearestLeftAlign(int stationTagID) {
+    // `Optional` here means there may not be a tag with the specified ID, again must be handled
+    Optional<Pose3d> tagPose = RobotConstants.kAprilTagFieldLayout.getTagPose(stationTagID);
+
+    if (tagPose.isEmpty()) return null;
+
+    Pose2d aprilTagPose = tagPose.get().toPose2d();
+
+    Pose2d resultPose =
+        aprilTagPose.plus(
+            new Transform2d(
+                kStationDistance, kStationLeftAlignDistance, kStationAlignmentRotation));
 
     return resultPose;
   }
@@ -111,11 +150,17 @@ public class StationAlign {
   /** Drives to align against the center of the nearest station, no manual driving */
   public static Command goToNearestCenterAlign(SwerveDrive swerveDrive) {
     return swerveDrive.driveToFieldPose(
-        () -> {
-          final Pose2d target = stationPoses.get(getNearestStationID(swerveDrive.getPose()));
-          swerveDrive.setAlignmentSetpoint(target);
-          return target;
-        });
+        () -> getNearestCenterAlign(getNearestStationID(swerveDrive.getPose())));
+  }
+
+  public static Command goToNearestRightAlign(SwerveDrive swerveDrive) {
+    return swerveDrive.driveToFieldPose(
+        () -> getNearestRightAlign(getNearestStationID(swerveDrive.getPose())));
+  }
+
+  public static Command goToNearestLeftAlign(SwerveDrive swerveDrive) {
+    return swerveDrive.driveToFieldPose(
+        () -> getNearestLeftAlign(getNearestStationID(swerveDrive.getPose())));
   }
 
   /** Maintain translational driving while rotating toward the nearest station tag */
@@ -128,5 +173,12 @@ public class StationAlign {
             getNearestStationPose(swerveDrive.getPose())
                 .getRotation()
                 .plus(kStationAlignmentRotation));
+  }
+
+  public static double getStationDistance(SwerveDrive swerveDrive) {
+    return swerveDrive
+        .getPose()
+        .getTranslation()
+        .getDistance(getNearestStationPose(swerveDrive.getPose()).getTranslation());
   }
 }

@@ -20,8 +20,8 @@
         "y": 5.361629098360655
       },
       "prevControl": {
-        "x": 4.135758196721311,
-        "y": 6.41654713114754
+        "x": 4.195696721311475,
+        "y": 6.680276639344262
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,22 +34,22 @@
   "eventMarkers": [
     {
       "name": "ArmCoralOuttake",
-      "waypointRelativePos": 0.32146248812915473,
+      "waypointRelativePos": 0.1429249762583097,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 3.5,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 1200.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -55.0
+    "rotation": -59.99999999999999
   },
   "reversed": false,
   "folder": "Paths",

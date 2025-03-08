@@ -4,9 +4,7 @@ package frc.robot.subsystems.drivetrain;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.epilogue.Logged;
@@ -72,9 +70,9 @@ public class DrivetrainSim implements SwerveDrive {
 
     this.headingController =
         new PIDController(
-            DrivetrainConstants.tuneHeadingGains.kP(),
-            DrivetrainConstants.tuneHeadingGains.kI(),
-            DrivetrainConstants.tuneHeadingGains.kD());
+            DrivetrainConstants.kTuneHeadingGains.kP(),
+            DrivetrainConstants.kTuneHeadingGains.kI(),
+            DrivetrainConstants.kTuneHeadingGains.kD());
 
     this.headingController.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -82,7 +80,7 @@ public class DrivetrainSim implements SwerveDrive {
 
     // A field2d widget for debugging
     field2d = new Field2d();
-    SmartDashboard.putData("simulation field", field2d);
+    SmartDashboard.putData("Drivetrain Pose Field", field2d);
 
     this.reefPoseEstimator =
         new SwerveDrivePoseEstimator(
@@ -178,14 +176,11 @@ public class DrivetrainSim implements SwerveDrive {
                 () -> {
                   ChassisSpeeds targetSpeeds =
                       new ChassisSpeeds(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY())
-                              * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+                          xPoseController.calculate(getPose().getX(), pose.get().getX()),
+                          yPoseController.calculate(getPose().getY(), pose.get().getY()),
                           thetaController.calculate(
-                                  getPose().getRotation().getRadians(),
-                                  pose.get().getRotation().getRadians())
-                              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond));
+                              getPose().getRotation().getRadians(),
+                              pose.get().getRotation().getRadians()));
 
                   driveRobotCentric(
                       targetSpeeds.vxMetersPerSecond,
@@ -197,20 +192,22 @@ public class DrivetrainSim implements SwerveDrive {
 
   @Override
   public void driveToFieldPose(Pose2d pose) {
-
     if (pose == null) return;
 
     ChassisSpeeds targetSpeeds =
         new ChassisSpeeds(
-            xPoseController.calculate(getPose().getX(), pose.getX())
-                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-            yPoseController.calculate(getPose().getY(), pose.getY())
-                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            xPoseController.calculate(getPose().getX(), pose.getX()),
+            yPoseController.calculate(getPose().getY(), pose.getY()),
             thetaController.calculate(
-                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
-                * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond));
+                getPose().getRotation().getRadians(), pose.getRotation().getRadians()));
 
     if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
+
+    // if (Math.hypot(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond) < 0.1)
+    //   targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
+    // if (targetSpeeds.omegaRadiansPerSecond < 0.1)
+    //   targetSpeeds =
+    //       new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
 
     simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, true, false);
   }
