@@ -62,5 +62,5 @@ public class ElevatorArmConstants {
   public static final Constraints kArmConstraints =
       RobotBase.isReal() // in deg
           ? new Constraints(0, 0) // real
-          : new Constraints(0, 0); // sim
+          : new Constraints(100, 100); // sim
 }

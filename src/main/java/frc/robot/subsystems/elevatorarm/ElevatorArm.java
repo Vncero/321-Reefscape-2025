@@ -12,6 +12,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -132,12 +133,20 @@ public class ElevatorArm extends SubsystemBase {
    * @param angleSup A supplier that supplies the angle for the arm to go to
    * @return a command that runs the arm to the desired angle supplied by the Supplier<Angle>
    */
-  public Command goToAngle(Supplier<Angle> angleSup) {
-    return run(
-        () -> {
+  public Command goToAngleProfiled(Supplier<Angle> angleSup) {
+    return run(() -> {
           goalAngle = angleSup.get().in(Degrees);
           goToAngle(angleSup.get());
-        });
+        })
+        .beforeStarting(() -> profile = new TrapezoidProfile(ElevatorArmConstants.kArmConstraints));
+  }
+
+  public Command goToAnglePID(Supplier<Angle> angleSup) {
+    return run(() -> {
+          goalAngle = angleSup.get().in(Degrees);
+          goToAngle(angleSup.get());
+        })
+        .beforeStarting(() -> profile = new TrapezoidProfile(new Constraints(0, 0)));
   }
 
   /**
@@ -201,6 +210,10 @@ public class ElevatorArm extends SubsystemBase {
 
   public Angle getAngle() {
     return inputs.angle;
+  }
+
+  public double getSetpoint() {
+    return setpointState.position;
   }
 
   public boolean atAngle(Angle angle) {
