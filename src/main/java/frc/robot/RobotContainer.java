@@ -135,13 +135,14 @@ public class RobotContainer {
                   .getRadians());
 
   // due to different units, some errors will have more impact on the percentage
-  private double reefAlignProgressPercent =
-      1
-          / (1
-              + elevatorErrorMeters.getAsDouble()
-              + elevatorArmErrorDeg.getAsDouble()
-              + drivetrainTranslationalErrorMeters.getAsDouble()
-              + drivetrainRotationalErrorDeg.getAsDouble());
+  private DoubleSupplier reefAlignProgressPercent =
+      () ->
+          1
+              / (1
+                  + elevatorErrorMeters.getAsDouble()
+                  + elevatorArmErrorDeg.getAsDouble()
+                  + drivetrainTranslationalErrorMeters.getAsDouble()
+                  + drivetrainRotationalErrorDeg.getAsDouble());
 
   public RobotContainer() {
 
@@ -194,17 +195,13 @@ public class RobotContainer {
     leds.registerSignal(
         7,
         () ->
-            leds.isAligning
+            leds.isRotateAligning
                 && ReefAlign.isWithinReefRange(drivetrain, ReefAlign.kMechanismDeadbandThreshold)
                 && Math.hypot(driverForward.getAsDouble(), driverStrafe.getAsDouble()) >= 0.05,
         () -> LedsConstants.kReadyToAlign);
 
     leds.registerSignal(
-        8,
-        () ->
-            leds.isReefAligning
-                && Math.hypot(driverForward.getAsDouble(), driverStrafe.getAsDouble()) <= 0.05,
-        () -> LedsConstants.kReefAligning(() -> reefAlignProgressPercent));
+        8, () -> leds.isReefAligning, () -> LedsConstants.kReefAligning(reefAlignProgressPercent));
 
     // when we are aligned, also works when manually aligning
     leds.registerSignal(9, () -> isDriverOverride, () -> LedsConstants.kAlignOverride);
@@ -245,12 +242,7 @@ public class RobotContainer {
                         .until(
                             () ->
                                 ReefAlign.isWithinReefRange(
-                                        drivetrain,
-                                        ReefAlign.kMechanismDeadbandThreshold) // use mechanism
-                                    // threshold
-                                    // cuz we
-                                    // wanna be close before aligning
-                                    // in this case
+                                        drivetrain, ReefAlign.kMechanismDeadbandThreshold)
                                     && Math.hypot(
                                             driverForward.getAsDouble(), driverStrafe.getAsDouble())
                                         <= 0.05
@@ -271,44 +263,40 @@ public class RobotContainer {
                                             &&
                                             // allow driver control to be taken back when
                                             // driverOverride becomes true
-                                            !isDriverOverride)
-                                // when we get far away, repeat the command
-                                .repeatedly()
-                                .alongWith( // and run the mechanism to where we need to go
+                                            !isDriverOverride))
+                        // when we get far away, repeat the command
+                        .repeatedly()
+                        .alongWith( // and run the mechanism to where we need to go
+                            coralSuperstructure
+                                .goToSetpoint(
+                                    // move arm up to avoid hitting reef until we get close
+                                    // to reef
+                                    () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                                    () -> ElevatorArmConstants.kPreAlignAngle)
+                                .until(
+                                    () ->
+                                        coralSuperstructure.atTargetState()
+                                            && ReefAlign.isWithinReefRange(
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold))
+                                .andThen(
+                                    // move the elevator up but keep arm up
                                     coralSuperstructure
                                         .goToSetpoint(
-                                            // move arm up to avoid hitting reef until we get close
-                                            // to reef
-                                            () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                                            () -> queuedSetpoint.getElevatorHeight(),
                                             () -> ElevatorArmConstants.kPreAlignAngle)
-                                        .until(
-                                            () ->
-                                                coralSuperstructure.atTargetState()
-                                                    && ReefAlign.isWithinReefRange(
-                                                        drivetrain,
-                                                        ReefAlign.kMechanismDeadbandThreshold))
+                                        .until(() -> coralSuperstructure.atTargetState())
+                                        // then move arm down to setpoint
                                         .andThen(
-                                            // move the elevator up but keep arm up
-                                            coralSuperstructure
-                                                .goToSetpoint(
-                                                    () -> queuedSetpoint.getElevatorHeight(),
-                                                    () -> ElevatorArmConstants.kPreAlignAngle)
-                                                .until(() -> coralSuperstructure.atTargetState())
-                                                // then move arm down to setpoint
-                                                .andThen(
-                                                    coralSuperstructure.goToSetpoint(
-                                                        () -> queuedSetpoint)))
-                                        // and only do this while we're in the zone (when we're not,
-                                        // we will
-                                        // stay in the pre-alignment position)
-                                        .onlyWhile(
-                                            () ->
-                                                ReefAlign.isWithinReefRange(
-                                                        drivetrain,
-                                                        ReefAlign.kMechanismDeadbandThreshold)
-                                                    && queuedSetpoint
-                                                        != CoralScorerSetpoint.NEUTRAL)
-                                        .repeatedly()))));
+                                            coralSuperstructure.goToSetpoint(() -> queuedSetpoint)))
+                                // and only do this while we're in the zone (when we're not,
+                                // we will
+                                // stay in the pre-alignment position)
+                                .onlyWhile(
+                                    () ->
+                                        ReefAlign.isWithinReefRange(
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                            && queuedSetpoint != CoralScorerSetpoint.NEUTRAL)
+                                .repeatedly())));
 
     driver
         .rightTrigger()
@@ -395,39 +383,6 @@ public class RobotContainer {
 
     // toggle driver override
     driver.povUp().onTrue(Commands.runOnce(() -> isDriverOverride = !isDriverOverride));
-
-    /**
-     * Preference 2:
-     *
-     * <p>Pressing right trigger down all the way performs translation-align/to-setpoint, while
-     * pressing it slightly performs the rotation align
-     *
-     * <p>Driver has override over translation-align/to-setpoint
-     */
-    // new Trigger(() -> driver.getRightTriggerAxis() >= 0.8)
-    //     .whileTrue(
-    //         ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
-    //             .onlyWhile(
-    //                 () ->
-    //                     ReefAlign.isWithinReefRange(
-    //                             drivetrain, ReefAlign.kMaxAlignmentDeadbandThreshold)
-    //                         && Math.hypot(driverForward.getAsDouble(),
-    // driverStrafe.getAsDouble())
-    //                             <= 0.05)
-    //             .asProxy()
-    //             .repeatedly()
-    //             .alongWith(
-    //                 coralSuperstructure
-    //                     .goToSetpoint(() -> queuedSetpoint)
-    //                     .onlyWhile(
-    //                         () ->
-    //                             ReefAlign.isWithinReefRange(
-    //                                 drivetrain, ReefAlign.kMechanismDeadbandThreshold))
-    //                     .asProxy()
-    //                     .repeatedly()));
-
-    // new Trigger(() -> driver.getRightTriggerAxis() > 0.05 && driver.getRightTriggerAxis() < 0.8)
-    //     .whileTrue(ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe));
 
     // manip controls
     // 1 to 4 - right side L1-L4

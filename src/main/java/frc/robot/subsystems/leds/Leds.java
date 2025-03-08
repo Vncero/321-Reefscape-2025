@@ -30,7 +30,6 @@ public class Leds extends SubsystemBase {
   private static TreeSet<Signal> signals;
   private LEDPattern currentPattern = LedsConstants.kDefault;
 
-  public boolean isAligning = false;
   public boolean isRotateAligning = false;
   public boolean isReefAligning = false;
 
