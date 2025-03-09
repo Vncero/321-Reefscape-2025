@@ -5,8 +5,10 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.RobotBase;
 
 public class ElevatorArmConstants {
   // the CAN ID of the arm motor on the elevator
@@ -56,4 +58,9 @@ public class ElevatorArmConstants {
   public static final Angle kCMOffset = Degrees.of(-19.6848);
   // the starting angle of the arm
   public static final Angle kStartAngle = Degrees.of(-64.53);
+
+  public static final Constraints kArmConstraints =
+      RobotBase.isReal()
+          ? new Constraints(0, 0) // real
+          : new Constraints(150, 150); // sim
 }
