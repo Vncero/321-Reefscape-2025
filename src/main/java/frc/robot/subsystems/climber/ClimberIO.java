@@ -15,4 +15,8 @@ public interface ClimberIO {
   default void setClimbVoltage(Voltage voltage) {} // sets climb voltage
 
   default void resetEncoder(Angle angle) {} // resets climb encoder
+
+  default void setLockServo(Angle angle) {} // sets angle for servo to go to
+
+  default void stopClimbCurrent() {} // stops climb current
 }

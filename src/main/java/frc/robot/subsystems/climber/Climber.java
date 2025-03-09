@@ -10,13 +10,14 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableConstant;
+import java.util.function.Supplier;
 
 // deep climb mechanism
 @Logged
@@ -24,11 +25,10 @@ public class Climber extends SubsystemBase {
 
   private ClimberIO io;
   private ClimberInputs inputs;
+  private ClimberConfig config;
 
-  private Servo climbServo;
   private PIDController climbController;
   private ArmFeedforward feedForward;
-  private ClimberConfig config;
 
   Timer timer = new Timer();
 
@@ -40,10 +40,7 @@ public class Climber extends SubsystemBase {
     climbController = new PIDController(config.kP(), config.kI(), config.kD());
     feedForward = new ArmFeedforward(0, config.kG(), 0);
 
-    climbServo = new Servo(2);
-
     climbController.setTolerance(ClimberConstants.kControllerTolerance.in(Degrees));
-
     io.resetEncoder(ClimberConstants.kStartingAngle);
   }
 
@@ -94,58 +91,56 @@ public class Climber extends SubsystemBase {
     return new Climber(new ClimberIOIdeal(), ClimberIOIdeal.config);
   }
 
-  // get to a desired angle by setting pivot voltage to sum of calculated pid and feedforward
-  public void goToAngle(Angle desiredAngle) {
-    Voltage desiredVoltage =
-        Volts.of(
-            feedForward.calculate(desiredAngle.in(Radians), 0)
-                + climbController.calculate(
-                    inputs.climbAngle.in(Degrees), desiredAngle.in(Degrees)));
-
-    io.setClimbVoltage(desiredVoltage);
-  }
-
-  // locks the climb servo
-  public Command lockServo() {
-    return run(() -> climbServo.setAngle(ClimberConstants.kServoLockPosition.in(Degrees)));
-  }
-
-  // unlocks the climb servo
-  public Command unlockServo() {
-    return run(() -> climbServo.setAngle(ClimberConstants.kServoUnlockPosition.in(Degrees)));
-  }
-
-  /*
-   * Sets the motor to a current control mode, ramping up current over time
-   */
-  public void regulateClimbCurrent() {
-    io.setClimbCurrent(
-        Amps.of(
-            Math.min(
-                ClimberConstants.kClimbCurrentRampRate.in(Amps) * timer.get(),
-                ClimberConstants.kClimbCurrent.in(Amps))));
-  }
-
-  public void stopClimbCurrent() {
-    io.setClimbCurrent(Amps.of(0));
-  }
-
   /*
    * Climb command
    * Courtesy of 6328's implementation <3
    */
   public Command climb() {
-    Timer timer = new Timer();
     return runOnce(timer::restart)
         .andThen(
-            run(() -> regulateClimbCurrent())
+            run(() ->
+                    io.setClimbCurrent(
+                        Amps.of( // Sets the motor to a current control mode, ramping up current
+                            // over time
+                            Math.min(
+                                ClimberConstants.kClimbCurrentRampRate.in(Amps) * timer.get(),
+                                ClimberConstants.kClimbCurrent.in(Amps)))))
                 .until(
                     () ->
                         inputs.climbAngle.in(Degrees)
-                                >= ClimberConstants.kClimbThreshold.in(Degrees)
-                            || inputs.climbCurrent.in(Amps) <= 0.0)) // Stop if cage slips
-        .andThen(lockServo())
-        .finallyDo(() -> stopClimbCurrent());
+                            <= ClimberConstants.kClimbThreshold.in(Degrees)))
+        .andThen(() -> io.setLockServo(ClimberConstants.kServoLockPosition))
+        .finallyDo(() -> io.stopClimbCurrent());
+  }
+
+  // get to a desired angle by setting pivot voltage to sum of calculated pid and feedforward
+  public Command goToAngle(Angle desiredAngle) {
+    return run(
+        () -> {
+          Voltage desiredVoltage =
+              Volts.of(
+                  feedForward.calculate(desiredAngle.in(Radians), 0)
+                      + climbController.calculate(
+                          inputs.climbAngle.in(Degrees), desiredAngle.in(Degrees)));
+
+          io.setClimbVoltage(desiredVoltage);
+        });
+  }
+
+  // sets voltage to the whole mechanism
+  public Command setMechanismVoltage(Supplier<Voltage> volts) {
+    return run(
+        () -> {
+          io.setClimbVoltage(volts.get());
+        });
+  }
+
+  // sets current to the whole mechanism
+  public Command setMechanismCurrent(Supplier<Current> current) {
+    return run(
+        () -> {
+          io.setClimbCurrent(current.get());
+        });
   }
 
   public Angle getAngle() {

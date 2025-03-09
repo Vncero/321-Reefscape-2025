@@ -14,9 +14,12 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Timer;
 
 /*
  * Spark implementation of the real climber subsystem
@@ -28,6 +31,10 @@ public class ClimberIOSpark implements ClimberIO {
   public static final ClimberConfig config = new ClimberConfig(0, 0, 0, 0);
 
   private SparkMax climbMotor = new SparkMax(ClimberConstants.kMotorId, MotorType.kBrushless);
+
+  private final Servo climbServo;
+
+  Timer timer = new Timer();
 
   public void configureMotors() {
     climbMotor.configure( // configures single motor
@@ -45,6 +52,7 @@ public class ClimberIOSpark implements ClimberIO {
 
   public ClimberIOSpark() {
     configureMotors();
+    climbServo = new Servo(2);
   }
 
   // sets climb current
@@ -57,8 +65,24 @@ public class ClimberIOSpark implements ClimberIO {
     climbMotor.setVoltage(volts);
   }
 
+  public void stopClimbCurrent() {
+    setClimbCurrent(Amps.of(0));
+  }
+
+  // sets servo to a specified position
+  public void setLockServo(Angle angle) {
+    climbServo.setAngle(angle.in(Degrees));
+  }
+
   public void updateInputs(ClimberInputs inputs) {
-    inputs.climbAngle = Degrees.of(climbMotor.getEncoder().getPosition());
+    // Gets raw angle from the encoder
+    double rawAngle = climbMotor.getEncoder().getPosition();
+
+    // adjusts the angle to be between -180 and 180 degrees
+    double moddedAngle = MathUtil.angleModulus(rawAngle);
+
+    // Update inputs with the modulus-adjusted angle
+    inputs.climbAngle = Degrees.of(moddedAngle);
     inputs.climbVelocity = DegreesPerSecond.of(climbMotor.getEncoder().getVelocity());
     inputs.climbCurrent = Amps.of(climbMotor.getOutputCurrent());
   }

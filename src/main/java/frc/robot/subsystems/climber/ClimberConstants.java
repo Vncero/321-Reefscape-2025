@@ -24,6 +24,7 @@ public class ClimberConstants {
   public static final Distance kClimbLength = Inches.of(0.6);
   public static final Angle kClimbMinAngle = Degrees.of(0);
   public static final Angle kClimbMaxAngle = Degrees.of(180);
+  public static final Angle kClimbPrepAngle = Degrees.of(45);
 
   // climb servo lock + unlock positions
   public static final Angle kServoLockPosition = Degrees.of(90);
