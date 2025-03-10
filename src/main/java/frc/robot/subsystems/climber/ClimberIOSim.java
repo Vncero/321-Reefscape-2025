@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
@@ -17,6 +18,8 @@ public class ClimberIOSim implements ClimberIO {
   public static final ClimberConfig config = new ClimberConfig(0, 0, 0.0, 0);
 
   private SingleJointedArmSim climbSim;
+  private double lockServoAngle;
+  private double currentVoltage;
 
   public ClimberIOSim() {
     // configures a simulated arm with two pivot motors controlling one
@@ -32,10 +35,33 @@ public class ClimberIOSim implements ClimberIO {
             ClimberConstants.kClimbMaxAngle.in(Radians),
             true,
             ClimberConstants.kStartingAngle.in(Radians));
+
+    lockServoAngle = 0.0; // default
+    currentVoltage = 0.0; // default
+  }
+
+  public void setLockServoAngle(double angle) {
+    lockServoAngle = angle; // Update the servo angle
+  }
+
+  public double getLockServoAngle() {
+    return lockServoAngle;
   }
 
   public void setClimbVoltage(Voltage volts) {
     climbSim.setInputVoltage(volts.in(Volts));
+  }
+
+  // need to test this in sim, not sure if it'll actually work
+  @Override
+  public void setClimbCurrent(Current current) {
+    DCMotor motor = DCMotor.getNEO(1);
+
+    // Calculate the torque based on the current
+    double torque = motor.getTorque(current.in(Amps));
+    double voltage = motor.getVoltage(torque, climbSim.getVelocityRadPerSec());
+
+    climbSim.setInputVoltage(voltage);
   }
 
   public void updateInputs(ClimberInputs inputs) { // gets info to update inputs
@@ -43,5 +69,6 @@ public class ClimberIOSim implements ClimberIO {
     inputs.climbAngle = Radians.of(climbSim.getAngleRads());
     inputs.climbVelocity = RadiansPerSecond.of(climbSim.getVelocityRadPerSec());
     inputs.climbCurrent = Amps.of(climbSim.getCurrentDrawAmps());
+    inputs.climbVoltage = Volts.of(currentVoltage);
   }
 }

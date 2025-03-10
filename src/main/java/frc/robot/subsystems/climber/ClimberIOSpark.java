@@ -19,7 +19,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.Timer;
 
 /*
  * Spark implementation of the real climber subsystem
@@ -32,9 +31,7 @@ public class ClimberIOSpark implements ClimberIO {
 
   private SparkMax climbMotor = new SparkMax(ClimberConstants.kMotorId, MotorType.kBrushless);
 
-  private final Servo climbServo;
-
-  Timer timer = new Timer();
+  private final Servo climbServo = new Servo(2);
 
   public void configureMotors() {
     climbMotor.configure( // configures single motor
@@ -52,7 +49,6 @@ public class ClimberIOSpark implements ClimberIO {
 
   public ClimberIOSpark() {
     configureMotors();
-    climbServo = new Servo(2);
   }
 
   // sets climb current
@@ -65,12 +61,8 @@ public class ClimberIOSpark implements ClimberIO {
     climbMotor.setVoltage(volts);
   }
 
-  public void stopClimbCurrent() {
-    setClimbCurrent(Amps.of(0));
-  }
-
   // sets servo to a specified position
-  public void setLockServo(Angle angle) {
+  public void setLockServoAngle(Angle angle) {
     climbServo.setAngle(angle.in(Degrees));
   }
 
@@ -78,11 +70,8 @@ public class ClimberIOSpark implements ClimberIO {
     // Gets raw angle from the encoder
     double rawAngle = climbMotor.getEncoder().getPosition();
 
-    // adjusts the angle to be between -180 and 180 degrees
-    double moddedAngle = MathUtil.angleModulus(rawAngle);
-
     // Update inputs with the modulus-adjusted angle
-    inputs.climbAngle = Degrees.of(moddedAngle);
+    inputs.climbAngle = Degrees.of(Math.toDegrees(MathUtil.angleModulus(Math.toRadians(rawAngle))));
     inputs.climbVelocity = DegreesPerSecond.of(climbMotor.getEncoder().getVelocity());
     inputs.climbCurrent = Amps.of(climbMotor.getOutputCurrent());
   }

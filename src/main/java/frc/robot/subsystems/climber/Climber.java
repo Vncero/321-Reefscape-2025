@@ -61,12 +61,12 @@ public class Climber extends SubsystemBase {
     TunableConstant kG = new TunableConstant("/Climber/kG", config.kG());
     TunableConstant desiredAngle = new TunableConstant("/Climber/desiredAngle", 0);
 
-    return run(
-        () -> {
-          this.climbController.setPID(kP.get(), kI.get(), kD.get());
-          this.feedForward = new ArmFeedforward(0, kG.get(), 0);
-          goToAngle(Degrees.of(desiredAngle.get()));
-        });
+    return runOnce(
+            () -> {
+              this.climbController.setPID(kP.get(), kI.get(), kD.get());
+              this.feedForward = new ArmFeedforward(0, kG.get(), 0);
+            })
+        .andThen(goToAngle(() -> Degrees.of(desiredAngle.get())));
   }
 
   // tunes kCurrentRampRate - how much should current be ramping per second
@@ -109,19 +109,19 @@ public class Climber extends SubsystemBase {
                     () ->
                         inputs.climbAngle.in(Degrees)
                             <= ClimberConstants.kClimbThreshold.in(Degrees)))
-        .andThen(() -> io.setLockServo(ClimberConstants.kServoLockPosition))
-        .finallyDo(() -> io.stopClimbCurrent());
+        .andThen(() -> io.setLockServoAngle(ClimberConstants.kServoLockPosition))
+        .finallyDo(() -> io.setClimbCurrent(Amps.of(0)));
   }
 
   // get to a desired angle by setting pivot voltage to sum of calculated pid and feedforward
-  public Command goToAngle(Angle desiredAngle) {
+  public Command goToAngle(Supplier<Angle> desiredAngle) {
     return run(
         () -> {
           Voltage desiredVoltage =
               Volts.of(
-                  feedForward.calculate(desiredAngle.in(Radians), 0)
+                  feedForward.calculate(desiredAngle.get().in(Radians), 0)
                       + climbController.calculate(
-                          inputs.climbAngle.in(Degrees), desiredAngle.in(Degrees)));
+                          inputs.climbAngle.in(Degrees), desiredAngle.get().in(Degrees)));
 
           io.setClimbVoltage(desiredVoltage);
         });
