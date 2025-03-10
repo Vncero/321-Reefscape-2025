@@ -312,14 +312,17 @@ public class RobotContainer {
                                         // then move arm down to setpoint
                                         .andThen(
                                             coralSuperstructure.goToSetpointProfiled(
-                                                () -> queuedSetpoint)))
+                                                () -> queuedSetpoint))
+                                        .onlyWhile(
+                                            () ->
+                                                ReefAlign.isWithinReefRange(
+                                                        drivetrain,
+                                                        ReefAlign.kMechanismDeadbandThreshold)
+                                                    && queuedSetpoint
+                                                        != CoralScorerSetpoint.NEUTRAL))
                                 // and only do this while we're in the zone (when we're not, we will
                                 // stay in the pre-alignment position)
-                                .onlyWhile(
-                                    () ->
-                                        ReefAlign.isWithinReefRange(
-                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
-                                            && queuedSetpoint != CoralScorerSetpoint.NEUTRAL)
+
                                 .repeatedly())));
 
     driver
