@@ -12,4 +12,6 @@ public interface ElevatorArmIO {
 
   // sets voltage to the arm based on the provided voltage
   default void setVoltage(Voltage volts) {}
+
+  default void seedEncoderValues() {}
 }

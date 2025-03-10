@@ -20,11 +20,7 @@ then
       echo "  feat(feature-name)"
       echo "  fix(fix-name)"
       echo "  docs(docs-change)"
-<<<<<<< HEAD
-      echo " "
-=======
       echo "  breaking(what is breaking)"
->>>>>>> 6f47aeecc992fc95e28a89e0e75d89f1c04f9964
 fi
 
 messagecheck=`echo $gitmessage | grep ": "`

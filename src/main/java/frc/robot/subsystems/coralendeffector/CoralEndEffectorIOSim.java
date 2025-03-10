@@ -23,8 +23,8 @@ class CoralEndEffectorIOSim implements CoralEndEffectorIO {
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(
               DCMotor.getNEO(1),
-              CoralEndEffectorConstants.momentOfInertia,
-              CoralEndEffectorConstants.gearing),
+              CoralEndEffectorConstants.kMomentOfInertia,
+              CoralEndEffectorConstants.kGearing),
           DCMotor.getNEO(1));
 
   public CoralEndEffectorIOSim() {

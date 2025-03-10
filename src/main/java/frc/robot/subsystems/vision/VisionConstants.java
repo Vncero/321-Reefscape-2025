@@ -18,8 +18,8 @@ import org.photonvision.simulation.SimCameraProperties;
 
 public class VisionConstants {
   // TODO: tune more thoroughly
-  public static final double kTranslationStdDevCoeff = 5e-2;
-  public static final double kRotationStdDevCoeff = 5e-2;
+  public static final double kTranslationStdDevCoeff = 1e-1;
+  public static final double kRotationStdDevCoeff = 1e-1;
 
   public static record CameraCalibration(
       int resolutionWidth,
@@ -74,17 +74,17 @@ public class VisionConstants {
 
   private static final Transform3d k321TopElevatorCameraMountTransform =
       new Transform3d(
-          Meters.of(0.2269236),
-          Meters.of(-0.1643126),
-          Meters.of(0.2339594),
-          new Rotation3d(Degrees.zero(), Degrees.of(-7), Degrees.of(48)));
+          Meters.of(0.2314956),
+          Meters.of(-0.16764),
+          Meters.of(0.3103626),
+          new Rotation3d(Degrees.zero(), Degrees.of(-1), Degrees.of(48)));
 
   private static final Transform3d k321BottomElevatorCameraMountTransform =
       new Transform3d(
-          Meters.of(0.2269236),
-          Meters.of(-0.1643126),
-          Meters.of(0.2339594),
-          new Rotation3d(Degrees.zero(), Degrees.of(-18), Degrees.of(-10)));
+          Meters.of(0.2288286),
+          Meters.of(-0.1723644),
+          Meters.of(0.2612136),
+          new Rotation3d(Degrees.zero(), Degrees.of(-10), Degrees.of(-10)));
 
   private static final Transform3d k321FrontSwerveModuleCameraMountTransform =
       new Transform3d(
@@ -97,10 +97,10 @@ public class VisionConstants {
 
   private static final Transform3d k321BackLeftSwerveModuleCameraMountTransform =
       new Transform3d(
-          Meters.of(-0.3010408),
-          Meters.of(-0.2278126),
-          Meters.of(0.1971802),
-          new Rotation3d(Degrees.zero(), Degrees.of(-15), Degrees.of(225)));
+          Meters.of(-0.2275078),
+          Meters.of(-0.1823466),
+          Meters.of(0.2745486),
+          new Rotation3d(Degrees.zero(), Degrees.of(-12), Degrees.of(225)));
   //  new Transform3d(Meters.of(-0.2278126), Meters.of(0.3010408), Meters.of(0.1971802), new
   // Rotation3d(Degrees.zero(), Degrees.of(-15), Degrees.of(135)));
 
@@ -130,10 +130,9 @@ public class VisionConstants {
           kOV9281);
 
   public static final CameraConfig[] kCameraConfigs = {
-    kElevatorTopCameraConfig,
-    kElevatorBottomCameraConfig,
-    kFrontSwerveCameraConfig,
-    kBackLeftSwerveCameraConfig
+    kElevatorTopCameraConfig, kElevatorBottomCameraConfig
+    // kFrontSwerveCameraConfig,
+    // kBackLeftSwerveCameraConfig
   };
 
   // camera data filtering

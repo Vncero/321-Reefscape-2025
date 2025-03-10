@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -20,6 +21,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -29,7 +31,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.util.MyAlliance;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -53,9 +60,17 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
   private final SwerveRequest.FieldCentricFacingAngle fieldCentricFacingAngleRequest =
       new SwerveRequest.FieldCentricFacingAngle()
           .withDriveRequestType(DriveRequestType.Velocity)
-          .withDesaturateWheelSpeeds(true);
+          .withDesaturateWheelSpeeds(true)
+          .withHeadingPID(
+              DrivetrainConstants.kTuneHeadingGains.kP(),
+              DrivetrainConstants.kTuneHeadingGains.kI(),
+              DrivetrainConstants.kTuneHeadingGains.kD())
+          .withRotationalDeadband(0.1);
+  // .withRotationalDeadband(0.25);
 
   private final SwerveDrivePoseEstimator reefPoseEstimator;
+
+  private final Field2d poseField = new Field2d();
 
   private Pose2d alignmentSetpoint = Pose2d.kZero;
 
@@ -70,6 +85,8 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     this.reefPoseEstimator =
         new SwerveDrivePoseEstimator(
             getKinematics(), getHeading(), getModulePositions(), getPose());
+
+    SmartDashboard.putData("Drivetrain Pose Field", poseField);
   }
 
   @Override
@@ -213,23 +230,30 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
 
   @Override
   public void driveToFieldPose(Pose2d pose) {
-    var targetSpeeds =
+    ChassisSpeeds targetSpeeds =
         ChassisSpeeds.discretize(
-            xPoseController.calculate(getPose().getX(), pose.getX())
-                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
-            yPoseController.calculate(getPose().getY(), pose.getY())
-                * DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond),
+            xPoseController.calculate(getPose().getX(), pose.getX()),
+            yPoseController.calculate(getPose().getY(), pose.getY()),
             thetaController.calculate(
-                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
-                * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond),
+                getPose().getRotation().getRadians(), pose.getRotation().getRadians()),
             DrivetrainConstants.kLoopDt.in(Seconds));
+
+    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
+
+    // TODO: find better way
+    // if (Math.hypot(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond) < 0.1)
+    //   targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
+    // if (targetSpeeds.omegaRadiansPerSecond < 0.1)
+    //   targetSpeeds =
+    //       new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
 
     setControl(
         fieldCentricRequest
             .withDriveRequestType(DriveRequestType.Velocity)
             .withVelocityX(targetSpeeds.vxMetersPerSecond)
             .withVelocityY(targetSpeeds.vyMetersPerSecond)
-            .withRotationalRate(targetSpeeds.omegaRadiansPerSecond));
+            .withRotationalRate(targetSpeeds.omegaRadiansPerSecond)
+            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
   }
 
   // drive with absolute heading control
@@ -244,8 +268,9 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
             .withDriveRequestType(DriveRequestType.Velocity)
             .withVelocityX(speeds.vxMetersPerSecond)
             .withVelocityY(speeds.vyMetersPerSecond)
-            .withTargetDirection(rotation)
-            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance));
+            .withTargetDirection(
+                MyAlliance.isRed() ? rotation.plus(Rotation2d.fromDegrees(180)) : rotation)
+            .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective));
   }
 
   @Override
@@ -318,7 +343,29 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
   }
 
   @Override
+  public void addVisionMeasurement(
+      Pose2d visionRobotPose, double timeStampSeconds, Matrix<N3, N1> standardDeviations) {
+    super.addVisionMeasurement(
+        visionRobotPose, Utils.fpgaToCurrentTime(timeStampSeconds), standardDeviations);
+  }
+
+  @NotLogged private Alliance lastAlliance;
+
+  @Override
   public void periodic() {
     reefPoseEstimator.update(getHeading(), getModulePositions());
+
+    if (DriverStation.isDisabled()) {
+      DriverStation.getAlliance()
+          .ifPresent(
+              allianceColor -> {
+                if (lastAlliance == allianceColor) return;
+                setOperatorPerspectiveForward(
+                    allianceColor == Alliance.Red ? Rotation2d.k180deg : Rotation2d.kZero);
+                lastAlliance = allianceColor;
+              });
+    }
+
+    poseField.setRobotPose(getPose());
   }
 }

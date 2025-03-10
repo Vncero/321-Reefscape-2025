@@ -26,7 +26,7 @@ public class ProcessorAlign {
 
   public static final Map<Integer, Pose2d> processorPoses = new HashMap<>();
 
-  private static final Distance kProcessorDistance = Inches.of(14);
+  private static final Distance kProcessorDistance = Inches.of(20);
   private static final Rotation2d kProcessorAlignmentRotation = Rotation2d.kCCW_90deg;
 
   private static final Transform2d kProcessorAlignTransform =

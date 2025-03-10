@@ -39,8 +39,8 @@ public class AlgaeIntakeRollers extends SubsystemBase {
   public static AlgaeIntakeRollers create() {
     return RobotBase.isReal()
         ? new AlgaeIntakeRollers(
-            new AlgaeIntakeRollersIOSpark(),
-            AlgaeIntakeRollersIOSpark.config) // creates real mechanism if robot, sim if no robot,
+            new AlgaeIntakeRollersIOKraken(),
+            AlgaeIntakeRollersIOKraken.config) // creates real mechanism if robot, sim if no robot,
         // ideal if disabled robot
         : new AlgaeIntakeRollers(new AlgaeIntakeRollersIOSim(), AlgaeIntakeRollersIOSim.config);
   }

@@ -21,7 +21,7 @@ import edu.wpi.first.units.measure.Voltage;
 @Logged
 public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
 
-  public static final AlgaeIntakePivotConfig config = new AlgaeIntakePivotConfig(0, 0, 0, 0);
+  public static final AlgaeIntakePivotConfig config = new AlgaeIntakePivotConfig(0.34, 0, 0, 0.21);
 
   // device ids are plcaeholders
   private SparkMax pivotMotorLeft =
@@ -52,7 +52,6 @@ public class AlgaeIntakePivotIOSpark implements AlgaeIntakePivotIO {
 
     pivotMotorRight.configure(
         new SparkMaxConfig()
-            .inverted(AlgaeIntakePivotConstants.kRightInverted)
             .voltageCompensation(AlgaeIntakePivotConstants.kNominalVoltage.in(Volts))
             .smartCurrentLimit(AlgaeIntakePivotConstants.kSmartCurrentLimit)
             .apply(

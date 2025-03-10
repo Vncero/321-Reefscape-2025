@@ -47,8 +47,8 @@ public class ElevatorConstants {
   public static final double kPositionConversionFactor =
       kElevatorConversion.in(Meters) / kElevatorGearing;
   public static final double kVelocityConversionFactor = kPositionConversionFactor / 60;
-  public static final LinearVelocity kMaxVelocity = MetersPerSecond.of(2);
-  public static final LinearAcceleration kMaxAcceleration = MetersPerSecondPerSecond.of(10);
+  public static final LinearVelocity kMaxVelocity = MetersPerSecond.of(1.25);
+  public static final LinearAcceleration kMaxAcceleration = MetersPerSecondPerSecond.of(5);
 
   // Constants for homing elevator
   public static final Voltage kHomingVoltage = Volts.of(-2);
