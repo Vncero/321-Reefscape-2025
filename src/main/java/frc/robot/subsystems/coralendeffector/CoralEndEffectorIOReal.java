@@ -22,7 +22,7 @@ public class CoralEndEffectorIOReal implements CoralEndEffectorIO {
   public static CoralEndEffectorConfig config = new CoralEndEffectorConfig(0, 0, 0, 0);
 
   private SparkMax motor; // motor controlling the end effector wheels
-  private TimeOfFlight
+  private TimeOfFlight;
       distSensor; // TOF distance sensor for detecting whether or not there is a coral in the intake
 
   public CoralEndEffectorIOReal() {

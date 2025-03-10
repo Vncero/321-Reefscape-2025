@@ -22,7 +22,7 @@ public class CoralEndEffectorConstants {
   // Setpoints
   public static final Voltage kIntakeVoltage = Volts.of(9);
   public static final Voltage kOuttakeVoltage = Volts.of(-9);
-  public static final Voltage kStallVoltage = Volts.of(1.2);
+  public static final Voltage kStallVoltage = Volts.of(0.6);
 
   // Tuned constants
   public static final Distance kDetectionRange = Meters.of(0);
