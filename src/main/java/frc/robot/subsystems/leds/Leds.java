@@ -46,7 +46,8 @@ public class Leds extends SubsystemBase {
     this.strip = new AddressableLED(LedsConstants.kPort);
     this.buffer = new AddressableLEDBuffer(LedsConstants.kLength);
     this.leftBuffer = buffer.createView(0, LedsConstants.kLength / 2);
-    this.rightBuffer = buffer.createView(LedsConstants.kLength / 2, LedsConstants.kLength - 1);
+    this.rightBuffer =
+        buffer.createView(LedsConstants.kLength / 2, LedsConstants.kLength - 1).reversed();
     this.strip.setLength(buffer.getLength());
     this.strip.setData(buffer);
     this.strip.start();
