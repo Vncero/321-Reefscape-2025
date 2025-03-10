@@ -69,6 +69,6 @@ public class ClimberIOSim implements ClimberIO {
     inputs.climbAngle = Radians.of(climbSim.getAngleRads());
     inputs.climbVelocity = RadiansPerSecond.of(climbSim.getVelocityRadPerSec());
     inputs.climbCurrent = Amps.of(climbSim.getCurrentDrawAmps());
-    inputs.climbVoltage = Volts.of(currentVoltage);
+    inputs.climbVoltage = Volts.of(climbSim.getInput(0));
   }
 }

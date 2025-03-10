@@ -16,15 +16,16 @@ import edu.wpi.first.units.measure.Voltage;
 public class ClimberConstants {
   // climb motor IDs
   public static final int kMotorId = 20; // placeholder id
+  public static final int kServoPort = 2; 
 
   // climb physical constants
-  public static final double kClimbGearing = 100;
+  public static final double kClimbGearing = 125;
   public static final double kClimbMOI = 1;
   public static final Angle kStartingAngle = Degrees.of(0);
   public static final Distance kClimbLength = Inches.of(0.6);
   public static final Angle kClimbMinAngle = Degrees.of(0);
   public static final Angle kClimbMaxAngle = Degrees.of(180);
-  public static final Angle kClimbPrepAngle = Degrees.of(45);
+  public static final Angle kClimbPrepAngle = Degrees.of(75);
 
   // climb servo lock + unlock positions
   public static final Angle kServoLockPosition = Degrees.of(90);
