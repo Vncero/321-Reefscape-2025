@@ -1,9 +1,7 @@
 /* (C) Robolancers 2025 */
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
@@ -106,44 +104,6 @@ public class RobotContainer {
   private boolean isDriverOverride = false;
   private boolean isClimbing = false;
 
-  private DoubleSupplier elevatorErrorMeters =
-      () ->
-          Math.abs(
-              elevator
-                  .getHeight()
-                  .minus(coralSuperstructure.getTargetState().getElevatorHeight())
-                  .in(Meters));
-  private DoubleSupplier elevatorArmErrorDeg =
-      () ->
-          Math.abs(
-              elevatorArm
-                  .getAngle()
-                  .minus(coralSuperstructure.getTargetState().getArmAngle())
-                  .in(Radians));
-  private DoubleSupplier drivetrainTranslationalErrorMeters =
-      () ->
-          drivetrain
-              .getPose()
-              .getTranslation()
-              .getDistance(drivetrain.getAlignmentSetpoint().getTranslation());
-  private DoubleSupplier drivetrainRotationalErrorDeg =
-      () ->
-          Math.abs(
-              drivetrain
-                  .getHeading()
-                  .minus(drivetrain.getAlignmentSetpoint().getRotation())
-                  .getRadians());
-
-  // due to different units, some errors will have more impact on the percentage
-  private DoubleSupplier reefAlignProgressPercent =
-      () ->
-          1
-              / (1
-                  + elevatorErrorMeters.getAsDouble()
-                  + elevatorArmErrorDeg.getAsDouble()
-                  + drivetrainTranslationalErrorMeters.getAsDouble()
-                  + drivetrainRotationalErrorDeg.getAsDouble());
-
   private Trigger isAlgaeSetpoint =
       new Trigger(
           () ->
@@ -156,6 +116,16 @@ public class RobotContainer {
                   || queuedSetpoint == CoralScorerSetpoint.L2
                   || queuedSetpoint == CoralScorerSetpoint.L3
                   || queuedSetpoint == CoralScorerSetpoint.L4);
+
+  private DoubleSupplier reefAlignProgressPercent =
+      () ->
+          leds.calculateProgressBar(
+              elevator.getHeight(),
+              coralSuperstructure.getTargetState().getElevatorHeight(),
+              elevatorArm.getAngle(),
+              coralSuperstructure.getTargetState().getArmAngle(),
+              drivetrain.getPose(),
+              drivetrain.getAlignmentSetpoint());
 
   public RobotContainer() {
 
@@ -296,6 +266,8 @@ public class RobotContainer {
     // Error State LED Signals
     leds.registerSignal(
         99, () -> !vision.areCamerasConnected(), () -> LedsConstants.kVisionDisconnect);
+    // leds.registerSignal(100, () -> !DriverStation.isDSAttached(), () ->
+    // LedsConstants.kRobotDisconnect);
   }
 
   private void configureBindings() {
@@ -321,7 +293,7 @@ public class RobotContainer {
 
     // coral outtake
     driver
-        .rightTrigger()
+        .a()
         .and(isCoralSetpoint)
         .whileTrue( // while right trigger is pressed:
             Commands.runOnce(
@@ -404,7 +376,7 @@ public class RobotContainer {
                                 .repeatedly())));
 
     driver
-        .rightTrigger()
+        .a()
         .onFalse( // for coral scoring
             coralSuperstructure
                 .goToSetpoint(() -> queuedSetpoint) // ensure we're at the setpoint

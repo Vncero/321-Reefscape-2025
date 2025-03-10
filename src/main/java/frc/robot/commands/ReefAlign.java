@@ -181,10 +181,7 @@ public class ReefAlign {
 
   public static Command alignToReef(
       SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
-    return Commands.runOnce(
-            () -> {
-              Leds.getInstance().isReefAligning = true;
-            })
+    return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)
         .andThen(
             swerveDrive.driveToFieldPose(
                 () -> {
@@ -198,10 +195,7 @@ public class ReefAlign {
                   swerveDrive.setAlignmentSetpoint(target);
                   return target;
                 }))
-        .finallyDo(
-            () -> {
-              Leds.getInstance().isReefAligning = false;
-            });
+        .finallyDo(() -> Leds.getInstance().isReefAligning = false);
   }
 
   public static Command tuneAlignment(SwerveDrive swerveDrive) {

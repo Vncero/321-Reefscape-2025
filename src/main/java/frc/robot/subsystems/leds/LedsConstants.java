@@ -21,7 +21,7 @@ public class LedsConstants {
 
   // DRIVING PATTERNS
   // default mode - meteor yellow. TODO: add meteor pattern or something cool like that
-  public static final LEDPattern kDefault = LEDPattern.solid(Color.kWhite).breathe(Seconds.of(1));
+  public static final LEDPattern kDefault = LEDPattern.kOff;
 
   // climb mode - solid blue
   public static final LEDPattern kClimbing = LEDPattern.solid(Color.kBlue);
@@ -33,17 +33,15 @@ public class LedsConstants {
   public static final LEDPattern kReadyToAlign = LEDPattern.solid(Color.kYellow);
 
   // when the robot is aligning to a pose - progress bar
-  private static final LEDPattern progressBarPattern =
-      LEDPattern.gradient(
-          GradientType.kDiscontinuous,
-          Color.kRed,
-          Color.kOrange,
-          Color.kYellow,
-          Color.kGreenYellow,
-          Color.kGreen);
-
   public static final LEDPattern kReefAligning(DoubleSupplier supp) {
-    return progressBarPattern.mask(LEDPattern.progressMaskLayer(supp));
+    return LEDPattern.gradient(
+            GradientType.kDiscontinuous,
+            Color.kRed,
+            Color.kOrange,
+            Color.kYellow,
+            Color.kGreenYellow,
+            Color.kGreen)
+        .mask(LEDPattern.progressMaskLayer(supp));
   }
 
   // when the driver interrupts the aligning process
@@ -59,11 +57,10 @@ public class LedsConstants {
   public static final LEDPattern kHasAlgae = LEDPattern.solid(kAlgaeColor);
 
   // has coral and algae - gradient of pink & light green (patrick star)
-  private static final LEDPattern hasCoralAndAlgaePattern =
-      LEDPattern.gradient(
-          LEDPattern.GradientType.kContinuous, Color.kHotPink, new Color(172, 220, 65));
   public static final LEDPattern kHasCoralAndAlgae =
-      hasCoralAndAlgaePattern.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.75), Meters.of(1.5));
+      LEDPattern.gradient(
+              LEDPattern.GradientType.kContinuous, Color.kHotPink, new Color(172, 220, 65))
+          .scrollAtAbsoluteSpeed(MetersPerSecond.of(0.75), Meters.of(1.5));
 
   // Intaking - solid orange
   public static final LEDPattern kIntaking = LEDPattern.solid(Color.kOrange);
@@ -74,7 +71,8 @@ public class LedsConstants {
   // progress bar for aligning w/ aligning colors
 
   // ERROR STATE Patterns
-  private static final LEDPattern visionDisconnectPattern = LEDPattern.rainbow(255, 255);
   public static final LEDPattern kVisionDisconnect =
-      visionDisconnectPattern.scrollAtAbsoluteSpeed(MetersPerSecond.one(), Meters.one());
+      LEDPattern.rainbow(255, 255).scrollAtAbsoluteSpeed(MetersPerSecond.one(), Meters.one());
+
+  public static final LEDPattern kRobotDisconnect = LEDPattern.solid(Color.kRed).blink(kBlinkSpeed);
 }
