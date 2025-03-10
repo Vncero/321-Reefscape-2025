@@ -16,7 +16,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class ClimberConstants {
   // climb motor IDs
   public static final int kMotorId = 20; // placeholder id
-  public static final int kServoPort = 2; 
+  public static final int kServoPort = 2;
 
   // climb physical constants
   public static final double kClimbGearing = 125;

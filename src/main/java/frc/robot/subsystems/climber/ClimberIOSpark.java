@@ -4,8 +4,8 @@ package frc.robot.subsystems.climber;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -19,7 +19,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-
 import edu.wpi.first.wpilibj.Servo;
 
 /*

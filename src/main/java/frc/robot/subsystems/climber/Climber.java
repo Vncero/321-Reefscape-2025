@@ -14,8 +14,8 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
@@ -60,7 +60,8 @@ public class Climber extends SubsystemBase {
     TunableConstant kI = new TunableConstant("/Climber/kI", config.kI());
     TunableConstant kD = new TunableConstant("/Climber/kD", config.kD());
     TunableConstant kG = new TunableConstant("/Climber/kG", config.kG());
-    TunableConstant maxClimbCurrent = new TunableConstant("/Climber/maxClimbCurrent", ClimberConstants.kClimbCurrent.in(Amps));
+    TunableConstant maxClimbCurrent =
+        new TunableConstant("/Climber/maxClimbCurrent", ClimberConstants.kClimbCurrent.in(Amps));
     TunableConstant desiredAngle = new TunableConstant("/Climber/desiredAngle", 0);
 
     return runOnce(
@@ -101,13 +102,14 @@ public class Climber extends SubsystemBase {
     return runOnce(timer::restart)
         .andThen(() -> io.setLockServoAngle(ClimberConstants.kServoUnlockPosition))
         .andThen(
-            Commands.run(() ->
-                    io.setClimbCurrent(
-                        Amps.of( // Sets the motor to a current control mode, ramping up current
-                            // over time
-                            Math.min(
-                                ClimberConstants.kClimbCurrentRampRate.in(Amps) * timer.get(),
-                                ClimberConstants.kClimbCurrent.in(Amps)))))
+            Commands.run(
+                    () ->
+                        io.setClimbCurrent(
+                            Amps.of( // Sets the motor to a current control mode, ramping up current
+                                // over time
+                                Math.min(
+                                    ClimberConstants.kClimbCurrentRampRate.in(Amps) * timer.get(),
+                                    ClimberConstants.kClimbCurrent.in(Amps)))))
                 .until(
                     () ->
                         inputs.climbAngle.in(Degrees)
@@ -126,7 +128,8 @@ public class Climber extends SubsystemBase {
                       + climbController.calculate(
                           inputs.climbAngle.in(Degrees), desiredAngle.get().in(Degrees)));
 
-          io.setLockServoAngle(ClimberConstants.kServoUnlockPosition); // unlocks servo before going to angle
+          io.setLockServoAngle(
+              ClimberConstants.kServoUnlockPosition); // unlocks servo before going to angle
           io.setClimbVoltage(desiredVoltage);
         });
   }
