@@ -2,10 +2,12 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.simulation.AddressableLEDSim;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.auto.AutomaticAutonomousMaker3000;
+import frc.robot.commands.ControllerCommands;
 import frc.robot.commands.ReefAlign;
 import frc.robot.commands.StationAlign;
 import frc.robot.subsystems.AlgaeSuperstructure;
@@ -240,7 +243,15 @@ public class RobotContainer {
                 .andThen(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn))
                 .until(() -> StationAlign.getStationDistance(drivetrain) < 2)
                 .repeatedly()
-                .alongWith(coralSuperstructure.feedCoral().asProxy().repeatedly()));
+                .alongWith(
+                    coralSuperstructure
+                        .feedCoral()
+                        .asProxy()
+                        .repeatedly()
+                        .until(() -> coralEndEffector.hasCoral())
+                        .andThen(
+                            ControllerCommands.rumbleController(
+                                driver.getHID(), Seconds.of(0.5), RumbleType.kRightRumble, 0.75))));
 
     // coral outtake
     driver
