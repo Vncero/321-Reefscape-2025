@@ -258,7 +258,7 @@ public class AutomaticAutonomousMaker3000 {
 
     return path.deadlineFor(
             coralSuperstructure
-                .goToSetpoint(
+                .goToSetpointPID(
                     () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                     () -> ElevatorArmConstants.kPreAlignAngle)
                 .asProxy())
@@ -280,7 +280,7 @@ public class AutomaticAutonomousMaker3000 {
         };
     return path.deadlineFor(
             coralSuperstructure
-                .goToSetpoint(
+                .goToSetpointPID(
                     () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                     () -> ElevatorArmConstants.kPreAlignAngle)
                 .asProxy())
@@ -288,14 +288,14 @@ public class AutomaticAutonomousMaker3000 {
             ReefAlign.alignToReef(
                     drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
                 .asProxy()
-                .alongWith(coralSuperstructure.goToSetpoint(() -> setpoint).asProxy())
+                .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint).asProxy())
                 .until(() -> drive.atPoseSetpoint() && coralSuperstructure.atTargetState(setpoint))
                 .withTimeout(2.5))
         .andThen(
             ReefAlign.alignToReef(
                     drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
                 .asProxy()
-                .alongWith(coralSuperstructure.goToSetpoint(() -> setpoint).asProxy())
+                .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint).asProxy())
                 .asProxy()
                 .withDeadline(
                     Commands.waitSeconds(1)
@@ -311,7 +311,7 @@ public class AutomaticAutonomousMaker3000 {
               CommandScheduler.getInstance()
                   .schedule(
                       coralSuperstructure
-                          .goToSetpoint(
+                          .goToSetpointPID(
                               () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                               () -> ElevatorArmConstants.kPreAlignAngle)
                           .asProxy());
