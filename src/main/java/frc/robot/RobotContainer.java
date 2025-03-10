@@ -224,12 +224,6 @@ public class RobotContainer {
     // driver.a().whileTrue(algaeSuperstructure.outtakeAlgae());
   }
 
-  private void controllerRumble() {
-    if (coralSuperstructure.hasCoral()) {
-      driver.setRumble(RumbleType.kBothRumble, 1);
-    }
-  }
-
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
@@ -249,12 +243,15 @@ public class RobotContainer {
                 .andThen(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn))
                 .until(() -> StationAlign.getStationDistance(drivetrain) < 2)
                 .repeatedly()
-                .alongWith(coralSuperstructure.feedCoral().asProxy().repeatedly())
-                .until(() -> coralEndEffector.hasCoral())
-                .andThen(
-                    () ->
-                        ControllerCommands.rumbleController(
-                            driver.getHID(), Seconds.of(0.75), RumbleType.kRightRumble, 1)));
+                .alongWith(
+                    coralSuperstructure
+                        .feedCoral()
+                        .asProxy()
+                        .repeatedly()
+                        .until(() -> coralEndEffector.hasCoral())
+                        .andThen(
+                            ControllerCommands.rumbleController(
+                                driver.getHID(), Seconds.of(0.5), RumbleType.kRightRumble, 0.75))));
 
     // coral outtake
     driver
