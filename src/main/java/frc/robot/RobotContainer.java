@@ -244,7 +244,7 @@ public class RobotContainer {
 
     // coral outtake
     driver
-        .a()
+        .rightTrigger()
         .and(isCoralSetpoint)
         .whileTrue( // while right trigger is pressed:
             Commands.runOnce(() -> isDriverOverride = false)
@@ -326,7 +326,7 @@ public class RobotContainer {
                                 .repeatedly())));
 
     driver
-        .a()
+        .rightTrigger()
         .onFalse( // for coral scoring
             coralSuperstructure
                 .goToSetpointPID(() -> queuedSetpoint) // ensure we're at the setpoint
