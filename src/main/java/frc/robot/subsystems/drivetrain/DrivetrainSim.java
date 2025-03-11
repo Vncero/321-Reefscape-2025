@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.ReefAlign;
 import frc.robot.util.SelfControlledSwerveDriveSimulationWrapper;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -164,30 +163,25 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  ChassisSpeeds targetSpeeds =
-                      new ChassisSpeeds(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX()),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY()),
-                          thetaController.calculate(
-                              getPose().getRotation().getRadians(),
-                              pose.get().getRotation().getRadians()));
+  public void driveToRobotPose(Pose2d pose) {
+    if (pose == null) return;
 
-                  driveRobotCentric(
-                      targetSpeeds.vxMetersPerSecond,
-                      targetSpeeds.vyMetersPerSecond,
-                      targetSpeeds.omegaRadiansPerSecond,
-                      DriveFeedforwards.zeros(4));
-                }));
+    ChassisSpeeds targetSpeeds =
+        new ChassisSpeeds(
+            xPoseController.calculate(getPose().getX(), pose.getX()),
+            yPoseController.calculate(getPose().getY(), pose.getY()),
+            thetaController.calculate(
+                getPose().getRotation().getRadians(), pose.getRotation().getRadians()));
+
+    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
+
+    // if (Math.hypot(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond) < 0.1)
+    //   targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
+    // if (targetSpeeds.omegaRadiansPerSecond < 0.1)
+    //   targetSpeeds =
+    //       new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
+
+    simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, false, false);
   }
 
   @Override

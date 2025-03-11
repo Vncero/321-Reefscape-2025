@@ -287,26 +287,27 @@ public class RobotContainer {
                         // when we get far away, repeat the command
                         .repeatedly()
                         .alongWith(
-                            coralSuperstructure.goToSetpointProfiled(
-                                () ->
-                                    Meters.of(
-                                        Math.min(
-                                            queuedSetpoint.getElevatorHeight().in(Meters),
-                                            CoralScorerSetpoint.PREALIGN
-                                                .getElevatorHeight()
-                                                .in(Meters))),
-                                () -> CoralScorerSetpoint.PREALIGN.getArmAngle()))
-                        .until(
-                            () ->
-                                ReefAlign.isWithinReefRange(
-                                    drivetrain, ReefAlign.kReefAlignmentThreshold))
-
+                            coralSuperstructure
+                                .goToSetpointProfiled(
+                                    () ->
+                                        Meters.of(
+                                            Math.min(
+                                                queuedSetpoint.getElevatorHeight().in(Meters),
+                                                CoralScorerSetpoint.PREALIGN
+                                                    .getElevatorHeight()
+                                                    .in(Meters))),
+                                    () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
+                                .onlyWhile(
+                                    () ->
+                                        ReefAlign.isWithinReefRange(
+                                            drivetrain, ReefAlign.kMechanismDeadbandThreshold)))
+                        .until(drivetrain::atPoseSetpoint)
                         // we are aligned
                         .andThen(coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
                         .onlyWhile(
                             () ->
                                 ReefAlign.isWithinReefRange(
-                                    drivetrain, ReefAlign.kReefAlignmentThreshold)))
+                                    drivetrain, ReefAlign.kMechanismDeadbandThreshold)))
                 // and only do this while we're in the zone (when we're not, we will
                 // stay in the pre-alignment position)
                 .repeatedly());
