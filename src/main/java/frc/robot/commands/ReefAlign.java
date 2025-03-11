@@ -58,6 +58,7 @@ public class ReefAlign {
   public static final Pose2d kRedCenterAlignPos = new Pose2d(13, 4, Rotation2d.kZero);
   public static final Pose2d kBlueCenterAlignPos = new Pose2d(4.457, 4, Rotation2d.kZero);
 
+  public static final Distance kReefAlignmentThreshold = Meters.of(0.05);
   public static final Distance kMechanismDeadbandThreshold =
       Meters.of(2); // distance to trigger mechanism
   public static final Distance kMaxAlignmentDeadbandThreshold =
@@ -190,6 +191,28 @@ public class ReefAlign {
               };
           swerveDrive.setAlignmentSetpoint(target);
           return target;
+        });
+  }
+
+  public static Command alignToTag(
+      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
+    return swerveDrive.driveToFieldPose(
+        () -> {
+          final Pose2d initialTargetPose =
+              switch (targetReefPosition.get()) {
+                case ALGAE -> centerAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                case LEFT -> leftAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                case RIGHT -> rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                default -> swerveDrive.getPose(); // more or less a no-op
+              };
+
+          Pose2d targetPose =
+              new Pose2d(
+                  swerveDrive.getPose().getX(),
+                  initialTargetPose.getY(),
+                  initialTargetPose.getRotation());
+          swerveDrive.setAlignmentSetpoint(targetPose);
+          return targetPose;
         });
   }
 

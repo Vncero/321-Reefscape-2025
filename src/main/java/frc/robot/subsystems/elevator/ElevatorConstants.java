@@ -31,6 +31,7 @@ public class ElevatorConstants {
   public static final Distance kElevatorMinimumHeight = Inches.of(35);
   public static final Distance kElevatorMaximumHeight = Inches.of(87.75);
   public static final Distance kElevatorStartingHeight = kElevatorMinimumHeight;
+  public static final Distance kPrealignHeight = Inches.of(53);
 
   public static final Distance kElevatorDangerHeight =
       Meters.of(0.9); // TODO: get this danger height
