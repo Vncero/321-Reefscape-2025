@@ -19,7 +19,7 @@ public class ClimberConstants {
   public static final int kServoPort = 2;
 
   // climb physical constants
-  public static final double kClimbGearing = 125;
+  public static final double kClimbGearing = 500;
   public static final double kClimbMOI = 1;
   public static final Angle kStartingAngle = Degrees.of(0);
   public static final Distance kClimbLength = Inches.of(0.6);

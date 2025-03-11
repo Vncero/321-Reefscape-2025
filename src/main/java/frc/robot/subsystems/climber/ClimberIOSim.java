@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class ClimberIOSim implements ClimberIO {
 
-  public static final ClimberConfig config = new ClimberConfig(0, 0, 0.0, 0);
+  public static final ClimberConfig config = new ClimberConfig(0.115, 0, 0.0, 3.561);
 
   private SingleJointedArmSim climbSim;
   private double lockServoAngle;
