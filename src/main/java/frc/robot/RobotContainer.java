@@ -115,6 +115,7 @@ public class RobotContainer {
                   || queuedSetpoint == CoralScorerSetpoint.L2
                   || queuedSetpoint == CoralScorerSetpoint.L3
                   || queuedSetpoint == CoralScorerSetpoint.L4);
+  private Trigger hasCoral = new Trigger(() -> coralEndEffector.hasCoral());
 
   public RobotContainer() {
 
@@ -136,7 +137,8 @@ public class RobotContainer {
     elevator.setDefaultCommand(
         elevator.goToHeight(() -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight()));
     elevatorArm.setDefaultCommand(
-        elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.NEUTRAL.getArmAngle()));
+        elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.NEUTRAL.getArmAngle()).unless(hasCoral));
+    hasCoral.whileTrue(elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.PREALIGN.getArmAngle()));
 
     coralEndEffector.setDefaultCommand(coralEndEffector.stallCoralIfDetected());
 
@@ -248,12 +250,22 @@ public class RobotContainer {
     driver
         .rightTrigger()
         .and(isCoralSetpoint)
-        .whileTrue( // while right trigger is pressed:
+        .whileTrue(
             Commands.runOnce(() -> isDriverOverride = false)
                 .andThen(
                     // either align to reef or coral based on how far we are away rotate to reef
                     // until we're close enough
                     ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)
+                        .alongWith(
+                            coralSuperstructure.goToSetpointPID(
+                                () ->
+                                    Meters.of(
+                                        Math.min(
+                                            queuedSetpoint.getElevatorHeight().in(Meters),
+                                            CoralScorerSetpoint.NEUTRAL
+                                                .getElevatorHeight()
+                                                .in(Meters))),
+                                () -> CoralScorerSetpoint.PREALIGN.getArmAngle()))
                         .until(
                             () ->
                                 ReefAlign.isWithinReefRange(
@@ -268,10 +280,9 @@ public class RobotContainer {
                             // when we get close enough, align to reef, but only while we're
                             // close enough
                             ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
-                                // .until(drivetrain::atPoseSetpoint)
-                                // .andThen(
-                                //     ReefAlign.rotateToNearestReefTag(drivetrain, driverForward,
-                                // driverStrafe))
+                                .alongWith(
+                                    coralSuperstructure.goToSetpointPID(
+                                        () -> CoralScorerSetpoint.PREALIGN))
                                 .onlyWhile(
                                     () ->
                                         ReefAlign.isWithinReefRange(
@@ -283,34 +294,30 @@ public class RobotContainer {
                                             &&
                                             // allow driver control to be taken back when
                                             // driverOverride becomes true
-                                            !isDriverOverride))
+                                            !isDriverOverride)
+                                .until(drivetrain::atPoseSetpoint)
+                                .andThen(
+                                    // we are aligned, but keep aligning unless driver is moving
+                                    coralSuperstructure
+                                        .goToSetpointProfiled(() -> queuedSetpoint)
+                                        .alongWith(
+                                            ReefAlign.alignToReef(
+                                                drivetrain, () -> queuedReefPosition))
+                                        .onlyWhile(
+                                            () ->
+                                                ReefAlign.isWithinReefRange(
+                                                        drivetrain,
+                                                        ReefAlign.kMechanismDeadbandThreshold)
+                                                    && Math.hypot(
+                                                            driverForward.getAsDouble(),
+                                                            driverStrafe.getAsDouble())
+                                                        <= 0.05
+                                                    &&
+                                                    // allow driver control to be taken back when
+                                                    // driverOverride becomes true
+                                                    !isDriverOverride)))
                         // when we get far away, repeat the command
-                        .repeatedly()
-                        .alongWith(
-                            coralSuperstructure
-                                .goToSetpointProfiled(
-                                    () ->
-                                        Meters.of(
-                                            Math.min(
-                                                queuedSetpoint.getElevatorHeight().in(Meters),
-                                                CoralScorerSetpoint.PREALIGN
-                                                    .getElevatorHeight()
-                                                    .in(Meters))),
-                                    () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                                .onlyWhile(
-                                    () ->
-                                        ReefAlign.isWithinReefRange(
-                                            drivetrain, ReefAlign.kMechanismDeadbandThreshold)))
-                        .until(drivetrain::atPoseSetpoint)
-                        // we are aligned
-                        .andThen(coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
-                        .onlyWhile(
-                            () ->
-                                ReefAlign.isWithinReefRange(
-                                    drivetrain, ReefAlign.kMechanismDeadbandThreshold)))
-                // and only do this while we're in the zone (when we're not, we will
-                // stay in the pre-alignment position)
-                .repeatedly());
+                        .repeatedly()));
 
     driver
         .rightTrigger()

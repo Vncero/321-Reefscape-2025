@@ -279,19 +279,12 @@ public class AutomaticAutonomousMaker3000 {
           case L4 -> CoralScorerSetpoint.L4;
         };
     return path.deadlineFor(
-            coralSuperstructure
-                .goToSetpointPID(
-                    () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                    () -> ElevatorArmConstants.kPreAlignAngle)
-                .asProxy())
+            coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.PREALIGN).asProxy())
         .andThen(
             ReefAlign.alignToReef(
                     drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
                 .asProxy()
-                .alongWith(
-                    coralSuperstructure.goToSetpointPID(
-                        () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                        () -> ElevatorArmConstants.kPreAlignAngle))
+                .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.PREALIGN))
                 .asProxy()
                 .until(() -> drive.atPoseSetpoint() && coralSuperstructure.atTargetState())
                 .andThen(coralSuperstructure.goToSetpointProfiled(() -> setpoint).asProxy())
