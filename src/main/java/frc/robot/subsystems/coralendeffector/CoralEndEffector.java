@@ -69,18 +69,12 @@ public class CoralEndEffector extends SubsystemBase {
 
   // shortcut to intake coral
   public Command intakeCoral() {
-    return run(
-        () -> {
-          io.setVoltage(CoralEndEffectorConstants.kIntakeVoltage);
-        });
+    return runAtVelocity(() -> CoralEndEffectorConstants.kIntakeRPM);
   }
 
   // shortcut to outtake coral
   public Command outtakeCoral() {
-    return run(
-        () -> {
-          io.setVoltage(CoralEndEffectorConstants.kOuttakeVoltage);
-        });
+    return runAtVelocity(() -> CoralEndEffectorConstants.kOuttakeRPM);
   }
 
   public Command runVolts(Supplier<Voltage> voltage) {
@@ -93,14 +87,12 @@ public class CoralEndEffector extends SubsystemBase {
 
   // stalls coral if we have a coral; this should be the default command
   public Command stallCoralIfDetected() {
-    return run(
-        () -> {
-          if (inputs.hasCoral) {
-            io.setVoltage(CoralEndEffectorConstants.kStallVoltage);
-          } else {
-            io.setVoltage(Volts.zero());
-          }
-        });
+    return runAtVelocity(() -> {
+      if (hasCoral()) {
+        return CoralEndEffectorConstants.kStallRPM;
+      }
+      return RPM.of(0);
+    });
   }
 
   // tune PIDFF of end effector
