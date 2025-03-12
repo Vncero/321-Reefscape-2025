@@ -291,6 +291,11 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
+  public Pose2d getAlignmentSetpoint() {
+    return alignmentSetpoint;
+  }
+
+  @Override
   public void addVisionMeasurement(Pose2d visionRobotPose, double timeStampSeconds) {
     simulatedDrive.addVisionEstimation(visionRobotPose, timeStampSeconds);
   }

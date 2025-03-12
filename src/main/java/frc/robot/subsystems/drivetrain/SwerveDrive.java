@@ -195,6 +195,8 @@ public interface SwerveDrive extends Subsystem {
 
   Rotation2d getHeading();
 
+  Pose2d getAlignmentSetpoint();
+
   /**
    * Add vision measurement to the main Swerve Drive pose estimator
    *

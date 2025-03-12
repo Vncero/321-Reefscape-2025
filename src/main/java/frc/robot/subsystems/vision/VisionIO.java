@@ -6,4 +6,6 @@ import edu.wpi.first.epilogue.Logged;
 @Logged
 public interface VisionIO {
   VisionEstimate[] getLatestEstimates();
+
+  boolean areCamerasConnected();
 }
