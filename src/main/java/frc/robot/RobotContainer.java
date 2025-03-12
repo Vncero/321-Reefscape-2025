@@ -313,10 +313,6 @@ public class RobotContainer {
                     // either align to reef or coral based on how far we are away rotate to reef
                     // until we're close enough
                     ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)
-                        .alongWith(
-                            coralSuperstructure.goToSetpointPID(
-                                () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                                () -> CoralScorerSetpoint.PREALIGN.getArmAngle()))
                         .until(
                             () ->
                                 ReefAlign.isWithinReefRange(
@@ -331,39 +327,51 @@ public class RobotContainer {
                             // when we get close enough, align to reef, but only while we're
                             // close enough
                             ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
-                                .alongWith(
-                                    coralSuperstructure
-                                        .goToSetpointProfiled(
-                                            () ->
-                                                Meters.of(
-                                                    Math.min(
-                                                        queuedSetpoint
-                                                            .getElevatorHeight()
-                                                            .in(Meters),
-                                                        CoralScorerSetpoint.PREALIGN
-                                                            .getElevatorHeight()
-                                                            .in(Meters))),
-                                            () -> queuedSetpoint.getArmAngle())
-                                        .until(drivetrain::atPoseSetpoint)
-                                        .andThen(
-                                            // we are aligned, but keep aligning unless driver is
-                                            // moving
-                                            coralSuperstructure.goToSetpointProfiled(
-                                                () -> queuedSetpoint))
-                                        .onlyWhile(
-                                            () ->
-                                                ReefAlign.isWithinReefRange(
-                                                        drivetrain,
-                                                        ReefAlign.kMechanismDeadbandThreshold)
-                                                    && Math.hypot(
-                                                            driverForward.getAsDouble(),
-                                                            driverStrafe.getAsDouble())
-                                                        <= 0.05
-                                                    &&
-                                                    // allow driver control to be taken back when
-                                                    // driverOverride becomes true
-                                                    !isDriverOverride)))
+                                .onlyWhile(
+                                    () ->
+                                        ReefAlign.isWithinReefRange(
+                                                drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                            && Math.hypot(
+                                                    driverForward.getAsDouble(),
+                                                    driverStrafe.getAsDouble())
+                                                <= 0.05
+                                            &&
+                                            // allow driver control to be taken back when
+                                            // driverOverride becomes true
+                                            !isDriverOverride))
                         // when we get far away, repeat the command
+                        .repeatedly())
+                .alongWith(
+                    coralSuperstructure
+                        .goToSetpointPID(
+                            () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
+                        .onlyWhile(
+                            () ->
+                                !ReefAlign.isWithinReefRange(
+                                    drivetrain, ReefAlign.kMechanismDeadbandThreshold))
+                        .andThen(
+                            coralSuperstructure
+                                .goToSetpointProfiled(
+                                    () ->
+                                        Meters.of(
+                                            Math.min(
+                                                queuedSetpoint.getElevatorHeight().in(Meters),
+                                                CoralScorerSetpoint.PREALIGN
+                                                    .getElevatorHeight()
+                                                    .in(Meters))),
+                                    () -> queuedSetpoint.getArmAngle())
+                                .onlyWhile(
+                                    () ->
+                                        ReefAlign.isWithinReefRange(
+                                            drivetrain, ReefAlign.kMechanismDeadbandThreshold))
+                                .until(drivetrain::atPoseSetpoint)
+                                .andThen(
+                                    coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
+                                .onlyWhile(
+                                    () ->
+                                        ReefAlign.isWithinReefRange(
+                                            drivetrain, ReefAlign.kMechanismDeadbandThreshold)))
                         .repeatedly()));
 
     driver

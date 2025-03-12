@@ -199,18 +199,25 @@ public class ReefAlign {
         .finallyDo(() -> Leds.getInstance().isReefAligning = false);
   }
 
-  public static Command alignToTag(SwerveDrive swerveDrive) {
+  public static Command alignToTag(
+      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
     return swerveDrive.driveToFieldPose(
         () -> {
-          Pose2d target = getNearestReefPose(swerveDrive.getPose());
+          Pose2d target =
+              switch (targetReefPosition.get()) {
+                case ALGAE -> centerAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                case LEFT -> leftAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                case RIGHT -> rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                default -> swerveDrive.getPose(); // more or less a no-op
+              };
 
           Translation2d translationError =
               new Translation2d(
-                  swerveDrive.getPose().getTranslation().getDistance(target.getTranslation()),
-                  Rotation2d.kZero);
+                  target.getTranslation().getDistance(swerveDrive.getPose().getTranslation()),
+                  kReefAlignmentRotation);
 
           Pose2d newTarget =
-              target.plus(new Transform2d(translationError.getX(), 0, kReefAlignmentRotation));
+              target.plus(new Transform2d(translationError.getX(), 0, Rotation2d.kZero));
 
           swerveDrive.setAlignmentSetpoint(newTarget);
 
