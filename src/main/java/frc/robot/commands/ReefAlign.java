@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -198,18 +199,21 @@ public class ReefAlign {
         .finallyDo(() -> Leds.getInstance().isReefAligning = false);
   }
 
-  public static Command alignToTag(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
+  public static Command alignToTag(SwerveDrive swerveDrive) {
     return swerveDrive.driveToFieldPose(
         () -> {
           Pose2d target = getNearestReefPose(swerveDrive.getPose());
 
-          double distance =
-              swerveDrive.getPose().getTranslation().getDistance(target.getTranslation());
+          Translation2d translationError =
+              new Translation2d(
+                  swerveDrive.getPose().getTranslation().getDistance(target.getTranslation()),
+                  Rotation2d.kZero);
 
-          Pose2d newTarget = target.plus(new Transform2d(distance, 0, kReefAlignmentRotation));
+          Pose2d newTarget =
+              target.plus(new Transform2d(translationError.getX(), 0, kReefAlignmentRotation));
 
           swerveDrive.setAlignmentSetpoint(newTarget);
+
           return newTarget;
         });
   }

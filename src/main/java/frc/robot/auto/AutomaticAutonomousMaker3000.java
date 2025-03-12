@@ -1,11 +1,14 @@
 /* (C) Robolancers 2025 */
 package frc.robot.auto;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,7 +20,6 @@ import frc.robot.commands.StationAlign;
 import frc.robot.subsystems.CoralSuperstructure;
 import frc.robot.subsystems.CoralSuperstructure.CoralScorerSetpoint;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
-import frc.robot.subsystems.elevatorarm.ElevatorArmConstants;
 import frc.robot.util.ReefPosition;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -278,15 +280,26 @@ public class AutomaticAutonomousMaker3000 {
           case L3 -> CoralScorerSetpoint.L3;
           case L4 -> CoralScorerSetpoint.L4;
         };
+
+    Distance preAlignElevatorHeight =
+        Meters.of(
+            Math.min(
+                CoralScorerSetpoint.PREALIGN.getElevatorHeight().in(Meters),
+                setpoint.getElevatorHeight().in(Meters)));
+
     return path.deadlineFor(
-            coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.PREALIGN).asProxy())
+            coralSuperstructure
+                .goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                .asProxy())
         .andThen(
             ReefAlign.alignToReef(
                     drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
                 .asProxy()
-                .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.PREALIGN))
+                .alongWith(
+                    coralSuperstructure.goToSetpointPID(
+                        () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
                 .asProxy()
-                .until(() -> drive.atPoseSetpoint() && coralSuperstructure.atTargetState())
+                .until(() -> drive.atPoseSetpoint())
                 .andThen(coralSuperstructure.goToSetpointProfiled(() -> setpoint).asProxy())
                 .until(() -> coralSuperstructure.atTargetState())
                 .withTimeout(2.5))
@@ -312,7 +325,7 @@ public class AutomaticAutonomousMaker3000 {
                       coralSuperstructure
                           .goToSetpointPID(
                               () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                              () -> ElevatorArmConstants.kPreAlignAngle)
+                              () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
                           .asProxy());
             });
   }
