@@ -2,10 +2,12 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.simulation.AddressableLEDSim;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.auto.AutomaticAutonomousMaker3000;
+import frc.robot.commands.ControllerCommands;
 import frc.robot.commands.ReefAlign;
 import frc.robot.commands.StationAlign;
 import frc.robot.subsystems.AlgaeSuperstructure;
@@ -31,6 +34,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
 import frc.robot.subsystems.elevatorarm.ElevatorArmConstants;
 import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.leds.LedsConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.ReefPosition;
 import java.util.function.DoubleSupplier;
@@ -98,9 +102,10 @@ public class RobotContainer {
       new SuperstructureVisualizer(
           () -> elevator.getHeight(), () -> elevatorArm.getAngle(), () -> algaePivot.getAngle());
 
-  private Leds leds = new Leds();
+  private Leds leds = Leds.getInstance();
   private AddressableLEDSim ledSim = new AddressableLEDSim(leds.strip);
   private boolean isDriverOverride = false;
+  private boolean isClimbing = false;
 
   private Trigger isAlgaeSetpoint =
       new Trigger(
@@ -114,6 +119,16 @@ public class RobotContainer {
                   || queuedSetpoint == CoralScorerSetpoint.L2
                   || queuedSetpoint == CoralScorerSetpoint.L3
                   || queuedSetpoint == CoralScorerSetpoint.L4);
+
+  private DoubleSupplier reefAlignProgressPercent =
+      () ->
+          leds.calculateProgressBar(
+              elevator.getHeight(),
+              coralSuperstructure.getTargetState().getElevatorHeight(),
+              elevatorArm.getAngle(),
+              coralSuperstructure.getTargetState().getArmAngle(),
+              drivetrain.getPose(),
+              drivetrain.getAlignmentSetpoint());
 
   public RobotContainer() {
 
@@ -156,6 +171,7 @@ public class RobotContainer {
     //             .goToHeight(() -> ElevatorConstants.kElevatorDangerHeight.plus(Meters.of(0.1)))
     //             .until(new Trigger(algaePivot::inCollisionZone).negate()));
 
+    configureLeds();
     configureBindings();
     // configureTuningBindings();
   }
@@ -221,6 +237,42 @@ public class RobotContainer {
     // driver.a().whileTrue(algaeSuperstructure.outtakeAlgae());
   }
 
+  private void configureLeds() {
+    // Driving LED signals
+    leds.registerSignal(0, () -> true, () -> LedsConstants.kDefault);
+    leds.registerSignal(1, () -> algaeSuperstructure.hasAlgae(), () -> LedsConstants.kHasAlgae);
+    leds.registerSignal(2, () -> coralSuperstructure.hasCoral(), () -> LedsConstants.kHasCoral);
+    leds.registerSignal(
+        3,
+        () -> algaeSuperstructure.hasAlgae() && coralSuperstructure.hasCoral(),
+        () -> LedsConstants.kHasCoralAndAlgae);
+    leds.registerSignal(4, () -> coralEndEffector.isIntaking(), () -> LedsConstants.kIntaking);
+    leds.registerSignal(5, () -> coralEndEffector.isOuttaking(), () -> LedsConstants.kOuttaking);
+
+    leds.registerSignal(6, () -> leds.isRotateAligning, () -> LedsConstants.kRotationAligning);
+
+    leds.registerSignal(
+        7,
+        () ->
+            leds.isRotateAligning
+                && ReefAlign.isWithinReefRange(drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                && Math.hypot(driverForward.getAsDouble(), driverStrafe.getAsDouble()) >= 0.05,
+        () -> LedsConstants.kReadyToAlign);
+
+    leds.registerSignal(
+        8, () -> leds.isReefAligning, () -> LedsConstants.kReefAligning(reefAlignProgressPercent));
+
+    // when we are aligned, also works when manually aligning
+    leds.registerSignal(9, () -> isDriverOverride, () -> LedsConstants.kAlignOverride);
+    leds.registerSignal(10, () -> isClimbing, () -> LedsConstants.kClimbing);
+
+    // Error State LED Signals
+    leds.registerSignal(
+        99, () -> !vision.areCamerasConnected(), () -> LedsConstants.kVisionDisconnect);
+    // leds.registerSignal(100, () -> !DriverStation.isDSAttached(), () ->
+    // LedsConstants.kRobotDisconnect);
+  }
+
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
@@ -240,14 +292,25 @@ public class RobotContainer {
                 .andThen(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn))
                 .until(() -> StationAlign.getStationDistance(drivetrain) < 2)
                 .repeatedly()
-                .alongWith(coralSuperstructure.feedCoral().asProxy().repeatedly()));
+                .alongWith(
+                    coralSuperstructure
+                        .feedCoral()
+                        .asProxy()
+                        .repeatedly()
+                        .until(() -> coralEndEffector.hasCoral())
+                        .andThen(
+                            ControllerCommands.rumbleController(
+                                driver.getHID(), Seconds.of(0.5), RumbleType.kRightRumble, 0.75))));
 
     // coral outtake
     driver
         .rightTrigger()
         .and(isCoralSetpoint)
         .whileTrue( // while right trigger is pressed:
-            Commands.runOnce(() -> isDriverOverride = false)
+            Commands.runOnce(
+                    () -> {
+                      isDriverOverride = false;
+                    })
                 .andThen(
                     // either align to reef or coral based on how far we are away rotate to reef
                     // until we're close enough
@@ -322,7 +385,6 @@ public class RobotContainer {
                                                         != CoralScorerSetpoint.NEUTRAL))
                                 // and only do this while we're in the zone (when we're not, we will
                                 // stay in the pre-alignment position)
-
                                 .repeatedly())));
 
     driver

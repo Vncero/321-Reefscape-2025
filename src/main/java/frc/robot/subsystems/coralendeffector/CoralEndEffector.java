@@ -85,6 +85,16 @@ public class CoralEndEffector extends SubsystemBase {
     return inputs.hasCoral;
   }
 
+  public boolean isIntaking() {
+    return inputs.voltage.isNear(
+        CoralEndEffectorConstants.kIntakeVoltage, CoralEndEffectorConstants.kVoltageTolerance);
+  }
+
+  public boolean isOuttaking() {
+    return inputs.voltage.isNear(
+        CoralEndEffectorConstants.kOuttakeVoltage, CoralEndEffectorConstants.kVoltageTolerance);
+  }
+
   // stalls coral if we have a coral; this should be the default command
   public Command stallCoralIfDetected() {
     return runAtVelocity(() -> {
