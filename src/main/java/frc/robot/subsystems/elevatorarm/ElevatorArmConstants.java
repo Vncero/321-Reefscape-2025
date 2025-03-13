@@ -33,9 +33,6 @@ public class ElevatorArmConstants {
   // absolute encoder offset
   public static final Angle kAbsoluteEncoderOffset = Degrees.of(0);
 
-  // non-setpoint setpoints
-  public static final Angle kPreAlignAngle = Degrees.of(150);
-
   // controller config
   public static final Angle kAngleTolerance = Degrees.of(1);
 
