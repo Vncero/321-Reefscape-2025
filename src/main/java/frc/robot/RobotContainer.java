@@ -26,6 +26,8 @@ import frc.robot.subsystems.CoralSuperstructure.CoralScorerSetpoint;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.algaeIntakePivot.AlgaeIntakePivot;
 import frc.robot.subsystems.algaeIntakeRollers.AlgaeIntakeRollers;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.subsystems.coralendeffector.CoralEndEffector;
 import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSim;
@@ -47,6 +49,8 @@ public class RobotContainer {
   private CoralEndEffector coralEndEffector = CoralEndEffector.create();
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
+
+  private Climber climber = Climber.create();
 
   private CoralSuperstructure coralSuperstructure =
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
@@ -160,6 +164,8 @@ public class RobotContainer {
     // elevatorArm.setDefaultCommand(elevatorArm.runVolts(() -> Volts.zero()));
     // coralEndEffector.setDefaultCommand(coralEndEffector.runVolts(() -> Volts.of(1)));
 
+    climber.setDefaultCommand(climber.goToAngle(() -> ClimberConstants.kDefaultAngle));
+
     leds.setDefaultCommand(leds.updateLeds());
 
     // when both are about to collide, move elevator out of the way until the algae pivot is out of
@@ -180,8 +186,12 @@ public class RobotContainer {
 
   private void configureTuningBindings() {
 
+    // driver.a().whileTrue(climber.tune());
+
     // climb!
-    // driver.y().toggleOnTrue(algaeSuperstructure.prepareClimb());
+    // driver.y().toggleOnTrue(climber.goToAngle(() -> ClimberConstants.kClimbPrepAngle));
+
+    // driver.a().onTrue(climber.climb());
 
     // driver.b().toggleOnTrue(coralSuperstructure.goToSetpoint(() -> CoralScorerSetpoint.CLIMB));
     // driver.y().whileTrue(algaePivot.setMechanismVoltage(() -> Volts.of(1)));
@@ -206,9 +216,9 @@ public class RobotContainer {
     //               System.out.println("Changing volts to: " + volts);
     //             }));
 
-    driver.a().whileTrue(ReefAlign.tuneAlignment(drivetrain));
+    // driver.a().whileTrue(ReefAlign.tuneAlignment(drivetrain));
 
-    driver.b().whileTrue(coralSuperstructure.feedCoral());
+    // driver.b().whileTrue(coralSuperstructure.feedCoral());
 
     // driver.leftBumper().whileTrue(elevator.setVoltage(() -> Volts.of(1)));
     // driver.rightBumper().whileTrue(elevator.setVoltage(() -> Volts.of(-1)));
@@ -223,9 +233,9 @@ public class RobotContainer {
     // driver.a().whileTrue(elevatorArm.tune());
 
     // find arm setpoints
-    driver.y().whileTrue(coralSuperstructure.tune());
+    // driver.y().whileTrue(coralSuperstructure.tune());
     // driver.leftBumper().whileTrue(coralSuperstructure.feedCoral());
-    driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
+    // driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
 
     // alignment testing (no arm)
     // driver.a().whileTrue(ReefAlign.rotateToNearestReefTag(drivetrain, driverForward,
