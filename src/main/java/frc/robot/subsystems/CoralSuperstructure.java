@@ -86,7 +86,7 @@ public class CoralSuperstructure {
   }
 
   public Command knockAlgae() {
-    return endEffector.runVolts(() -> CoralEndEffectorConstants.kAlgaeKnockVoltage);
+    return endEffector.runAtVelocity(() -> CoralEndEffectorConstants.kAlgaeKnockRPM);
   }
 
   public CoralScorerSetpoint getTargetState() {

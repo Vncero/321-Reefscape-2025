@@ -290,7 +290,7 @@ public class RobotContainer {
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
-    // driver.y().toggleOnTrue(algaeSuperstructure.prepareClimb());
+    driver.y().toggleOnTrue(algaeSuperstructure.prepareClimb());
     // driver.a().onTrue(algaeSuperstructure.climb());
 
     driver.y().whileTrue(coralSuperstructure.feedCoral());
