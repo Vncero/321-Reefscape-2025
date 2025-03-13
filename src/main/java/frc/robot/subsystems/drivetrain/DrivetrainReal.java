@@ -221,13 +221,6 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
 
     if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
 
-    // TODO: find better way
-    // if (Math.hypot(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond) < 0.1)
-    //   targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
-    // if (targetSpeeds.omegaRadiansPerSecond < 0.1)
-    //   targetSpeeds =
-    //       new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
-
     setControl(
         fieldCentricRequest
             .withDriveRequestType(DriveRequestType.Velocity)
