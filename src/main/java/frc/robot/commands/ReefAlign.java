@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -196,6 +197,32 @@ public class ReefAlign {
                   return target;
                 }))
         .finallyDo(() -> Leds.getInstance().isReefAligning = false);
+  }
+
+  public static Command alignToTag(
+      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
+    return swerveDrive.driveToFieldPose(
+        () -> {
+          Pose2d target =
+              switch (targetReefPosition.get()) {
+                case ALGAE -> centerAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                case LEFT -> leftAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                case RIGHT -> rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                default -> swerveDrive.getPose(); // more or less a no-op
+              };
+
+          Translation2d translationError =
+              new Translation2d(
+                  target.getTranslation().getDistance(swerveDrive.getPose().getTranslation()),
+                  kReefAlignmentRotation);
+
+          Pose2d newTarget =
+              target.plus(new Transform2d(translationError.getX(), 0, Rotation2d.kZero));
+
+          swerveDrive.setAlignmentSetpoint(newTarget);
+
+          return newTarget;
+        });
   }
 
   public static Command tuneAlignment(SwerveDrive swerveDrive) {
