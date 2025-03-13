@@ -3,6 +3,7 @@ package frc.robot.subsystems.coralendeffector;
 
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 
@@ -28,5 +29,5 @@ public class CoralEndEffectorConstants {
   public static final Distance kDetectionRange = Millimeters.of(100);
 
   // for detecting if the end effector is intaking
-  public static final Voltage kVoltageTolerance = Volts.of(0.5);
+  public static final AngularVelocity kRPMTolerance = RPM.of(240);
 }
