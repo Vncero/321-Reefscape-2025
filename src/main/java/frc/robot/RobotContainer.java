@@ -459,29 +459,7 @@ public class RobotContainer {
                             && isCoralSetpoint.getAsBoolean()) // and outtake coral
                 // .until(() -> !coralSuperstructure.hasCoral()) // until we don't have coral
                 .withTimeout(0.5) // timeout at 1 second
-                .andThen(
-                    // move arm up and go back down (only if we're already at the scoring setpoint
-                    // state)
-                    coralSuperstructure
-                        .goToSetpointPID(
-                            () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                        .until(
-                            () ->
-                                coralSuperstructure
-                                    .getElevator()
-                                    .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight()))
-                        .onlyIf(
-                            () ->
-                                !coralSuperstructure
-                                    .getElevator()
-                                    .atHeight(
-                                        CoralScorerSetpoint.NEUTRAL
-                                            .getElevatorHeight()))) // and then resume default
-                // command
-                // only if we're at the target state and are ready to score
-
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+            );
 
     // --- DEALGAEFYING ---
     driver
