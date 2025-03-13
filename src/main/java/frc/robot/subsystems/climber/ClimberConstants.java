@@ -17,15 +17,17 @@ public class ClimberConstants {
   // climb motor IDs
   public static final int kMotorId = 20; // placeholder id
   public static final int kServoPort = 2;
+  public static final int kLimitSwitchPort = 0;
 
   // climb physical constants
   public static final double kClimbGearing = 500;
-  public static final double kClimbMOI = 1;
-  public static final Angle kStartingAngle = Degrees.of(0);
+  public static final double kClimbMOI = 0.1;
+  public static final Angle kStartingAngle = Degrees.of(-90);
   public static final Distance kClimbLength = Inches.of(0.6);
-  public static final Angle kClimbMinAngle = Degrees.of(0);
+  public static final Angle kClimbMinAngle = Degrees.of(-180);
   public static final Angle kClimbMaxAngle = Degrees.of(180);
-  public static final Angle kClimbPrepAngle = Degrees.of(75);
+  public static final Angle kClimbPrepAngle = Degrees.of(180);
+  public static final Angle kDefaultAngle = Degrees.of(-90);
 
   // climb servo lock + unlock positions
   public static final Angle kServoLockPosition = Degrees.of(90);
@@ -36,9 +38,10 @@ public class ClimberConstants {
   public static final int kSmartCurrentLimit = 40;
   public static final double kClimbPositionConversionFactor = 360 / kClimbGearing;
   public static final double kClimbVelocityConversionFactor = kClimbPositionConversionFactor / 60;
+  public static final Voltage kClimbHomeVoltage = Volts.of(-4);
 
   public static final Voltage kNominalVoltage = Volts.of(12);
-  public static final Angle kClimbThreshold = Degrees.of(35); // to be tuned
+  public static final Angle kClimbThreshold = Degrees.of(75); // to be tuned
 
   public static final Current kClimbCurrentRampRate =
       Amps.of(20); // placeholder, will need to tune this

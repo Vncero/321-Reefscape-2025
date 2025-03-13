@@ -28,6 +28,8 @@ public class Climber extends SubsystemBase {
   private ClimberInputs inputs;
   private ClimberConfig config;
 
+  private boolean climbHomed = false;
+
   private PIDController climbController;
   private ArmFeedforward feedForward;
 
@@ -42,6 +44,7 @@ public class Climber extends SubsystemBase {
     feedForward = new ArmFeedforward(0, config.kG(), 0);
 
     climbController.setTolerance(ClimberConstants.kControllerTolerance.in(Degrees));
+    climbController.enableContinuousInput(-180, 180);
     io.resetEncoder(ClimberConstants.kStartingAngle);
   }
 
@@ -60,14 +63,13 @@ public class Climber extends SubsystemBase {
     TunableConstant kI = new TunableConstant("/Climber/kI", config.kI());
     TunableConstant kD = new TunableConstant("/Climber/kD", config.kD());
     TunableConstant kG = new TunableConstant("/Climber/kG", config.kG());
-    TunableConstant maxClimbCurrent =
-        new TunableConstant("/Climber/maxClimbCurrent", ClimberConstants.kClimbCurrent.in(Amps));
     TunableConstant desiredAngle = new TunableConstant("/Climber/desiredAngle", 0);
 
     return runOnce(
             () -> {
               this.climbController.setPID(kP.get(), kI.get(), kD.get());
               this.feedForward = new ArmFeedforward(0, kG.get(), 0);
+              io.setLockServoAngle(ClimberConstants.kServoUnlockPosition);
             })
         .andThen(goToAngle(() -> Degrees.of(desiredAngle.get())));
   }
@@ -78,15 +80,23 @@ public class Climber extends SubsystemBase {
         new TunableConstant(
             "/Climber/ClimbCurrentRampRate", ClimberConstants.kClimbCurrentRampRate.in(Amps));
 
-    return run(
-        () -> {
-          double newRampRate = climbCurrentRampRate.get();
-          io.setClimbCurrent(
-              Amps.of(
-                  // Ensures the current never exceeds the max
-                  // ramps up current over time as we tune
-                  Math.min(newRampRate * timer.get(), ClimberConstants.kClimbCurrent.in(Amps))));
-        });
+    return runOnce(timer::restart)
+        .andThen(() -> io.setLockServoAngle(ClimberConstants.kServoUnlockPosition))
+        .andThen(
+            Commands.run(
+                    () ->
+                        io.setClimbCurrent(
+                            Amps.of( // Sets the motor to a current control mode, ramping up current
+                                // over time
+                                -Math.min(
+                                    climbCurrentRampRate.get() * timer.get(),
+                                    ClimberConstants.kClimbCurrent.in(Amps)))))
+                .until(
+                    () ->
+                        inputs.climbAngle.in(Degrees)
+                            <= ClimberConstants.kClimbThreshold.in(Degrees)))
+        .andThen(() -> io.setLockServoAngle(ClimberConstants.kServoLockPosition))
+        .andThen(Commands.run(() -> io.setClimbCurrent(Amps.of(0))));
   }
 
   // creates placeholder implementation to disable robot
@@ -107,7 +117,7 @@ public class Climber extends SubsystemBase {
                         io.setClimbCurrent(
                             Amps.of( // Sets the motor to a current control mode, ramping up current
                                 // over time
-                                Math.min(
+                                -Math.min(
                                     ClimberConstants.kClimbCurrentRampRate.in(Amps) * timer.get(),
                                     ClimberConstants.kClimbCurrent.in(Amps)))))
                 .until(
@@ -148,6 +158,23 @@ public class Climber extends SubsystemBase {
         () -> {
           io.setClimbCurrent(current.get());
         });
+  }
+
+  public Command homeMechanism() {
+    return run(() -> {
+          io.setClimbVoltage(ClimberConstants.kClimbHomeVoltage);
+        })
+        .until(() -> inputs.limitSwitchHit)
+        .andThen(
+            () -> {
+              io.resetEncoder(ClimberConstants.kStartingAngle);
+              io.setClimbVoltage(Volts.zero());
+              climbHomed = true;
+            });
+  }
+
+  public boolean climbIsHomed() {
+    return climbHomed;
   }
 
   public Angle getAngle() {

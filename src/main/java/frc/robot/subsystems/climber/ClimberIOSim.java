@@ -7,19 +7,22 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+@Logged
 public class ClimberIOSim implements ClimberIO {
 
-  public static final ClimberConfig config = new ClimberConfig(0.115, 0, 0.0, 3.561);
+  public static final ClimberConfig config = new ClimberConfig(4, 0, 0.0, 0.8903);
 
   private SingleJointedArmSim climbSim;
   private double lockServoAngle;
-  private double currentVoltage;
 
   public ClimberIOSim() {
     // configures a simulated arm with two pivot motors controlling one
@@ -37,7 +40,8 @@ public class ClimberIOSim implements ClimberIO {
             ClimberConstants.kStartingAngle.in(Radians));
 
     lockServoAngle = 0.0; // default
-    currentVoltage = 0.0; // default
+
+    SmartDashboard.putBoolean("/SimInputs/Climber/LimitSwitchHit", false);
   }
 
   public void setLockServoAngle(double angle) {
@@ -69,6 +73,10 @@ public class ClimberIOSim implements ClimberIO {
     inputs.climbAngle = Radians.of(climbSim.getAngleRads());
     inputs.climbVelocity = RadiansPerSecond.of(climbSim.getVelocityRadPerSec());
     inputs.climbCurrent = Amps.of(climbSim.getCurrentDrawAmps());
-    inputs.climbVoltage = Volts.of(climbSim.getInput(0));
+    inputs.limitSwitchHit = SmartDashboard.getBoolean("/SimInputs/Climber/LimitSwitchHit", false);
+  }
+
+  public void resetEncoder(Angle angle) {
+    climbSim.setState(angle.in(Radians), 0);
   }
 }

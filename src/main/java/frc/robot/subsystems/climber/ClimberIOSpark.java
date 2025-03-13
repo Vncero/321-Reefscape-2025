@@ -19,6 +19,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
 
 /*
@@ -31,6 +32,8 @@ public class ClimberIOSpark implements ClimberIO {
   public static final ClimberConfig config = new ClimberConfig(0, 0, 0, 0);
 
   private SparkMax climbMotor = new SparkMax(ClimberConstants.kMotorId, MotorType.kBrushless);
+
+  private DigitalInput homingLimitSwitch = new DigitalInput(ClimberConstants.kLimitSwitchPort);
 
   private final Servo climbServo = new Servo(ClimberConstants.kServoPort);
 
@@ -75,6 +78,7 @@ public class ClimberIOSpark implements ClimberIO {
     inputs.climbAngle = Radians.of((MathUtil.angleModulus(Math.toRadians(rawAngle))));
     inputs.climbVelocity = DegreesPerSecond.of(climbMotor.getEncoder().getVelocity());
     inputs.climbCurrent = Amps.of(climbMotor.getOutputCurrent());
+    inputs.limitSwitchHit = homingLimitSwitch.get();
   }
 
   public void resetEncoder(Angle angle) {

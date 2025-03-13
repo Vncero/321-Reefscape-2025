@@ -4,7 +4,6 @@ package frc.robot.subsystems.climber;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Current;
@@ -20,7 +19,7 @@ public class ClimberIOIdeal implements ClimberIO {
     inputs.climbAngle = Degrees.of(0);
     inputs.climbVelocity = DegreesPerSecond.of(0);
     inputs.climbCurrent = Amps.zero();
-    inputs.climbVoltage = Volts.of(0);
+    inputs.limitSwitchHit = false;
   }
 
   public void setClimbVoltage(Voltage volts) {}
