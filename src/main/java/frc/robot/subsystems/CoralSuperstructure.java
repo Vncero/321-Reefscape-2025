@@ -123,7 +123,7 @@ public class CoralSuperstructure {
     L4(Meters.of(2.06).plus(Inches.of(1)), Degrees.of(85)),
     ALGAE_LOW(Meters.of(1), Degrees.of(40)), // TODO: actually tune
     ALGAE_HIGH(Meters.of(1.4), Degrees.of(40)), // TODO: actually tune
-    PREALIGN(Inches.of(50), Degrees.of(150)),
+    PREALIGN(Inches.of(50), Degrees.of(120)),
     CLIMB(Meters.of(1.4), Degrees.of(0));
 
     private Distance elevatorHeight; // the height of the elevator to got

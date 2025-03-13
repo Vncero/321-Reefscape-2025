@@ -33,6 +33,7 @@ import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSim;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.leds.LedsConstants;
@@ -49,7 +50,7 @@ public class RobotContainer {
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
 
-  private Climber climber = Climber.create();
+  private Climber climber = Climber.disable();
 
   private CoralSuperstructure coralSuperstructure =
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
@@ -79,7 +80,10 @@ public class RobotContainer {
   private CommandXboxController driver = new CommandXboxController(0);
   private XboxController manipulator = new XboxController(1);
 
-  private Trigger isSlowMode = driver.leftBumper();
+  private Trigger isSlowMode =
+      driver
+          .leftBumper()
+          .or(() -> elevator.getHeight().in(Meters) > ElevatorConstants.kSlowedHeight.in(Meters));
 
   private DoubleSupplier driverForward =
       () ->

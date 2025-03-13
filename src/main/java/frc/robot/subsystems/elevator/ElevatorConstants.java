@@ -35,6 +35,8 @@ public class ElevatorConstants {
   public static final Distance kElevatorDangerHeight =
       Meters.of(0.9); // TODO: get this danger height
 
+  public static final Distance kSlowedHeight = Inches.of(65);
+
   // controller config
   public static final Distance kHeightTolerance = Meters.of(0.1);
 
