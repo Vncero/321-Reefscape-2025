@@ -85,14 +85,25 @@ public class CoralEndEffector extends SubsystemBase {
     return inputs.hasCoral;
   }
 
+  public boolean isIntaking() {
+    return inputs.velocity.isNear(
+        CoralEndEffectorConstants.kIntakeRPM, CoralEndEffectorConstants.kRPMTolerance);
+  }
+
+  public boolean isOuttaking() {
+    return inputs.velocity.isNear(
+        CoralEndEffectorConstants.kOuttakeRPM, CoralEndEffectorConstants.kRPMTolerance);
+  }
+
   // stalls coral if we have a coral; this should be the default command
   public Command stallCoralIfDetected() {
-    return runAtVelocity(() -> {
-      if (hasCoral()) {
-        return CoralEndEffectorConstants.kStallRPM;
-      }
-      return RPM.of(0);
-    });
+    return runAtVelocity(
+        () -> {
+          if (hasCoral()) {
+            return CoralEndEffectorConstants.kStallRPM;
+          }
+          return RPM.of(0);
+        });
   }
 
   // tune PIDFF of end effector
