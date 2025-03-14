@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -23,12 +24,18 @@ public class DrivetrainConstants {
   public static final AutoGains kTranslationGains =
       RobotBase.isReal()
           ? new AutoGains(6.328, 0, 0.01) // real (TODO: TUNE)
-          : new AutoGains(6.328, 0, 0.01); // sim
+          : new AutoGains(6.328, 0, 0); // sim
+
+  public static final Constraints kTranslationConstraints =
+      RobotBase.isReal() ? new Constraints(3.8, 3) : new Constraints(3.8, 3);
 
   public static final AutoGains kHeadingGains =
       RobotBase.isReal()
           ? new AutoGains(3.14, 0, 0) // real (TODO: TUNE)
           : new AutoGains(3.14, 0, 0); // sim
+
+  public static final Constraints kHeadingConstraints =
+      RobotBase.isReal() ? new Constraints(2 * Math.PI, 8) : new Constraints(2 * Math.PI, 8);
 
   public static final AutoGains kTuneTranslationGains = new AutoGains(0, 0, 0); // isn't used
   public static final AutoGains kTuneHeadingGains =

@@ -92,6 +92,7 @@ public class RobotContainer {
               * (isSlowMode.getAsBoolean()
                   ? 1.5
                   : DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond));
+
   private DoubleSupplier driverStrafe =
       () ->
           -MathUtil.applyDeadband(Math.hypot(driver.getLeftY(), driver.getLeftX()), 0.05)
@@ -99,6 +100,7 @@ public class RobotContainer {
               * (isSlowMode.getAsBoolean()
                   ? 1.5
                   : DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond));
+
   private DoubleSupplier driverTurn = () -> -MathUtil.applyDeadband(driver.getRightX(), 0.05) * 5;
 
   // robot queued states

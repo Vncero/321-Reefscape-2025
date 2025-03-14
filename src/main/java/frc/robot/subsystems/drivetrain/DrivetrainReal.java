@@ -192,9 +192,7 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons()));
   }
-  ;
 
-  @Override
   public void driveToRobotPose(Pose2d pose) {
     ChassisSpeeds targetSpeeds =
         ChassisSpeeds.discretize(

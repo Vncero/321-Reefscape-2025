@@ -65,7 +65,7 @@ public class DrivetrainSim implements SwerveDrive {
 
     this.simulatedDrive =
         new SelfControlledSwerveDriveSimulationWrapper(
-            new SwerveDriveSimulation(simConfig, new Pose2d(2, 2, new Rotation2d())));
+            new SwerveDriveSimulation(simConfig, new Pose2d(2, 2, Rotation2d.kZero)));
 
     this.headingController =
         new PIDController(
