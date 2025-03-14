@@ -44,14 +44,14 @@ public class DrivetrainConstants {
   public static final Distance kTrackWidth = Inches.of(29);
   public static final Distance kWheelBase = Inches.of(29);
 
-  public static final double kDriveDeadband = 0.03;
-  public static final double kRotationDeadband = 0.03;
+  public static final double kDriveDeadband = 0.05;
+  public static final double kRotationDeadband = 0.05;
   public static final AngularVelocity kMaxAngularVelocity = RadiansPerSecond.of(Math.PI * 6);
   public static final LinearVelocity kMaxLinearVelocity =
       MetersPerSecond.of(5.0); // TunerConstants.kSpeedAt12Volts
 
   public static final Time kLoopDt = Seconds.of(0.02);
 
-  public static final Distance kAlignmentSetpointTranslationTolerance = Meters.of(0.05);
+  public static final Distance kAlignmentSetpointTranslationTolerance = Meters.of(0.02);
   public static final Angle kAlignmentSetpointRotationTolerance = Degrees.of(2.0);
 }

@@ -87,7 +87,9 @@ public class RobotContainer {
 
   private DoubleSupplier driverForward =
       () ->
-          -MathUtil.applyDeadband(Math.hypot(driver.getLeftY(), driver.getLeftX()), 0.05)
+          -MathUtil.applyDeadband(
+                  Math.pow(Math.hypot(driver.getLeftY(), driver.getLeftX()), 2),
+                  DrivetrainConstants.kDriveDeadband)
               * Math.cos(Math.atan2(driver.getLeftX(), driver.getLeftY()))
               * (isSlowMode.getAsBoolean()
                   ? 1.5
@@ -95,13 +97,16 @@ public class RobotContainer {
 
   private DoubleSupplier driverStrafe =
       () ->
-          -MathUtil.applyDeadband(Math.hypot(driver.getLeftY(), driver.getLeftX()), 0.05)
+          -MathUtil.applyDeadband(
+                  Math.pow(Math.hypot(driver.getLeftY(), driver.getLeftX()), 2),
+                  DrivetrainConstants.kDriveDeadband)
               * Math.sin(Math.atan2(driver.getLeftX(), driver.getLeftY()))
               * (isSlowMode.getAsBoolean()
                   ? 1.5
                   : DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond));
 
-  private DoubleSupplier driverTurn = () -> -MathUtil.applyDeadband(driver.getRightX(), 0.05) * 5;
+  private DoubleSupplier driverTurn =
+      () -> -MathUtil.applyDeadband(driver.getRightX(), DrivetrainConstants.kRotationDeadband) * 5;
 
   // robot queued states
   private ReefPosition queuedReefPosition = ReefPosition.RIGHT;
@@ -239,14 +244,14 @@ public class RobotContainer {
     // driver.a().whileTrue(elevatorArm.tune());
 
     // find arm setpoints
-    // driver.y().whileTrue(coralSuperstructure.tune());
-    // driver.leftBumper().whileTrue(coralSuperstructure.feedCoral());
-    // driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
+    driver.y().whileTrue(coralSuperstructure.tune());
+    driver.leftBumper().whileTrue(coralSuperstructure.feedCoral());
+    driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
 
     // alignment testing (no arm)
     // driver.a().whileTrue(ReefAlign.rotateToNearestReefTag(drivetrain, driverForward,
     // driverStrafe));
-    // driver.b().whileTrue(ReefAlign.alignToReef(drivetrain, () -> ReefPosition.LEFT));
+    driver.b().whileTrue(ReefAlign.alignToReef(drivetrain, () -> ReefPosition.RIGHT));
 
     // test algae intake
     // driver.b().whileTrue(algaeSuperstructure.intakeAlgae());

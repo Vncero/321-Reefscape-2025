@@ -203,7 +203,16 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                 getPose().getRotation().getRadians(), pose.getRotation().getRadians()),
             DrivetrainConstants.kLoopDt.in(Seconds));
 
-    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
+    final var currentPose = getPose();
+
+    if (currentPose.getTranslation().getDistance(alignmentSetpoint.getTranslation())
+        < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters))
+      targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
+
+    if (Math.abs(currentPose.getRotation().minus(alignmentSetpoint.getRotation()).getDegrees())
+        < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees))
+      targetSpeeds =
+          new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
 
     setControl(
         fieldCentricRequest

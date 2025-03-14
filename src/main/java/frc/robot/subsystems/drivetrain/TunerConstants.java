@@ -51,11 +51,11 @@ public class TunerConstants {
 
   // The stator current at which the wheels start to slip;
   // This needs to be tuned to your individual robot
-  private static final Current kDriveSlipCurrent = Amps.of(60.0);
+  private static final Current kDriveSlipCurrent = Amps.of(50.0);
   private static final Current kDriveSupplyCurrent = Amps.of(40.0);
   private static final Current kSteerSlipCurrent = Amps.of(40.0);
   private static final Current kSteerSupplyCurrent = Amps.of(40.0);
-  private static final double kDriveClosedLoopRampRate = 0.2;
+  private static final double kDriveClosedLoopRampRate = 0.01;
   private static final double kSteerClosedLoopRampRate = 0.01;
 
   // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
