@@ -16,6 +16,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -120,7 +122,13 @@ public interface SwerveDrive extends Subsystem {
    *
    * @return whether the SwerveDrive is at the target alignment pose
    */
-  boolean atPoseSetpoint();
+  boolean atPoseSetpoint(Distance translationTolerance, Angle rotationTolerance);
+
+  default boolean atPoseSetpoint() {
+    return atPoseSetpoint(
+        DrivetrainConstants.kAlignmentSetpointTranslationTolerance,
+        DrivetrainConstants.kAlignmentSetpointRotationTolerance);
+  }
 
   default boolean atFinalPoseSetpoint() {
     if (!getAlignmentSetpoint().isFinalSetpoint()) return false;
@@ -187,6 +195,8 @@ public interface SwerveDrive extends Subsystem {
 
               thetaController.reset(
                   getPose().getRotation().getRadians(), speeds.omegaRadiansPerSecond);
+
+              setAlignmentSetpoint(pose.get());
             })
         .andThen(run(() -> driveToFieldPose(pose.get().pose)));
   }
@@ -242,5 +252,6 @@ public interface SwerveDrive extends Subsystem {
   void addReefVisionMeasurement(
       Pose2d visionRobotPose, double timeStampSeconds, Matrix<N3, N1> standardDeviations);
 
+  @Logged
   public record AlignmentSetpoint(Pose2d pose, boolean isFinalSetpoint) {}
 }

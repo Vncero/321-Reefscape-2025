@@ -29,6 +29,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -251,16 +253,16 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
   }
 
   @Override
-  public boolean atPoseSetpoint() {
+  public boolean atPoseSetpoint(Distance tranTol, Angle rotTol) {
     final var currentPose = getPose();
     return currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
-            < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters)
+            < tranTol.in(Meters)
         && Math.abs(
                 currentPose
                     .getRotation()
                     .minus(alignmentSetpoint.pose().getRotation())
                     .getDegrees())
-            < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees);
+            < rotTol.in(Degrees);
   }
 
   @Override

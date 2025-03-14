@@ -20,6 +20,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -218,16 +220,16 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public boolean atPoseSetpoint() {
+  public boolean atPoseSetpoint(Distance tranTol, Angle rotTol) {
     final var currentPose = getPose();
     return currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
-            < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters)
+            < tranTol.in(Meters)
         && Math.abs(
                 currentPose
                     .getRotation()
                     .minus(alignmentSetpoint.pose().getRotation())
                     .getDegrees())
-            < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees);
+            < rotTol.in(Degrees);
   }
 
   @Override

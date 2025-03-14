@@ -342,7 +342,13 @@ public class RobotContainer {
                             // when we get close enough, align to reef, but only while we're
                             // close enough
                             ReefAlign.alignToTag(drivetrain, () -> queuedReefPosition)
-                                .until(drivetrain::atPoseSetpoint)
+                                .until(
+                                    () ->
+                                        drivetrain.atPoseSetpoint(
+                                            Meters.of(0.2),
+                                            DrivetrainConstants
+                                                .kAlignmentSetpointRotationTolerance))
+                                .withTimeout(2)
                                 .andThen(
                                     ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition))
                                 .onlyWhile(
