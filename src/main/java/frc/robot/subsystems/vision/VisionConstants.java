@@ -149,4 +149,8 @@ public class VisionConstants {
                   + kAllowedFieldDistance.in(Meters),
               RobotConstants.kAprilTagFieldLayout.getFieldWidth()
                   + kAllowedFieldDistance.in(Meters)));
+
+  public static final double kAmbiguityThreshold = 0.4;
+  public static final double kAmbiguityShifter = 0.2;
+  public static final double kAmbiguityScalar = 4;
 }
