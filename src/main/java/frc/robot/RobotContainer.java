@@ -135,7 +135,7 @@ public class RobotContainer {
               elevatorArm.getAngle(),
               coralSuperstructure.getTargetState().getArmAngle(),
               drivetrain.getPose(),
-              drivetrain.getAlignmentSetpoint());
+              drivetrain.getAlignmentSetpoint().pose());
 
   public RobotContainer() {
 
@@ -339,7 +339,10 @@ public class RobotContainer {
                         .andThen(
                             // when we get close enough, align to reef, but only while we're
                             // close enough
-                            ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
+                            ReefAlign.alignToTag(drivetrain, () -> queuedReefPosition)
+                                .until(drivetrain::atPoseSetpoint)
+                                .andThen(
+                                    ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition))
                                 .onlyWhile(
                                     () ->
                                         ReefAlign.isWithinReefRange(
@@ -359,9 +362,9 @@ public class RobotContainer {
                         .goToSetpointPID(
                             () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                             () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                        .onlyWhile(
+                        .until(
                             () ->
-                                !ReefAlign.isWithinReefRange(
+                                ReefAlign.isWithinReefRange(
                                     drivetrain, ReefAlign.kMechanismDeadbandThreshold))
                         .andThen(
                             coralSuperstructure
@@ -378,7 +381,7 @@ public class RobotContainer {
                                     () ->
                                         ReefAlign.isWithinReefRange(
                                             drivetrain, ReefAlign.kMechanismDeadbandThreshold))
-                                .until(drivetrain::atPoseSetpoint)
+                                .until(drivetrain::atFinalPoseSetpoint)
                                 .andThen(
                                     coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
                                 .onlyWhile(
