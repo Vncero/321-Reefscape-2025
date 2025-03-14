@@ -19,7 +19,7 @@ public class TunerConstants {
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
   private static final Slot0Configs steerGains =
       new Slot0Configs()
-          .withKP(100)
+          .withKP(75)
           .withKI(0)
           .withKD(0.2)
           .withKS(0)
@@ -51,12 +51,12 @@ public class TunerConstants {
 
   // The stator current at which the wheels start to slip;
   // This needs to be tuned to your individual robot
-  private static final Current kDriveStatorCurrent = Amps.of(60.0);
+  private static final Current kDriveSlipCurrent = Amps.of(60.0);
   private static final Current kDriveSupplyCurrent = Amps.of(40.0);
-  private static final Current kSteerStatorCurrent = Amps.of(40.0);
+  private static final Current kSteerSlipCurrent = Amps.of(40.0);
   private static final Current kSteerSupplyCurrent = Amps.of(40.0);
-  private static final double kDriveClosedLoopRampRate = 0.02;
-  private static final double kSteerClosedLoopRampRate = 0.0;
+  private static final double kDriveClosedLoopRampRate = 0.2;
+  private static final double kSteerClosedLoopRampRate = 0.01;
 
   // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
   // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
@@ -64,7 +64,7 @@ public class TunerConstants {
       new TalonFXConfiguration()
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(kDriveStatorCurrent)
+                  .withStatorCurrentLimit(kDriveSlipCurrent)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(kDriveSupplyCurrent)
                   .withSupplyCurrentLimitEnable(true))
@@ -78,7 +78,7 @@ public class TunerConstants {
                   // Swerve azimuth does not require much torque output, so we can set a relatively
                   // low
                   // stator current limit to help avoid brownouts without impacting performance.
-                  .withStatorCurrentLimit(kSteerStatorCurrent)
+                  .withStatorCurrentLimit(kSteerSlipCurrent)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(kSteerSupplyCurrent)
                   .withSupplyCurrentLimitEnable(true))
@@ -136,6 +136,7 @@ public class TunerConstants {
               .withDriveMotorGains(driveGains)
               .withSteerMotorClosedLoopOutput(kSteerClosedLoopOutput)
               .withDriveMotorClosedLoopOutput(kDriveClosedLoopOutput)
+              .withSlipCurrent(kDriveSlipCurrent)
               .withSpeedAt12Volts(kSpeedAt12Volts)
               .withDriveMotorType(kDriveMotorType)
               .withSteerMotorType(kSteerMotorType)
