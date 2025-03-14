@@ -102,4 +102,8 @@ public class Camera {
 
     return VecBuilder.fill(translationStdDev, translationStdDev, rotationStdDev);
   }
+
+  public boolean isConnected() {
+    return camera.isConnected();
+  }
 }
