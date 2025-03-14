@@ -165,22 +165,6 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public void driveToRobotPose(Pose2d pose) {
-    if (pose == null) return;
-
-    ChassisSpeeds targetSpeeds =
-        new ChassisSpeeds(
-            xPoseController.calculate(getPose().getX(), pose.getX()),
-            yPoseController.calculate(getPose().getY(), pose.getY()),
-            thetaController.calculate(
-                getPose().getRotation().getRadians(), pose.getRotation().getRadians()));
-
-    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
-
-    simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, false, false);
-  }
-
-  @Override
   public void driveToFieldPose(Pose2d pose) {
     if (pose == null) return;
 
