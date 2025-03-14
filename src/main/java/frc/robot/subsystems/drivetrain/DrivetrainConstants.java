@@ -27,7 +27,7 @@ public class DrivetrainConstants {
           : new AutoGains(6.328, 0, 0); // sim
 
   public static final Constraints kTranslationConstraints =
-      RobotBase.isReal() ? new Constraints(0, 0) : new Constraints(3.8, 3);
+      RobotBase.isReal() ? new Constraints(3.8, 3) : new Constraints(3.8, 3);
 
   public static final AutoGains kHeadingGains =
       RobotBase.isReal()
@@ -35,7 +35,7 @@ public class DrivetrainConstants {
           : new AutoGains(3.14, 0, 0); // sim
 
   public static final Constraints kHeadingConstraints =
-      RobotBase.isReal() ? new Constraints(0, 0) : new Constraints(2 * Math.PI, 8);
+      RobotBase.isReal() ? new Constraints(2 * Math.PI, 8) : new Constraints(2 * Math.PI, 8);
 
   public static final AutoGains kTuneTranslationGains = new AutoGains(0, 0, 0); // isn't used
   public static final AutoGains kTuneHeadingGains =
