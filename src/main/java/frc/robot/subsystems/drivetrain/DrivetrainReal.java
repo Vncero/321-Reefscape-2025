@@ -192,22 +192,6 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons()));
   }
-  ;
-
-  @Override
-  public void driveToRobotPose(Pose2d pose) {
-    ChassisSpeeds targetSpeeds =
-        ChassisSpeeds.discretize(
-            xPoseController.calculate(getPose().getX(), pose.getX()),
-            yPoseController.calculate(getPose().getY(), pose.getY()),
-            thetaController.calculate(
-                getPose().getRotation().getRadians(), pose.getRotation().getRadians()),
-            DrivetrainConstants.kLoopDt.in(Seconds));
-
-    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
-
-    setControl(robotCentricRequest.withSpeeds(targetSpeeds));
-  }
 
   @Override
   public void driveToFieldPose(Pose2d pose) {
@@ -219,7 +203,16 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
                 getPose().getRotation().getRadians(), pose.getRotation().getRadians()),
             DrivetrainConstants.kLoopDt.in(Seconds));
 
-    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
+    final var currentPose = getPose();
+
+    if (currentPose.getTranslation().getDistance(alignmentSetpoint.getTranslation())
+        < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters))
+      targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
+
+    if (Math.abs(currentPose.getRotation().minus(alignmentSetpoint.getRotation()).getDegrees())
+        < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees))
+      targetSpeeds =
+          new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
 
     setControl(
         fieldCentricRequest

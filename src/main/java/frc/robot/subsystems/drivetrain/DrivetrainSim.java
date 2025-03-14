@@ -65,7 +65,7 @@ public class DrivetrainSim implements SwerveDrive {
 
     this.simulatedDrive =
         new SelfControlledSwerveDriveSimulationWrapper(
-            new SwerveDriveSimulation(simConfig, new Pose2d(2, 2, new Rotation2d())));
+            new SwerveDriveSimulation(simConfig, new Pose2d(2, 2, Rotation2d.kZero)));
 
     this.headingController =
         new PIDController(
@@ -160,22 +160,6 @@ public class DrivetrainSim implements SwerveDrive {
       double translationX, double translationY, double rotation, DriveFeedforwards feedforwards) {
     simulatedDrive.runChassisSpeeds(
         new ChassisSpeeds(translationX, translationY, rotation), new Translation2d(), false, false);
-  }
-
-  @Override
-  public void driveToRobotPose(Pose2d pose) {
-    if (pose == null) return;
-
-    ChassisSpeeds targetSpeeds =
-        new ChassisSpeeds(
-            xPoseController.calculate(getPose().getX(), pose.getX()),
-            yPoseController.calculate(getPose().getY(), pose.getY()),
-            thetaController.calculate(
-                getPose().getRotation().getRadians(), pose.getRotation().getRadians()));
-
-    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
-
-    simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, false, false);
   }
 
   @Override

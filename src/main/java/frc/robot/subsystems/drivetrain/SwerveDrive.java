@@ -8,7 +8,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -32,23 +32,26 @@ import java.util.function.Supplier;
 public interface SwerveDrive extends Subsystem {
 
   // driveToPose PID controllers
-  PIDController xPoseController =
-      new PIDController(
+  ProfiledPIDController xPoseController =
+      new ProfiledPIDController(
           DrivetrainConstants.kTranslationGains.kP(),
           DrivetrainConstants.kTranslationGains.kI(),
-          DrivetrainConstants.kTranslationGains.kD());
+          DrivetrainConstants.kTranslationGains.kD(),
+          DrivetrainConstants.kTranslationConstraints);
 
-  PIDController yPoseController =
-      new PIDController(
+  ProfiledPIDController yPoseController =
+      new ProfiledPIDController(
           DrivetrainConstants.kTranslationGains.kP(),
           DrivetrainConstants.kTranslationGains.kI(),
-          DrivetrainConstants.kTranslationGains.kD());
+          DrivetrainConstants.kTranslationGains.kD(),
+          DrivetrainConstants.kTranslationConstraints);
 
-  PIDController thetaController =
-      new PIDController(
+  ProfiledPIDController thetaController =
+      new ProfiledPIDController(
           DrivetrainConstants.kHeadingGains.kP(),
           DrivetrainConstants.kHeadingGains.kI(),
-          DrivetrainConstants.kHeadingGains.kD());
+          DrivetrainConstants.kHeadingGains.kD(),
+          DrivetrainConstants.kHeadingConstraints);
 
   public static SwerveDrive create() {
     return RobotBase.isReal()
@@ -149,30 +152,22 @@ public interface SwerveDrive extends Subsystem {
                 translationX.getAsDouble(), translationY.getAsDouble(), rotation.get()));
   }
 
-  // robot relative auto drive w/ external pid controllers
-  void driveToRobotPose(Pose2d pose);
-
-  default Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-              setAlignmentSetpoint(pose.get());
-            })
-        .andThen(run(() -> driveToRobotPose(pose.get())));
-  }
-
   // field relative auto drive w/ external pid controllers
   void driveToFieldPose(Pose2d pose);
 
   default Command driveToFieldPose(Supplier<Pose2d> pose) {
     return runOnce(
             () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-              setAlignmentSetpoint(pose.get());
+              ChassisSpeeds speeds =
+                  ChassisSpeeds.fromRobotRelativeSpeeds(
+                      getChassisSpeeds(), getPose().getRotation());
+
+              xPoseController.reset(getPose().getTranslation().getX(), speeds.vxMetersPerSecond);
+
+              yPoseController.reset(getPose().getTranslation().getY(), speeds.vyMetersPerSecond);
+
+              thetaController.reset(
+                  getPose().getRotation().getRadians(), speeds.omegaRadiansPerSecond);
             })
         .andThen(run(() -> driveToFieldPose(pose.get())));
   }

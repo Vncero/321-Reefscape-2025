@@ -98,13 +98,19 @@ public class CoralSuperstructure {
   }
 
   public Command tune() {
-    TunableConstant armAngle = new TunableConstant("/CoralSuperstructure/ArmAngle", 0);
-    TunableConstant height = new TunableConstant("/CoralSuperstructure/ElevatorHeight", 0);
+    TunableConstant armAngle =
+        new TunableConstant(
+            "/CoralSuperstructure/ArmAngle",
+            CoralScorerSetpoint.PREALIGN.getArmAngle().in(Degrees));
+    TunableConstant height =
+        new TunableConstant(
+            "/CoralSuperstructure/ElevatorHeight",
+            CoralScorerSetpoint.L4.getElevatorHeight().in(Meters));
 
     return arm.goToAnglePID(() -> CoralScorerSetpoint.PREALIGN.getArmAngle())
         .until(arm::atSetpoint)
         .andThen(elevator.goToHeight(() -> Meters.of(height.get())).until(elevator::atSetpoint))
-        .andThen(arm.goToAnglePID(() -> Degrees.of(armAngle.get())));
+        .andThen(arm.goToAngleProfiled(() -> Degrees.of(armAngle.get())));
   }
 
   public Elevator getElevator() {

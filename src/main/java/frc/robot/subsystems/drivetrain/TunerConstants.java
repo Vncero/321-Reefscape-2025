@@ -51,11 +51,12 @@ public class TunerConstants {
 
   // The stator current at which the wheels start to slip;
   // This needs to be tuned to your individual robot
-  private static final Current kDriveSlipCurrent = Amps.of(60.0);
+  private static final Current kDriveSlipCurrent = Amps.of(50.0);
   private static final Current kDriveSupplyCurrent = Amps.of(40.0);
   private static final Current kSteerSlipCurrent = Amps.of(40.0);
   private static final Current kSteerSupplyCurrent = Amps.of(40.0);
-  private static final double kClosedLoopRampRate = 0.2;
+  private static final double kDriveClosedLoopRampRate = 0.01;
+  private static final double kSteerClosedLoopRampRate = 0.01;
 
   // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
   // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
@@ -68,7 +69,8 @@ public class TunerConstants {
                   .withSupplyCurrentLimit(kDriveSupplyCurrent)
                   .withSupplyCurrentLimitEnable(true))
           .withClosedLoopRamps(
-              new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(kClosedLoopRampRate));
+              new ClosedLoopRampsConfigs()
+                  .withVoltageClosedLoopRampPeriod(kDriveClosedLoopRampRate));
   private static final TalonFXConfiguration steerInitialConfigs =
       new TalonFXConfiguration()
           .withCurrentLimits(
@@ -81,7 +83,8 @@ public class TunerConstants {
                   .withSupplyCurrentLimit(kSteerSupplyCurrent)
                   .withSupplyCurrentLimitEnable(true))
           .withClosedLoopRamps(
-              new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(kClosedLoopRampRate));
+              new ClosedLoopRampsConfigs()
+                  .withVoltageClosedLoopRampPeriod(kSteerClosedLoopRampRate));
   private static final CANcoderConfiguration encoderInitialConfigs = new CANcoderConfiguration();
   // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
   private static final Pigeon2Configuration pigeonConfigs = null;
