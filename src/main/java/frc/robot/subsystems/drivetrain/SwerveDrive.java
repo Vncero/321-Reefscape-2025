@@ -158,9 +158,9 @@ public interface SwerveDrive extends Subsystem {
   default Command driveToRobotPose(Supplier<Pose2d> pose) {
     return runOnce(
             () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
+              xPoseController.reset(0);
+              yPoseController.reset(0);
+              thetaController.reset(0);
               setAlignmentSetpoint(pose.get());
             })
         .andThen(run(() -> driveToRobotPose(pose.get())));

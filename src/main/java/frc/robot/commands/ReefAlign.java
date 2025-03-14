@@ -181,24 +181,6 @@ public class ReefAlign {
     return resultPose;
   }
 
-  public static Command alignToTag(SwerveDrive swerveDrive) {
-    return Commands.runOnce(() -> Leds.getInstance().isTagAligning = true)
-        .andThen(
-            () -> {
-              swerveDrive.driveToFieldPose(
-                  () -> {
-                    Pose2d target =
-                        getNearestReefPose(swerveDrive.getPose())
-                            .plus(
-                                new Transform2d(
-                                    kIntermediateDistance.in(Meters), 0, kReefAlignmentRotation));
-                    swerveDrive.setAlignmentSetpoint(target);
-                    return target;
-                  });
-            })
-        .finallyDo(() -> Leds.getInstance().isTagAligning = false);
-  }
-
   public static Command alignToReef(
       SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
     return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)

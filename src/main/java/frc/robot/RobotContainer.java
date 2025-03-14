@@ -325,23 +325,19 @@ public class RobotContainer {
         .whileTrue(
             Commands.runOnce(() -> isDriverOverride = false)
                 .andThen(
-                    ReefAlign.alignToTag(drivetrain)
-                        .until(() -> drivetrain.atPoseSetpoint())
-                        // either align to reef or coral based on how far we are away rotate to reef
-                        // until we're close enough
-                        // ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)
-                        //     .until(
-                        //         () ->
-                        //             ReefAlign.isWithinReefRange(
-                        //                     drivetrain, ReefAlign.kMechanismDeadbandThreshold)
-                        //                 // use mechanism threshold cuz we wanna be close before
-                        // aligning
-                        //                 // in this case
-                        //                 && Math.hypot(
-                        //                         driverForward.getAsDouble(),
-                        // driverStrafe.getAsDouble())
-                        //                     <= 0.05
-                        //                 && !isDriverOverride)
+                    // either align to reef or coral based on how far we are away rotate to reef
+                    // until we're close enough
+                    ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)
+                        .until(
+                            () ->
+                                ReefAlign.isWithinReefRange(
+                                        drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                    // use mechanism threshold cuz we wanna be close before aligning
+                                    // in this case
+                                    && Math.hypot(
+                                            driverForward.getAsDouble(), driverStrafe.getAsDouble())
+                                        <= 0.05
+                                    && !isDriverOverride)
                         .andThen(
                             // when we get close enough, align to reef, but only while we're
                             // close enough
