@@ -152,20 +152,6 @@ public interface SwerveDrive extends Subsystem {
                 translationX.getAsDouble(), translationY.getAsDouble(), rotation.get()));
   }
 
-  // robot relative auto drive w/ external pid controllers
-  void driveToRobotPose(Pose2d pose);
-
-  default Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset(0);
-              yPoseController.reset(0);
-              thetaController.reset(0);
-              setAlignmentSetpoint(pose.get());
-            })
-        .andThen(run(() -> driveToRobotPose(pose.get())));
-  }
-
   // field relative auto drive w/ external pid controllers
   void driveToFieldPose(Pose2d pose);
 
