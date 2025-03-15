@@ -2,10 +2,10 @@
 package frc.robot.subsystems.coralendeffector;
 
 import static edu.wpi.first.units.Units.Millimeters;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.RPM;
 
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Voltage;
 
 // list of constants for the coral end effector
 public class CoralEndEffectorConstants {
@@ -20,11 +20,14 @@ public class CoralEndEffectorConstants {
   public static final double kGearing = 1;
 
   // Setpoints
-  public static final Voltage kIntakeVoltage = Volts.of(8);
-  public static final Voltage kOuttakeVoltage = Volts.of(-2.5);
-  public static final Voltage kStallVoltage = Volts.of(1.2);
-  public static final Voltage kAlgaeKnockVoltage = Volts.of(-8);
+  public static final AngularVelocity kIntakeRPM = RPM.of(3000);
+  public static final AngularVelocity kOuttakeRPM = RPM.of(-1000);
+  public static final AngularVelocity kStallRPM = RPM.of(1000);
+  public static final AngularVelocity kAlgaeKnockRPM = RPM.of(-3000);
 
   // Tuned constants
   public static final Distance kDetectionRange = Millimeters.of(100);
+
+  // for detecting if the end effector is intaking
+  public static final AngularVelocity kRPMTolerance = RPM.of(240);
 }

@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.ReefAlign;
 import frc.robot.util.SelfControlledSwerveDriveSimulationWrapper;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -66,7 +65,7 @@ public class DrivetrainSim implements SwerveDrive {
 
     this.simulatedDrive =
         new SelfControlledSwerveDriveSimulationWrapper(
-            new SwerveDriveSimulation(simConfig, new Pose2d(2, 2, new Rotation2d())));
+            new SwerveDriveSimulation(simConfig, new Pose2d(2, 2, Rotation2d.kZero)));
 
     this.headingController =
         new PIDController(
@@ -164,33 +163,6 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  ChassisSpeeds targetSpeeds =
-                      new ChassisSpeeds(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX()),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY()),
-                          thetaController.calculate(
-                              getPose().getRotation().getRadians(),
-                              pose.get().getRotation().getRadians()));
-
-                  driveRobotCentric(
-                      targetSpeeds.vxMetersPerSecond,
-                      targetSpeeds.vyMetersPerSecond,
-                      targetSpeeds.omegaRadiansPerSecond,
-                      DriveFeedforwards.zeros(4));
-                }));
-  }
-
-  @Override
   public void driveToFieldPose(Pose2d pose) {
     if (pose == null) return;
 
@@ -202,12 +174,6 @@ public class DrivetrainSim implements SwerveDrive {
                 getPose().getRotation().getRadians(), pose.getRotation().getRadians()));
 
     if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
-
-    // if (Math.hypot(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond) < 0.1)
-    //   targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
-    // if (targetSpeeds.omegaRadiansPerSecond < 0.1)
-    //   targetSpeeds =
-    //       new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
 
     simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, true, false);
   }
@@ -294,6 +260,11 @@ public class DrivetrainSim implements SwerveDrive {
   @Override
   public Rotation2d getHeading() {
     return simulatedDrive.getDriveTrainSimulation().getGyroSimulation().getGyroReading();
+  }
+
+  @Override
+  public Pose2d getAlignmentSetpoint() {
+    return alignmentSetpoint;
   }
 
   @Override

@@ -19,7 +19,7 @@ import edu.wpi.first.units.measure.Voltage;
 @Logged
 public class CoralEndEffectorIOReal implements CoralEndEffectorIO {
 
-  public static CoralEndEffectorConfig config = new CoralEndEffectorConfig(0, 0, 0, 0);
+  public static CoralEndEffectorConfig config = new CoralEndEffectorConfig(0.00007, 0, 0, 0.0022);
 
   private SparkMax motor; // motor controlling the end effector wheels
   private TimeOfFlight
