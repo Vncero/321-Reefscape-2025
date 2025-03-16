@@ -42,7 +42,7 @@ public class ReefAlign {
   private static final Distance kLeftAlignDistance = Inches.of(-5.6);
   private static final Distance kReefDistance = Inches.of(17.5);
   private static final Distance kRightAlignDistance = Inches.of(7.3);
-  private static final Distance kIntermediateDistance = Inches.of(36);
+  private static final Distance kIntermediateDistance = Inches.of(-10);
 
   private static final Rotation2d kReefAlignmentRotation = Rotation2d.k180deg;
   private static final Transform2d kLeftAlignTransform =
@@ -194,6 +194,31 @@ public class ReefAlign {
                         case RIGHT -> rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
                         default -> swerveDrive.getPose(); // more or less a no-op
                       };
+                  swerveDrive.setAlignmentSetpoint(target);
+                  return target;
+                }))
+        .finallyDo(() -> Leds.getInstance().isReefAligning = false);
+  }
+
+  public static Command alignToPrealignReef(
+      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
+    return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)
+        .andThen(
+            swerveDrive.driveToFieldPose(
+                () -> {
+                  Pose2d target =
+                      switch (targetReefPosition.get()) {
+                        case ALGAE -> centerAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                        case LEFT -> leftAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                        case RIGHT -> rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
+                        default -> swerveDrive.getPose(); // more or less a no-op
+                      };
+
+                  target =
+                      target.plus(
+                          new Transform2d(
+                              new Translation2d(kIntermediateDistance, Meters.zero()),
+                              Rotation2d.kZero));
                   swerveDrive.setAlignmentSetpoint(target);
                   return target;
                 }))
