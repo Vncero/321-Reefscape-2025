@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.robot.subsystems.algaeIntakePivot.AlgaeIntakePivotConstants;
+import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArmConstants;
 import frc.robot.util.VirtualSubsystem;
@@ -33,21 +33,21 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
 
   Supplier<Distance> elevatorSetpoint = () -> ElevatorConstants.kElevatorMinimumHeight;
   Supplier<Angle> armSetpoint = () -> ElevatorArmConstants.kStartAngle;
-  Supplier<Angle> algaePivotSetpoint = () -> AlgaeIntakePivotConstants.kPivotStartingAngle;
+  Supplier<Angle> climbSetpoint = () -> ClimberConstants.kStartingAngle;
 
   Pose3d elevatorFirstStagePose = new Pose3d();
   Pose3d elevatorSecondStagePose = new Pose3d();
   Pose3d shoulderPose = new Pose3d();
   Pose3d elbowPose = new Pose3d();
-  Pose3d algaeIntakePose = new Pose3d();
+  Pose3d climbPose = new Pose3d();
 
   public SuperstructureVisualizer(
       Supplier<Distance> elevatorSetpoint,
       Supplier<Angle> armSetpoint,
-      Supplier<Angle> algaeIntakeSetpoint) {
+      Supplier<Angle> climbSetpoint) {
     this.elevatorSetpoint = elevatorSetpoint;
     this.armSetpoint = armSetpoint;
-    this.algaePivotSetpoint = algaeIntakeSetpoint;
+    this.climbSetpoint = climbSetpoint;
 
     this.mechanism = new Mechanism2d(Inches.of(29).in(Meters), Inches.of(80).in(Meters));
 
@@ -75,10 +75,7 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
                 4.0,
                 new Color8Bit(Color.kFirstRed)));
 
-    this.algaeIntakePose =
-        new Pose3d(
-            VisualizerConstants.algaeRoot3d,
-            new Rotation3d(0, AlgaeIntakePivotConstants.kPivotStartingAngle.in(Radians), 0));
+    this.climbPose = new Pose3d(VisualizerConstants.climbRoot3d, new Rotation3d(0, 0, 0));
   }
 
   public void update() {
@@ -114,10 +111,10 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
                 new Translation3d(0, ElevatorArmConstants.kElevatorArmLength.in(Meters), 0),
                 new Rotation3d()));
 
-    this.algaeIntakePose =
+    this.climbPose =
         new Pose3d(
-            VisualizerConstants.algaeRoot3d,
-            new Rotation3d(-algaePivotSetpoint.get().in(Radians), 0, 0));
+            VisualizerConstants.climbRoot3d,
+            new Rotation3d(-climbSetpoint.get().in(Radians), 0, 0));
   }
 
   @Logged(name = "ElevatorFirstStage")
@@ -142,14 +139,12 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
 
   @Logged(name = "AlgaeIntakePose")
   public Pose3d getWristPose() {
-    return algaeIntakePose;
+    return climbPose;
   }
 
   @Logged(name = "AllComponentPoses")
   public Pose3d[] getAllPoses() {
-    return new Pose3d[] {
-      elevatorFirstStagePose, elevatorSecondStagePose, shoulderPose, algaeIntakePose
-    };
+    return new Pose3d[] {elevatorFirstStagePose, elevatorSecondStagePose, shoulderPose, climbPose};
   }
 
   @Logged(name = "ElevatorSetpoint")
@@ -164,7 +159,7 @@ public class SuperstructureVisualizer extends VirtualSubsystem {
 
   @Logged(name = "AlgaeIntakeSetpoint")
   public double getAlgaeIntakeSetpoint() {
-    return algaePivotSetpoint.get().in(Degrees);
+    return climbSetpoint.get().in(Degrees);
   }
 
   @Override
