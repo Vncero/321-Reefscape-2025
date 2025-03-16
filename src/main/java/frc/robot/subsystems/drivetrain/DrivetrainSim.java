@@ -168,12 +168,24 @@ public class DrivetrainSim implements SwerveDrive {
 
     ChassisSpeeds targetSpeeds =
         new ChassisSpeeds(
-            xPoseController.calculate(getPose().getX(), pose.getX()),
-            yPoseController.calculate(getPose().getY(), pose.getY()),
+            xPoseController.calculate(getPose().getX(), pose.getX())
+                + xPoseController.getSetpoint().velocity,
+            yPoseController.calculate(getPose().getY(), pose.getY())
+                + yPoseController.getSetpoint().velocity,
             thetaController.calculate(
-                getPose().getRotation().getRadians(), pose.getRotation().getRadians()));
+                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                + thetaController.getSetpoint().velocity);
 
-    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
+    final Pose2d currentPose = getPose();
+
+    if (currentPose.getTranslation().getDistance(alignmentSetpoint.getTranslation())
+        < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters))
+      targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
+
+    if (Math.abs(currentPose.getRotation().minus(alignmentSetpoint.getRotation()).getDegrees())
+        < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees))
+      targetSpeeds =
+          new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
 
     simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, true, false);
   }

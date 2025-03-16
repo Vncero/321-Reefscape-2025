@@ -2,18 +2,20 @@
 package frc.robot.auto;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.ReefAlign;
 import frc.robot.commands.StationAlign;
@@ -29,6 +31,8 @@ import org.json.simple.parser.ParseException;
 @Logged
 public class AutomaticAutonomousMaker3000 {
 
+  private static final LinearVelocity kScorePathEndVelocity = MetersPerSecond.of(1.5);
+
   private CycleAutoChooser autoChooser = new CycleAutoChooser(5);
 
   private Field2d field = new Field2d();
@@ -40,19 +44,21 @@ public class AutomaticAutonomousMaker3000 {
       new CycleAutoConfig(
           StartingPosition.TOP,
           List.of(
-              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFR1, Pole.RIGHTPOLE, Level.L4),
-              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.RIGHTPOLE, Level.L4)));
+                  FeedLocation.UPCORALRIGHT, ReefSide.REEFR1, Pole.RIGHTPOLE, Level.L4),
+              new ScoringGroup(FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4),
+              new ScoringGroup(
+                  FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneTopAuto =
       new CycleAutoConfig(
           StartingPosition.MIDDLE,
           List.of(
-              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4),
-              new ScoringGroup(FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4),
               new ScoringGroup(
-                  FeedLocation.UPCORALLEFT, ReefSide.REEFL1, Pole.RIGHTPOLE, Level.L4)));
+                  FeedLocation.UPCORALRIGHT, ReefSide.REEFR2, Pole.RIGHTPOLE, Level.L4),
+              new ScoringGroup(FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.LEFTPOLE, Level.L4),
+              new ScoringGroup(
+                  FeedLocation.UPCORALRIGHT, ReefSide.REEFL1, Pole.RIGHTPOLE, Level.L4)));
 
   private static CycleAutoConfig kMidLaneBotAuto =
       new CycleAutoConfig(
@@ -226,6 +232,18 @@ public class AutomaticAutonomousMaker3000 {
                       + " to "
                       + config.scoringGroup.get(i).reefSide.pathID);
 
+          PathPlannerPath scorePathNewGoalEndState =
+              new PathPlannerPath(
+                  scorePath.getWaypoints(),
+                  scorePath.getRotationTargets(),
+                  scorePath.getPointTowardsZones(),
+                  scorePath.getConstraintZones(),
+                  scorePath.getEventMarkers(),
+                  scorePath.getGlobalConstraints(),
+                  scorePath.getIdealStartingState(),
+                  new GoalEndState(kScorePathEndVelocity, scorePath.getGoalEndState().rotation()),
+                  scorePath.isReversed());
+
           auto =
               auto.andThen(
                       withIntaking(
@@ -233,7 +251,7 @@ public class AutomaticAutonomousMaker3000 {
                           config.scoringGroup.get(i).feedLocation))
                   .andThen(
                       withScoring(
-                          toPathCommand(scorePath).asProxy(),
+                          toPathCommand(scorePathNewGoalEndState).asProxy(),
                           config.scoringGroup.get(i).pole,
                           config.scoringGroup.get(i).level));
           lastReefSide = config.scoringGroup.get(i).reefSide;
@@ -258,17 +276,14 @@ public class AutomaticAutonomousMaker3000 {
           case UPCORALRIGHT, DOWNCORALRIGHT -> StationAlign.goToNearestRightAlign(drive);
         };
 
-    return path.deadlineFor(
-            coralSuperstructure
-                .goToSetpointPID(
-                    () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                    () -> CoralScorerSetpoint.NEUTRAL.getArmAngle())
-                .asProxy())
-        .andThen(
-            pathCmd
-                .asProxy()
-                .alongWith(coralSuperstructure.feedCoral().asProxy())
-                .until(() -> coralSuperstructure.hasCoral()));
+    return path.andThen(
+        pathCmd
+            .asProxy()
+            .withDeadline(
+                coralSuperstructure
+                    .feedCoral()
+                    .asProxy()
+                    .until(() -> coralSuperstructure.hasCoral())));
   }
 
   public Command withScoring(Command path, Pole pole, Level level) {
@@ -316,18 +331,7 @@ public class AutomaticAutonomousMaker3000 {
                                 .outtakeCoral()
                                 .asProxy()
                                 // .until(() -> !coralSuperstructure.hasCoral())
-                                .withTimeout(0.5))))
-        .finallyDo(
-            () -> {
-              // yucky. This is to prevent us from smashing into reef
-              CommandScheduler.getInstance()
-                  .schedule(
-                      coralSuperstructure
-                          .goToSetpointPID(
-                              () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                              () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                          .asProxy());
-            });
+                                .withTimeout(0.5))));
   }
 
   private Command toPathCommand(PathPlannerPath path, boolean zero) {

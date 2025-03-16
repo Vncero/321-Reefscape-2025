@@ -197,10 +197,13 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
   public void driveToFieldPose(Pose2d pose) {
     ChassisSpeeds targetSpeeds =
         ChassisSpeeds.discretize(
-            xPoseController.calculate(getPose().getX(), pose.getX()),
-            yPoseController.calculate(getPose().getY(), pose.getY()),
+            xPoseController.calculate(getPose().getX(), pose.getX())
+                + xPoseController.getSetpoint().velocity,
+            yPoseController.calculate(getPose().getY(), pose.getY())
+                + yPoseController.getSetpoint().velocity,
             thetaController.calculate(
-                getPose().getRotation().getRadians(), pose.getRotation().getRadians()),
+                getPose().getRotation().getRadians(),
+                pose.getRotation().getRadians() + thetaController.getSetpoint().velocity),
             DrivetrainConstants.kLoopDt.in(Seconds));
 
     final var currentPose = getPose();
