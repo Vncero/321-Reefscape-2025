@@ -50,7 +50,7 @@ public class RobotContainer {
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
 
-  private Climber climber = Climber.disable();
+  private Climber climber = Climber.create();
 
   private CoralSuperstructure coralSuperstructure =
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
@@ -114,7 +114,7 @@ public class RobotContainer {
 
   private SuperstructureVisualizer stateVisualizer =
       new SuperstructureVisualizer(
-          () -> elevator.getHeight(), () -> elevatorArm.getAngle(), () -> algaePivot.getAngle());
+          () -> elevator.getHeight(), () -> elevatorArm.getAngle(), () -> climber.getAngle());
 
   private Leds leds = Leds.getInstance();
   private AddressableLEDSim ledSim = new AddressableLEDSim(leds.strip);
@@ -244,14 +244,14 @@ public class RobotContainer {
     // driver.a().whileTrue(elevatorArm.tune());
 
     // find arm setpoints
-    driver.y().whileTrue(coralSuperstructure.tune());
-    driver.leftBumper().whileTrue(coralSuperstructure.feedCoral());
-    driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
+    // driver.y().whileTrue(coralSuperstructure.tune());
+    // driver.leftBumper().whileTrue(coralSuperstructure.feedCoral());
+    // driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
 
     // alignment testing (no arm)
     // driver.a().whileTrue(ReefAlign.rotateToNearestReefTag(drivetrain, driverForward,
     // driverStrafe));
-    driver.b().whileTrue(ReefAlign.alignToReef(drivetrain, () -> ReefPosition.RIGHT));
+    // driver.b().whileTrue(ReefAlign.alignToReef(drivetrain, () -> ReefPosition.RIGHT));
 
     // test algae intake
     // driver.b().whileTrue(algaeSuperstructure.intakeAlgae());
@@ -297,10 +297,8 @@ public class RobotContainer {
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
-    driver.y().toggleOnTrue(algaeSuperstructure.prepareClimb());
-    // driver.a().onTrue(algaeSuperstructure.climb());
-
-    driver.y().whileTrue(coralSuperstructure.feedCoral());
+    driver.y().toggleOnTrue(climber.goToAngle(() -> ClimberConstants.kClimbPrepAngle));
+    driver.a().onTrue(climber.climb());
 
     // --- CORAL AUTOMATED CONTROLS ---
 

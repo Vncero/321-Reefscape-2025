@@ -1,8 +1,8 @@
 {
     "name": "321Robot",
     "rotations": [
-        {"axis" : "x", "degrees": 90},
-        {"axis" : "z", "degrees": 270},
+        {"axis" : "x", "degrees": 0},
+        {"axis" : "z", "degrees": -90},
         {"axis" : "y", "degrees": 0}
     ],
     "position": [-0.156, 0.216, -0.105],
@@ -58,35 +58,35 @@
     "components": [
         {
             "zeroedRotations": [
-                {"axis" : "x", "degrees": 90},
-                {"axis" : "z", "degrees": 270},
+                {"axis" : "x", "degrees": 0},
+                {"axis" : "z", "degrees": -90},
                 {"axis" : "y", "degrees": 0}
             ],
-            "zeroedPosition": [-0.156, 0.215, -0.110]
+            "zeroedPosition": [-0.156, 0.215, -0.10]
         },
         {
             "zeroedRotations": [
-                {"axis" : "x", "degrees": 90},
-                {"axis" : "z", "degrees": 270},
-                {"axis" : "y", "degrees": 0}
+                {"axis" : "x", "degrees": 0},
+                {"axis" : "z", "degrees": -90},
+                {"axis" : "y", "degrees": 0}	
             ],
             "zeroedPosition": [-0.156, 0.215, -0.104]
         },
         {
             "zeroedRotations": [
-                {"axis" : "x", "degrees": 90},
-                {"axis" : "z", "degrees": 270},
+                {"axis" : "x", "degrees": 0},
+                {"axis" : "z", "degrees": -90},
                 {"axis" : "y", "degrees": 0}
             ],
-            "zeroedPosition": [-0.23, 0.31, -0.97]
-        },
+            "zeroedPosition": [-0.23, 0.20, -0.97]
+        }, 
         {
             "zeroedRotations": [
-                {"axis" : "x", "degrees": 90},
-                {"axis" : "z", "degrees": 270},
-                {"axis" : "y", "degrees": 0}
+                {"axis" : "x", "degrees": 0},
+                {"axis" : "z", "degrees": -90},
+                {"axis" : "y", "degrees": -90}
             ],
-            "zeroedPosition": [-0.156, -0.1127, -0.32]
+            "zeroedPosition": [-0.26, -0.1, -0.5579872]
         }
     ]
 }

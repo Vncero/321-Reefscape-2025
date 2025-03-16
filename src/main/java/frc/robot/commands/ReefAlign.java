@@ -39,9 +39,9 @@ public class ReefAlign {
   public static final Map<Integer, Pose2d> centerAlignPoses = new HashMap<>();
   public static final Map<Integer, Pose2d> rightAlignPoses = new HashMap<>();
 
-  private static final Distance kLeftAlignDistance = Inches.of(-9.65);
+  private static final Distance kLeftAlignDistance = Inches.of(-5.6);
   private static final Distance kReefDistance = Inches.of(17.5);
-  private static final Distance kRightAlignDistance = Inches.of(3.35);
+  private static final Distance kRightAlignDistance = Inches.of(7.3);
   private static final Distance kIntermediateDistance = Inches.of(36);
 
   private static final Rotation2d kReefAlignmentRotation = Rotation2d.k180deg;
