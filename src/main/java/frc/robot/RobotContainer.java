@@ -145,7 +145,7 @@ public class RobotContainer {
               elevatorArm.getAngle(),
               coralSuperstructure.getTargetAngle(),
               drivetrain.getPose(),
-              drivetrain.getAlignmentSetpoint());
+              drivetrain.getAlignmentSetpoint().pose());
 
   public RobotContainer() {
 
@@ -401,10 +401,7 @@ public class RobotContainer {
                                                     .getElevatorHeight()
                                                     .in(Meters))),
                                     () -> queuedSetpoint.getArmAngle())
-                                .until(
-                                    drivetrain
-                                        ::atPoseSetpoint) // TODO: this is getting skipped due to
-                                // pose setpoint triggering before
+                                .until(drivetrain::atFinalPoseSetpoint)
                                 .andThen(
                                     coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
                                 .onlyWhile(
