@@ -142,7 +142,7 @@ public class RobotContainer {
               elevatorArm.getAngle(),
               coralSuperstructure.getTargetAngle(),
               drivetrain.getPose(),
-              drivetrain.getAlignmentSetpoint());
+              drivetrain.getAlignmentSetpoint().pose());
 
   public RobotContainer() {
 
@@ -400,7 +400,7 @@ public class RobotContainer {
                                     () ->
                                         ReefAlign.isWithinReefRange(
                                             drivetrain, ReefAlign.kMechanismDeadbandThreshold))
-                                .until(drivetrain::atPoseSetpoint)
+                                .until(drivetrain::atFinalPoseSetpoint)
                                 .andThen(
                                     coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
                                 .onlyWhile(
