@@ -24,8 +24,8 @@ public class ClimberConstants {
   public static final double kClimbMOI = 0.1;
   public static final Angle kStartingAngle = Degrees.of(-90);
   public static final Distance kClimbLength = Inches.of(0.6);
-  public static final Angle kClimbMinAngle = Degrees.of(-180);
-  public static final Angle kClimbMaxAngle = Degrees.of(180);
+  public static final Angle kClimbMinAngle = Degrees.of(-12000); // freely rotating climber
+  public static final Angle kClimbMaxAngle = Degrees.of(12000);
   public static final Angle kClimbPrepAngle = Degrees.of(180);
   public static final Angle kDefaultAngle = Degrees.of(-90);
 

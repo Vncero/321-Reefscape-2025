@@ -75,7 +75,8 @@ public class ClimberIOSpark implements ClimberIO {
     double rawAngle = climbMotor.getEncoder().getPosition();
 
     // Update inputs with the modulus-adjusted angle
-    inputs.climbAngle = Radians.of((MathUtil.angleModulus(Math.toRadians(rawAngle))));
+    inputs.climbAngle =
+        Radians.of((MathUtil.inputModulus(Math.toRadians(rawAngle), 0, 2 * Math.PI)));
     inputs.climbVelocity = DegreesPerSecond.of(climbMotor.getEncoder().getVelocity());
     inputs.climbCurrent = Amps.of(climbMotor.getOutputCurrent());
     inputs.limitSwitchHit = homingLimitSwitch.get();
