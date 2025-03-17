@@ -52,7 +52,7 @@ public class RobotContainer {
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
 
-  private Climber climber = Climber.create();
+  private Climber climber = Climber.disable();
 
   private CoralSuperstructure coralSuperstructure =
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
@@ -345,7 +345,7 @@ public class RobotContainer {
                                     // in this case
                                     && Math.hypot(
                                             driverForward.getAsDouble(), driverStrafe.getAsDouble())
-                                        <= 0.05
+                                        <= 0.075
                                     && !isDriverOverride)
                         .andThen(
                             // when we get close enough, align to reef, but only while we're
@@ -372,7 +372,7 @@ public class RobotContainer {
                                             && Math.hypot(
                                                     driverForward.getAsDouble(),
                                                     driverStrafe.getAsDouble())
-                                                <= 0.05
+                                                <= 0.075
                                             &&
                                             // allow driver control to be taken back when
                                             // driverOverride becomes true
@@ -457,17 +457,19 @@ public class RobotContainer {
         .leftTrigger()
         .and(isCoralSetpoint)
         .whileTrue(
-            coralSuperstructure
-                .goToSetpointPID(
-                    // move arm up to avoid hitting reef until we get close to reef
-                    () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                    () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                .until(
-                    () ->
-                        coralSuperstructure
-                            .getElevator()
-                            .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight()))
-                .andThen(coralSuperstructure.goToSetpointPID(() -> queuedSetpoint))
+            // coralSuperstructure
+            //     .goToSetpointPID(
+            //         // move arm up to avoid hitting reef until we get close to reef
+            //         () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+            //         () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
+            //     .until(
+            //         () ->
+            //             coralSuperstructure
+            //                 .getElevator()
+            //                 .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight()))
+            //     .andThen(
+            coralSuperstructure.goToSetpointPID(() -> queuedSetpoint)
+            // )
             // and only do this while we're in the zone (when we're not, we will
             // stay in the pre-alignment position)
             );
@@ -682,7 +684,7 @@ public class RobotContainer {
                   queuedSetpoint = CoralScorerSetpoint.ALGAE_HIGH;
                 }));
 
-    new Trigger(() -> manipulator.getPOV() == 90)
+    new Trigger(() -> manipulator.getPOV() == 0)
         .onTrue(
             Commands.runOnce(
                 () -> {
