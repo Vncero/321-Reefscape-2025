@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
-// coral end effector subsystem
+// coral end effector subsystem (now a coral / algae end effector mechanism)
 @Logged
 public class CoralEndEffector extends SubsystemBase {
   private CoralEndEffectorInputs inputs;
@@ -69,12 +69,20 @@ public class CoralEndEffector extends SubsystemBase {
 
   // shortcut to intake coral
   public Command intakeCoral() {
-    return runAtVelocity(() -> CoralEndEffectorConstants.kIntakeRPM);
+    return runAtVelocity(() -> CoralEndEffectorConstants.kCoralIntakeRPM);
   }
 
   // shortcut to outtake coral
   public Command outtakeCoral() {
-    return runAtVelocity(() -> CoralEndEffectorConstants.kOuttakeRPM);
+    return runAtVelocity(() -> CoralEndEffectorConstants.kCoralOuttakeRPM);
+  }
+
+  public Command intakeAlgae() {
+    return runAtVelocity(() -> CoralEndEffectorConstants.kAlgaeIntakeRPM);
+  }
+
+  public Command outtakeAlgae() {
+    return runAtVelocity(() -> CoralEndEffectorConstants.kAlgaeOuttakeRPM);
   }
 
   public Command runVolts(Supplier<Voltage> voltage) {
@@ -85,22 +93,28 @@ public class CoralEndEffector extends SubsystemBase {
     return inputs.hasCoral;
   }
 
+  public boolean hasAlgae() {
+    return inputs.hasAlgae;
+  }
+
   public boolean isIntaking() {
     return inputs.velocity.isNear(
-        CoralEndEffectorConstants.kIntakeRPM, CoralEndEffectorConstants.kRPMTolerance);
+        CoralEndEffectorConstants.kCoralIntakeRPM, CoralEndEffectorConstants.kRPMTolerance);
   }
 
   public boolean isOuttaking() {
     return inputs.velocity.isNear(
-        CoralEndEffectorConstants.kOuttakeRPM, CoralEndEffectorConstants.kRPMTolerance);
+        CoralEndEffectorConstants.kCoralOuttakeRPM, CoralEndEffectorConstants.kRPMTolerance);
   }
 
   // stalls coral if we have a coral; this should be the default command
-  public Command stallCoralIfDetected() {
+  public Command stallCoralOrAlgaeIfDetected() {
     return runAtVelocity(
         () -> {
           if (hasCoral()) {
-            return CoralEndEffectorConstants.kStallRPM;
+            return CoralEndEffectorConstants.kCoralStallRPM;
+          } else if (hasAlgae()) {
+            return CoralEndEffectorConstants.kAlgaeStallRPM;
           }
           return RPM.of(0);
         });
