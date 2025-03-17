@@ -16,6 +16,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -112,7 +114,7 @@ public interface SwerveDrive extends Subsystem {
     return MyAlliance.isRed() ? rotation.plus(Rotation2d.k180deg) : rotation;
   }
 
-  void setAlignmentSetpoint(Pose2d setpoint);
+  void setAlignmentSetpoint(AlignmentSetpoint setpoint);
 
   /**
    * Checks whether the translation components and rotation are within 1e-9, the WPILib default
@@ -120,7 +122,18 @@ public interface SwerveDrive extends Subsystem {
    *
    * @return whether the SwerveDrive is at the target alignment pose
    */
-  boolean atPoseSetpoint();
+  boolean atPoseSetpoint(Distance translationTolerance, Angle rotationTolerance);
+
+  default boolean atPoseSetpoint() {
+    return atPoseSetpoint(
+        DrivetrainConstants.kAlignmentSetpointTranslationTolerance,
+        DrivetrainConstants.kAlignmentSetpointRotationTolerance);
+  }
+
+  default boolean atFinalPoseSetpoint() {
+    if (!getAlignmentSetpoint().isFinalSetpoint()) return false;
+    return atPoseSetpoint();
+  }
 
   Command teleopDrive(
       DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier rotation);
@@ -155,7 +168,7 @@ public interface SwerveDrive extends Subsystem {
   // field relative auto drive w/ external pid controllers
   void driveToFieldPose(Pose2d pose);
 
-  default Command driveToFieldPose(Supplier<Pose2d> pose) {
+  default Command driveToFieldPose(Supplier<AlignmentSetpoint> pose) {
     return runOnce(
             () -> {
               ChassisSpeeds speeds =
@@ -169,7 +182,12 @@ public interface SwerveDrive extends Subsystem {
               thetaController.reset(
                   getPose().getRotation().getRadians(), speeds.omegaRadiansPerSecond);
             })
-        .andThen(run(() -> driveToFieldPose(pose.get())));
+        .andThen(
+            run(
+                () -> {
+                  setAlignmentSetpoint(pose.get());
+                  driveToFieldPose(pose.get().pose);
+                }));
   }
 
   void resetPose(Pose2d pose);
@@ -190,7 +208,7 @@ public interface SwerveDrive extends Subsystem {
 
   Rotation2d getHeading();
 
-  Pose2d getAlignmentSetpoint();
+  AlignmentSetpoint getAlignmentSetpoint();
 
   /**
    * Add vision measurement to the main Swerve Drive pose estimator
@@ -222,4 +240,7 @@ public interface SwerveDrive extends Subsystem {
    */
   void addReefVisionMeasurement(
       Pose2d visionRobotPose, double timeStampSeconds, Matrix<N3, N1> standardDeviations);
+
+  @Logged
+  public record AlignmentSetpoint(Pose2d pose, boolean isFinalSetpoint) {}
 }

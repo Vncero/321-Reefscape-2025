@@ -138,11 +138,11 @@ public class RobotContainer {
       () ->
           leds.calculateProgressBar(
               elevator.getHeight(),
-              coralSuperstructure.getTargetState().getElevatorHeight(),
+              coralSuperstructure.getTargetHeight(),
               elevatorArm.getAngle(),
-              coralSuperstructure.getTargetState().getArmAngle(),
+              coralSuperstructure.getTargetAngle(),
               drivetrain.getPose(),
-              drivetrain.getAlignmentSetpoint());
+              drivetrain.getAlignmentSetpoint().pose());
 
   public RobotContainer() {
 
@@ -164,7 +164,7 @@ public class RobotContainer {
     elevator.setDefaultCommand(
         elevator.goToHeight(() -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight()));
     elevatorArm.setDefaultCommand(
-        elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.PREALIGN.getArmAngle()));
+        elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.NEUTRAL.getArmAngle()));
 
     coralEndEffector.setDefaultCommand(coralEndEffector.stallCoralIfDetected());
 
@@ -344,7 +344,21 @@ public class RobotContainer {
                         .andThen(
                             // when we get close enough, align to reef, but only while we're
                             // close enough
-                            ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
+                            Commands.sequence(
+                                    ReefAlign.alignToPrealignReef(
+                                            drivetrain, () -> queuedReefPosition)
+                                        .onlyWhile(
+                                            () ->
+                                                coralSuperstructure
+                                                        .getTargetHeight()
+                                                        .isEquivalent(
+                                                            CoralScorerSetpoint.NEUTRAL
+                                                                .getElevatorHeight())
+                                                    && coralSuperstructure
+                                                        .getTargetAngle()
+                                                        .isEquivalent(
+                                                            queuedSetpoint.getArmAngle())),
+                                    ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition))
                                 .onlyWhile(
                                     () ->
                                         ReefAlign.isWithinReefRange(
@@ -363,11 +377,14 @@ public class RobotContainer {
                     coralSuperstructure
                         .goToSetpointPID(
                             () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                        .onlyWhile(
+                            () -> queuedSetpoint.getArmAngle())
+                        .until(
                             () ->
-                                !ReefAlign.isWithinReefRange(
-                                    drivetrain, ReefAlign.kMechanismDeadbandThreshold))
+                                ReefAlign.isWithinReefRange(
+                                        drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                    && coralSuperstructure.atTargetState(
+                                        CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                                        queuedSetpoint.getArmAngle()))
                         .andThen(
                             coralSuperstructure
                                 .goToSetpointProfiled(
@@ -383,7 +400,7 @@ public class RobotContainer {
                                     () ->
                                         ReefAlign.isWithinReefRange(
                                             drivetrain, ReefAlign.kMechanismDeadbandThreshold))
-                                .until(drivetrain::atPoseSetpoint)
+                                .until(drivetrain::atFinalPoseSetpoint)
                                 .andThen(
                                     coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
                                 .onlyWhile(
@@ -418,8 +435,10 @@ public class RobotContainer {
                         .until(
                             () ->
                                 coralSuperstructure
-                                    .getElevator()
-                                    .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight()))
+                                        .getElevator()
+                                        .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight())
+                                    && !ReefAlign.isWithinReefRange(
+                                        drivetrain, ReefAlign.kMechanismDeadbandThreshold))
                         .onlyIf(
                             () ->
                                 !coralSuperstructure
@@ -441,19 +460,7 @@ public class RobotContainer {
                         coralSuperstructure
                             .getElevator()
                             .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight()))
-                .andThen(
-                    // move the elevator up but keep arm up
-                    coralSuperstructure
-                        .goToSetpointPID(
-                            () -> queuedSetpoint.getElevatorHeight(),
-                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                        .until(
-                            () ->
-                                coralSuperstructure
-                                    .getElevator()
-                                    .atHeight(queuedSetpoint.getElevatorHeight()))
-                        // then move arm down to setpoint
-                        .andThen(coralSuperstructure.goToSetpointPID(() -> queuedSetpoint)))
+                .andThen(coralSuperstructure.goToSetpointPID(() -> queuedSetpoint))
             // and only do this while we're in the zone (when we're not, we will
             // stay in the pre-alignment position)
             );

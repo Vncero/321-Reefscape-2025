@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,13 +19,15 @@ import frc.robot.subsystems.elevatorarm.ElevatorArm;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
+@Logged
 public class CoralSuperstructure {
 
-  private Elevator elevator;
-  private ElevatorArm arm;
-  private CoralEndEffector endEffector;
+  @NotLogged private Elevator elevator;
+  @NotLogged private ElevatorArm arm;
+  @NotLogged private CoralEndEffector endEffector;
 
-  private CoralScorerSetpoint targetState = CoralScorerSetpoint.FEED_CORAL;
+  private Distance targetHeight = CoralScorerSetpoint.NEUTRAL.getElevatorHeight();
+  private Angle targetAngle = CoralScorerSetpoint.NEUTRAL.getArmAngle();
 
   public CoralSuperstructure(Elevator elevator, ElevatorArm arm, CoralEndEffector endEffector) {
     this.elevator = elevator;
@@ -34,25 +38,37 @@ public class CoralSuperstructure {
   // moves the entire elevator+arm superstructure to a desired state; this should be the go-to way
   // of moving the superstructure, aside from the default subsystem commands
   public Command goToSetpointPID(Supplier<CoralScorerSetpoint> setpoint) {
-    return Commands.runOnce(() -> targetState = setpoint.get())
-        .andThen(
-            goToSetpointPID(
-                () -> setpoint.get().getElevatorHeight(), () -> setpoint.get().getArmAngle()));
+    return goToSetpointPID(
+        () -> setpoint.get().getElevatorHeight(), () -> setpoint.get().getArmAngle());
   }
 
   public Command goToSetpointPID(Supplier<Distance> height, Supplier<Angle> angle) {
-    return elevator.goToHeight(() -> height.get()).alongWith(arm.goToAnglePID(() -> angle.get()));
+    return elevator
+        .goToHeight(() -> height.get())
+        .alongWith(arm.goToAnglePID(() -> angle.get()))
+        .deadlineFor(
+            Commands.run(
+                () -> {
+                  targetHeight = height.get();
+                  targetAngle = angle.get();
+                }));
   }
 
   public Command goToSetpointProfiled(Supplier<CoralScorerSetpoint> setpoint) {
-    return Commands.runOnce(() -> targetState = setpoint.get())
-        .andThen(
-            goToSetpointProfiled(
-                () -> setpoint.get().getElevatorHeight(), () -> setpoint.get().getArmAngle()));
+    return goToSetpointProfiled(
+        () -> setpoint.get().getElevatorHeight(), () -> setpoint.get().getArmAngle());
   }
 
   public Command goToSetpointProfiled(Supplier<Distance> height, Supplier<Angle> angle) {
-    return elevator.goToHeight(height).alongWith(arm.goToAngleProfiled(() -> angle.get()));
+    return elevator
+        .goToHeight(height)
+        .alongWith(arm.goToAngleProfiled(() -> angle.get()))
+        .deadlineFor(
+            Commands.run(
+                () -> {
+                  targetHeight = height.get();
+                  targetAngle = angle.get();
+                }));
   }
 
   public void goToSetpoint(CoralScorerSetpoint setpoint) {
@@ -89,8 +105,12 @@ public class CoralSuperstructure {
     return endEffector.runAtVelocity(() -> CoralEndEffectorConstants.kAlgaeKnockRPM);
   }
 
-  public CoralScorerSetpoint getTargetState() {
-    return targetState;
+  public Distance getTargetHeight() {
+    return targetHeight;
+  }
+
+  public Angle getTargetAngle() {
+    return targetAngle;
   }
 
   public boolean hasCoral() {
