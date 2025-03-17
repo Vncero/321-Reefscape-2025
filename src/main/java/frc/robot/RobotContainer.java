@@ -321,6 +321,7 @@ public class RobotContainer {
                 .alongWith(
                     coralSuperstructure
                         .feedCoral()
+                        .asProxy()
                         .until(() -> coralEndEffector.hasCoral())
                         .andThen(
                             ControllerCommands.rumbleController(
