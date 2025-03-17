@@ -139,6 +139,9 @@ public class VisionConstants {
   // camera data filtering
   public static final Distance kAllowedFieldDistance =
       Meters.of(2.5); // allow field estimates 2.5 meters outside field
+  public static final Distance kAllowedFieldHeight =
+      Meters.of(0.75); // Vision estimates can be at maximum 0.75 meters off the floor before being
+  // rejected
   public static final Rectangle2d kAllowedFieldArea =
       new Rectangle2d(
           new Translation2d(-kAllowedFieldDistance.in(Meters), -kAllowedFieldDistance.in(Meters)),
