@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
@@ -71,8 +70,7 @@ public class ClimberIOSim implements ClimberIO {
 
   public void updateInputs(ClimberInputs inputs) { // gets info to update inputs
     climbSim.update(0.02);
-    inputs.climbAngle =
-        Radians.of((MathUtil.inputModulus(climbSim.getAngleRads(), 0, 2 * Math.PI)));
+    inputs.climbAngle = Radians.of(climbSim.getAngleRads());
     inputs.climbVelocity = RadiansPerSecond.of(climbSim.getVelocityRadPerSec());
     inputs.climbCurrent = Amps.of(climbSim.getCurrentDrawAmps());
     inputs.limitSwitchHit = SmartDashboard.getBoolean("/SimInputs/Climber/LimitSwitchHit", false);

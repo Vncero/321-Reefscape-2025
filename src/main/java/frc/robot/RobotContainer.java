@@ -52,7 +52,7 @@ public class RobotContainer {
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
 
-  private Climber climber = Climber.disable();
+  private Climber climber = Climber.create();
 
   private CoralSuperstructure coralSuperstructure =
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
@@ -199,6 +199,14 @@ public class RobotContainer {
   private double volts = 0;
 
   private void configureTuningBindings() {
+    driver.a().whileTrue(coralSuperstructure.tune());
+    driver.b().whileTrue(coralSuperstructure.feedCoral());
+    driver.leftBumper().whileTrue(coralEndEffector.intakeCoral());
+
+    // driver.a().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-2000)));
+    // driver.b().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-3000)));
+    // driver.x().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-4000)));
+    // driver.y().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-5000)));
 
     // driver.a().whileTrue(climber.tune());
 

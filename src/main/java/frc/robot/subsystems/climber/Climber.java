@@ -3,7 +3,6 @@ package frc.robot.subsystems.climber;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
@@ -44,7 +43,6 @@ public class Climber extends SubsystemBase {
     feedForward = new ArmFeedforward(0, config.kG(), 0);
 
     climbController.setTolerance(ClimberConstants.kControllerTolerance.in(Degrees));
-    climbController.enableContinuousInput(-180, 180);
     io.resetEncoder(ClimberConstants.kStartingAngle);
   }
 
@@ -134,9 +132,9 @@ public class Climber extends SubsystemBase {
         () -> {
           Voltage desiredVoltage =
               Volts.of(
-                  feedForward.calculate(desiredAngle.get().in(Radians), 0)
-                      + climbController.calculate(
-                          inputs.climbAngle.in(Degrees), desiredAngle.get().in(Degrees)));
+                  // feedForward.calculate(desiredAngle.get().in(Radians), 0)
+                  climbController.calculate(
+                      inputs.climbAngle.in(Degrees), desiredAngle.get().in(Degrees)));
 
           io.setLockServoAngle(
               ClimberConstants.kServoUnlockPosition); // unlocks servo before going to angle
