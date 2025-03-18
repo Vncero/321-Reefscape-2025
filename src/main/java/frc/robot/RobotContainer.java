@@ -49,7 +49,7 @@ public class RobotContainer {
   private SwerveDrive drivetrain = SwerveDrive.create();
   private AlgaeIntakePivot algaePivot = AlgaeIntakePivot.disable();
   private AlgaeIntakeRollers algaeRollers = AlgaeIntakeRollers.disable();
-  private CoralEndEffector coralEndEffector = CoralEndEffector.disable();
+  private CoralEndEffector coralEndEffector = CoralEndEffector.create();
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
 
@@ -199,8 +199,8 @@ public class RobotContainer {
     //             .until(new Trigger(algaePivot::inCollisionZone).negate()));
 
     configureLeds();
-    // configureBindings();
-    configureTuningBindings();
+    configureBindings();
+    // configureTuningBindings();
   }
 
   private double volts = 0;

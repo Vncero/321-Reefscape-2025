@@ -280,6 +280,15 @@ public class AutomaticAutonomousMaker3000 {
           paths.add(scorePath);
         }
       }
+
+      auto =
+          auto.andThen(
+              drive
+                  .driveFieldCentric(() -> 0, () -> 0, () -> 0)
+                  .alongWith(
+                      coralSuperstructure.goToSetpointPID(
+                          () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                          () -> CoralScorerSetpoint.PREALIGN.getArmAngle())));
       return new PathsAndAuto(auto, paths);
     } catch (Exception e) {
       pathError = "Path doesn't exist";
@@ -308,7 +317,9 @@ public class AutomaticAutonomousMaker3000 {
                             CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                             CoralScorerSetpoint.PREALIGN.getArmAngle()))
                 .andThen(
-                    coralSuperstructure.feedCoral().until(() -> coralSuperstructure.hasCoral())));
+                    coralSuperstructure.feedCoral().withTimeout(2)
+                    // .until(() -> coralSuperstructure.hasCoral())
+                    ));
   }
 
   public Command withScoring(Command path, Pole pole, Level level) {
@@ -338,7 +349,7 @@ public class AutomaticAutonomousMaker3000 {
                         () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
                 .until(() -> drive.atPoseSetpoint())
                 .andThen(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
-                .until(() -> coralSuperstructure.atTargetState())
+                .until(() -> coralSuperstructure.atTargetState(setpoint))
                 .withTimeout(2.5))
         .andThen(
             ReefAlign.alignToReef(
