@@ -25,7 +25,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class ElevatorArmIOSpark implements ElevatorArmIO {
 
   // tuning config for the ElevatorArmIOReal
-  public static final ElevatorArmConfig config = new ElevatorArmConfig(0.25, 0, 0.002, 0.33, 0);
+  public static final ElevatorArmConfig config = new ElevatorArmConfig(0.20, 0, 0.002, 0.25, 0);
 
   // the motor that is controlling the arm (using a SparkMax controller)
   private SparkMax armMotor =
