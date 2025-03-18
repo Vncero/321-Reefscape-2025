@@ -84,7 +84,7 @@ public class VisionConstants {
           Meters.of(0.2280412),
           Meters.of(-0.1723644),
           Meters.of(0.2151634),
-          new Rotation3d(Degrees.zero(), Degrees.of(-20), Degrees.of(8)));
+          new Rotation3d(Degrees.zero(), Degrees.of(-20), Degrees.of(-10)));
 
   private static final Transform3d k321FrontSwerveModuleCameraMountTransform =
       new Transform3d(

@@ -19,6 +19,7 @@ public class CoralEndEffectorIOIdeal implements CoralEndEffectorIO {
   public void updateInputs(CoralEndEffectorInputs inputs) {
     inputs.voltage = Volts.of(0);
     inputs.hasCoral = false;
+    inputs.hasAlgae = false;
     inputs.velocity = RPM.of(0);
   }
 }

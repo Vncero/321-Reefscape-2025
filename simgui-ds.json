@@ -4,6 +4,16 @@
       "visible": true
     }
   },
+  "Keyboard 1 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
+  "System Joysticks": {
+    "window": {
+      "enabled": false
+    }
+  },
   "keyboardJoysticks": [
     {
       "axisConfig": [
@@ -60,10 +70,6 @@
       "axisConfig": [
         {
           "incKey": 74
-        },
-        {
-          "decKey": 75,
-          "incKey": 73
         }
       ],
       "axisCount": 2,
@@ -105,6 +111,9 @@
   "robotJoysticks": [
     {
       "guid": "Keyboard0"
+    },
+    {
+      "guid": "Keyboard1"
     }
   ]
 }
