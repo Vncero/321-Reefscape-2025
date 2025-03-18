@@ -256,9 +256,8 @@ public class RobotContainer {
         3,
         () -> algaeSuperstructure.hasAlgae() && coralSuperstructure.hasCoral(),
         () -> LedsConstants.kHasCoralAndAlgae);
-    leds.registerSignal(4, () -> coralEndEffector.isIntaking(), () -> LedsConstants.kIntaking);
-    leds.registerSignal(5, () -> coralEndEffector.isOuttaking(), () -> LedsConstants.kOuttaking);
-
+    leds.registerSignal(4, () -> leds.isIntaking, () -> LedsConstants.kIntaking);
+    leds.registerSignal(5, () -> leds.isOuttaking, () -> LedsConstants.kOuttaking);
     leds.registerSignal(6, () -> leds.isRotateAligning, () -> LedsConstants.kRotationAligning);
 
     leds.registerSignal(

@@ -11,7 +11,9 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.leds.Leds;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
@@ -69,12 +71,16 @@ public class CoralEndEffector extends SubsystemBase {
 
   // shortcut to intake coral
   public Command intakeCoral() {
-    return runAtVelocity(() -> CoralEndEffectorConstants.kIntakeRPM);
+    return Commands.runOnce(() -> Leds.getInstance().isIntaking = true)
+        .andThen(runAtVelocity(() -> CoralEndEffectorConstants.kIntakeRPM))
+        .finallyDo(() -> Leds.getInstance().isIntaking = false);
   }
 
   // shortcut to outtake coral
   public Command outtakeCoral() {
-    return runAtVelocity(() -> CoralEndEffectorConstants.kOuttakeRPM);
+    return Commands.runOnce(() -> Leds.getInstance().isOuttaking = true)
+        .andThen(runAtVelocity(() -> CoralEndEffectorConstants.kOuttakeRPM))
+        .finallyDo(() -> Leds.getInstance().isOuttaking = false);
   }
 
   public Command runVolts(Supplier<Voltage> voltage) {
@@ -83,16 +89,6 @@ public class CoralEndEffector extends SubsystemBase {
 
   public boolean hasCoral() {
     return inputs.hasCoral;
-  }
-
-  public boolean isIntaking() {
-    return inputs.velocity.isNear(
-        CoralEndEffectorConstants.kIntakeRPM, CoralEndEffectorConstants.kRPMTolerance);
-  }
-
-  public boolean isOuttaking() {
-    return inputs.velocity.isNear(
-        CoralEndEffectorConstants.kOuttakeRPM, CoralEndEffectorConstants.kRPMTolerance);
   }
 
   // stalls coral if we have a coral; this should be the default command
