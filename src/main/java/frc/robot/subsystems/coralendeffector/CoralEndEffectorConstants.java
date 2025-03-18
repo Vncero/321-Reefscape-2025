@@ -23,10 +23,10 @@ public class CoralEndEffectorConstants {
   // Setpoints
   public static final AngularVelocity kCoralIntakeRPM = RPM.of(3000);
   public static final AngularVelocity kCoralOuttakeRPM = RPM.of(-1000);
-  public static final AngularVelocity kCoralStallRPM = RPM.of(1000);
+  public static final AngularVelocity kCoralStallRPM = RPM.of(500);
   public static final AngularVelocity kAlgaeIntakeRPM = RPM.of(-3000);
   public static final AngularVelocity kAlgaeOuttakeRPM = RPM.of(3000);
-  public static final AngularVelocity kAlgaeStallRPM = RPM.of(-1000);
+  public static final AngularVelocity kAlgaeStallRPM = RPM.of(-500);
 
   // Tuned constants
   public static final Distance kDetectionRange = Millimeters.of(100);

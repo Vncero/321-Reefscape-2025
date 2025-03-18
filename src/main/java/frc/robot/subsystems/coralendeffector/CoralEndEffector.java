@@ -90,7 +90,8 @@ public class CoralEndEffector extends SubsystemBase {
   }
 
   public boolean hasCoral() {
-    return inputs.hasCoral;
+    // return inputs.hasCoral;
+    return false;
   }
 
   public boolean hasAlgae() {

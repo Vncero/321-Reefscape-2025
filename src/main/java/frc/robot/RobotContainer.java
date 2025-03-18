@@ -199,6 +199,7 @@ public class RobotContainer {
     //             .until(new Trigger(algaePivot::inCollisionZone).negate()));
 
     configureLeds();
+    configManipTriggers();
     configureBindings();
     // configureTuningBindings();
   }
@@ -206,8 +207,10 @@ public class RobotContainer {
   private double volts = 0;
 
   private void configureTuningBindings() {
+    // driver.a().whileTrue(elevatorArm.tune());
+    // driver.y().whileTrue(coralEndEffector.tune());
     driver.a().whileTrue(coralSuperstructure.tune());
-    driver.b().whileTrue(coralSuperstructure.feedCoral());
+    // driver.b().whileTrue(coralSuperstructure.feedCoral());
     driver.leftBumper().whileTrue(coralEndEffector.intakeCoral());
     driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
 
@@ -380,6 +383,8 @@ public class RobotContainer {
                                                         .getTargetAngle()
                                                         .isEquivalent(
                                                             queuedSetpoint.getArmAngle())),
+                                    Commands.waitUntil(
+                                        () -> coralSuperstructure.atTargetState(queuedSetpoint)),
                                     ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition))
                                 .onlyWhile(
                                     () ->
@@ -408,19 +413,20 @@ public class RobotContainer {
                                         CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                                         queuedSetpoint.getArmAngle()))
                         .andThen(
+                            // coralSuperstructure
+                            //     .goToSetpointProfiled(
+                            //         () ->
+                            //             Meters.of(
+                            //                 Math.min(
+                            //                     queuedSetpoint.getElevatorHeight().in(Meters),
+                            //                     CoralScorerSetpoint.PREALIGN
+                            //                         .getElevatorHeight()
+                            //                         .in(Meters))),
+                            //         () -> queuedSetpoint.getArmAngle())
+                            // .andThen(
                             coralSuperstructure
-                                .goToSetpointProfiled(
-                                    () ->
-                                        Meters.of(
-                                            Math.min(
-                                                queuedSetpoint.getElevatorHeight().in(Meters),
-                                                CoralScorerSetpoint.PREALIGN
-                                                    .getElevatorHeight()
-                                                    .in(Meters))),
-                                    () -> queuedSetpoint.getArmAngle())
-                                .until(drivetrain::atFinalPoseSetpoint)
-                                .andThen(
-                                    coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
+                                .goToSetpointProfiled(() -> queuedSetpoint)
+                                // )
                                 .onlyWhile(
                                     () ->
                                         ReefAlign.isWithinReefRange(
@@ -614,6 +620,9 @@ public class RobotContainer {
 
     // toggle driver override
     driver.povUp().onTrue(Commands.runOnce(() -> isDriverOverride = !isDriverOverride));
+  }
+
+  public void configManipTriggers() {
 
     // manip controls
     // 1 to 4 - right side L1-L4
