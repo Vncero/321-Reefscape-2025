@@ -33,6 +33,7 @@ import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSim;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.leds.LedsConstants;
@@ -79,23 +80,33 @@ public class RobotContainer {
   private CommandXboxController driver = new CommandXboxController(0);
   private XboxController manipulator = new XboxController(1);
 
-  private Trigger isSlowMode = driver.leftBumper();
+  private Trigger isSlowMode =
+      driver
+          .leftBumper()
+          .or(() -> elevator.getHeight().in(Meters) > ElevatorConstants.kSlowedHeight.in(Meters));
 
   private DoubleSupplier driverForward =
       () ->
-          -MathUtil.applyDeadband(Math.hypot(driver.getLeftY(), driver.getLeftX()), 0.05)
+          -MathUtil.applyDeadband(
+                  Math.pow(Math.hypot(driver.getLeftY(), driver.getLeftX()), 2),
+                  DrivetrainConstants.kDriveDeadband)
               * Math.cos(Math.atan2(driver.getLeftX(), driver.getLeftY()))
               * (isSlowMode.getAsBoolean()
                   ? 1.5
                   : DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond));
+
   private DoubleSupplier driverStrafe =
       () ->
-          -MathUtil.applyDeadband(Math.hypot(driver.getLeftY(), driver.getLeftX()), 0.05)
+          -MathUtil.applyDeadband(
+                  Math.pow(Math.hypot(driver.getLeftY(), driver.getLeftX()), 2),
+                  DrivetrainConstants.kDriveDeadband)
               * Math.sin(Math.atan2(driver.getLeftX(), driver.getLeftY()))
               * (isSlowMode.getAsBoolean()
                   ? 1.5
                   : DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond));
-  private DoubleSupplier driverTurn = () -> -MathUtil.applyDeadband(driver.getRightX(), 0.05) * 5;
+
+  private DoubleSupplier driverTurn =
+      () -> -MathUtil.applyDeadband(driver.getRightX(), DrivetrainConstants.kRotationDeadband) * 5;
 
   // robot queued states
   private ReefPosition queuedReefPosition = ReefPosition.RIGHT;
@@ -103,7 +114,7 @@ public class RobotContainer {
 
   private SuperstructureVisualizer stateVisualizer =
       new SuperstructureVisualizer(
-          () -> elevator.getHeight(), () -> elevatorArm.getAngle(), () -> algaePivot.getAngle());
+          () -> elevator.getHeight(), () -> elevatorArm.getAngle(), () -> climber.getAngle());
 
   private Leds leds = Leds.getInstance();
   private AddressableLEDSim ledSim = new AddressableLEDSim(leds.strip);
@@ -127,11 +138,11 @@ public class RobotContainer {
       () ->
           leds.calculateProgressBar(
               elevator.getHeight(),
-              coralSuperstructure.getTargetState().getElevatorHeight(),
+              coralSuperstructure.getTargetHeight(),
               elevatorArm.getAngle(),
-              coralSuperstructure.getTargetState().getArmAngle(),
+              coralSuperstructure.getTargetAngle(),
               drivetrain.getPose(),
-              drivetrain.getAlignmentSetpoint());
+              drivetrain.getAlignmentSetpoint().pose());
 
   public RobotContainer() {
 
@@ -153,7 +164,7 @@ public class RobotContainer {
     elevator.setDefaultCommand(
         elevator.goToHeight(() -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight()));
     elevatorArm.setDefaultCommand(
-        elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.PREALIGN.getArmAngle()));
+        elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.NEUTRAL.getArmAngle()));
 
     coralEndEffector.setDefaultCommand(coralEndEffector.stallCoralIfDetected());
 
@@ -240,7 +251,7 @@ public class RobotContainer {
     // alignment testing (no arm)
     // driver.a().whileTrue(ReefAlign.rotateToNearestReefTag(drivetrain, driverForward,
     // driverStrafe));
-    // driver.b().whileTrue(ReefAlign.alignToReef(drivetrain, () -> ReefPosition.LEFT));
+    // driver.b().whileTrue(ReefAlign.alignToReef(drivetrain, () -> ReefPosition.RIGHT));
 
     // test algae intake
     // driver.b().whileTrue(algaeSuperstructure.intakeAlgae());
@@ -285,10 +296,8 @@ public class RobotContainer {
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
-    driver.y().toggleOnTrue(algaeSuperstructure.prepareClimb());
-    // driver.a().onTrue(algaeSuperstructure.climb());
-
-    driver.y().whileTrue(coralSuperstructure.feedCoral());
+    driver.y().toggleOnTrue(climber.goToAngle(() -> ClimberConstants.kClimbPrepAngle));
+    driver.a().onTrue(climber.climb());
 
     // --- CORAL AUTOMATED CONTROLS ---
 
@@ -334,7 +343,21 @@ public class RobotContainer {
                         .andThen(
                             // when we get close enough, align to reef, but only while we're
                             // close enough
-                            ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
+                            Commands.sequence(
+                                    ReefAlign.alignToPrealignReef(
+                                            drivetrain, () -> queuedReefPosition)
+                                        .onlyWhile(
+                                            () ->
+                                                coralSuperstructure
+                                                        .getTargetHeight()
+                                                        .isEquivalent(
+                                                            CoralScorerSetpoint.NEUTRAL
+                                                                .getElevatorHeight())
+                                                    && coralSuperstructure
+                                                        .getTargetAngle()
+                                                        .isEquivalent(
+                                                            queuedSetpoint.getArmAngle())),
+                                    ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition))
                                 .onlyWhile(
                                     () ->
                                         ReefAlign.isWithinReefRange(
@@ -353,11 +376,14 @@ public class RobotContainer {
                     coralSuperstructure
                         .goToSetpointPID(
                             () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                        .onlyWhile(
+                            () -> queuedSetpoint.getArmAngle())
+                        .until(
                             () ->
-                                !ReefAlign.isWithinReefRange(
-                                    drivetrain, ReefAlign.kMechanismDeadbandThreshold))
+                                ReefAlign.isWithinReefRange(
+                                        drivetrain, ReefAlign.kMechanismDeadbandThreshold)
+                                    && coralSuperstructure.atTargetState(
+                                        CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                                        queuedSetpoint.getArmAngle()))
                         .andThen(
                             coralSuperstructure
                                 .goToSetpointProfiled(
@@ -373,7 +399,7 @@ public class RobotContainer {
                                     () ->
                                         ReefAlign.isWithinReefRange(
                                             drivetrain, ReefAlign.kMechanismDeadbandThreshold))
-                                .until(drivetrain::atPoseSetpoint)
+                                .until(drivetrain::atFinalPoseSetpoint)
                                 .andThen(
                                     coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
                                 .onlyWhile(
@@ -408,8 +434,10 @@ public class RobotContainer {
                         .until(
                             () ->
                                 coralSuperstructure
-                                    .getElevator()
-                                    .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight()))
+                                        .getElevator()
+                                        .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight())
+                                    && !ReefAlign.isWithinReefRange(
+                                        drivetrain, ReefAlign.kMechanismDeadbandThreshold))
                         .onlyIf(
                             () ->
                                 !coralSuperstructure
@@ -431,19 +459,7 @@ public class RobotContainer {
                         coralSuperstructure
                             .getElevator()
                             .atHeight(CoralScorerSetpoint.NEUTRAL.getElevatorHeight()))
-                .andThen(
-                    // move the elevator up but keep arm up
-                    coralSuperstructure
-                        .goToSetpointPID(
-                            () -> queuedSetpoint.getElevatorHeight(),
-                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                        .until(
-                            () ->
-                                coralSuperstructure
-                                    .getElevator()
-                                    .atHeight(queuedSetpoint.getElevatorHeight()))
-                        // then move arm down to setpoint
-                        .andThen(coralSuperstructure.goToSetpointPID(() -> queuedSetpoint)))
+                .andThen(coralSuperstructure.goToSetpointPID(() -> queuedSetpoint))
             // and only do this while we're in the zone (when we're not, we will
             // stay in the pre-alignment position)
             );

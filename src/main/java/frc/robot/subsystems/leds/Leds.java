@@ -43,6 +43,7 @@ public class Leds extends SubsystemBase {
   public boolean isReefAligning = false;
   public boolean isIntaking = false;
   public boolean isOuttaking = false;
+  public boolean isTagAligning = false;
 
   public Leds() {
     this.strip = new AddressableLED(LedsConstants.kPort);

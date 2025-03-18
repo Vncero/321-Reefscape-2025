@@ -19,7 +19,7 @@ public class TunerConstants {
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
   private static final Slot0Configs steerGains =
       new Slot0Configs()
-          .withKP(100)
+          .withKP(75)
           .withKI(0)
           .withKD(0.2)
           .withKS(0)
@@ -51,9 +51,12 @@ public class TunerConstants {
 
   // The stator current at which the wheels start to slip;
   // This needs to be tuned to your individual robot
-  private static final Current kSlipCurrent = Amps.of(40.0);
-  private static final Current kSupplyCurrent = Amps.of(40.0);
-  private static final double kClosedLoopRampRate = 0.02;
+  private static final Current kDriveSlipCurrent = Amps.of(50.0);
+  private static final Current kDriveSupplyCurrent = Amps.of(40.0);
+  private static final Current kSteerSlipCurrent = Amps.of(40.0);
+  private static final Current kSteerSupplyCurrent = Amps.of(40.0);
+  private static final double kDriveClosedLoopRampRate = 0.01;
+  private static final double kSteerClosedLoopRampRate = 0.01;
 
   // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
   // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
@@ -61,12 +64,13 @@ public class TunerConstants {
       new TalonFXConfiguration()
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(kSlipCurrent)
+                  .withStatorCurrentLimit(kDriveSlipCurrent)
                   .withStatorCurrentLimitEnable(true)
-                  .withSupplyCurrentLimit(kSupplyCurrent)
+                  .withSupplyCurrentLimit(kDriveSupplyCurrent)
                   .withSupplyCurrentLimitEnable(true))
           .withClosedLoopRamps(
-              new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(kClosedLoopRampRate));
+              new ClosedLoopRampsConfigs()
+                  .withVoltageClosedLoopRampPeriod(kDriveClosedLoopRampRate));
   private static final TalonFXConfiguration steerInitialConfigs =
       new TalonFXConfiguration()
           .withCurrentLimits(
@@ -74,12 +78,13 @@ public class TunerConstants {
                   // Swerve azimuth does not require much torque output, so we can set a relatively
                   // low
                   // stator current limit to help avoid brownouts without impacting performance.
-                  .withStatorCurrentLimit(kSlipCurrent)
+                  .withStatorCurrentLimit(kSteerSlipCurrent)
                   .withStatorCurrentLimitEnable(true)
-                  .withSupplyCurrentLimit(kSupplyCurrent)
+                  .withSupplyCurrentLimit(kSteerSupplyCurrent)
                   .withSupplyCurrentLimitEnable(true))
           .withClosedLoopRamps(
-              new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(kClosedLoopRampRate));
+              new ClosedLoopRampsConfigs()
+                  .withVoltageClosedLoopRampPeriod(kSteerClosedLoopRampRate));
   private static final CANcoderConfiguration encoderInitialConfigs = new CANcoderConfiguration();
   // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
   private static final Pigeon2Configuration pigeonConfigs = null;
@@ -131,7 +136,7 @@ public class TunerConstants {
               .withDriveMotorGains(driveGains)
               .withSteerMotorClosedLoopOutput(kSteerClosedLoopOutput)
               .withDriveMotorClosedLoopOutput(kDriveClosedLoopOutput)
-              .withSlipCurrent(kSlipCurrent)
+              .withSlipCurrent(kDriveSlipCurrent)
               .withSpeedAt12Volts(kSpeedAt12Volts)
               .withDriveMotorType(kDriveMotorType)
               .withSteerMotorType(kSteerMotorType)
