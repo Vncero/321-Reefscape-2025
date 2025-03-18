@@ -30,6 +30,7 @@ import frc.robot.subsystems.algaeIntakeRollers.AlgaeIntakeRollers;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.subsystems.coralendeffector.CoralEndEffector;
+import frc.robot.subsystems.coralendeffector.CoralEndEffectorConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainConstants;
 import frc.robot.subsystems.drivetrain.DrivetrainSim;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
@@ -169,7 +170,13 @@ public class RobotContainer {
     elevatorArm.setDefaultCommand(
         elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.NEUTRAL.getArmAngle()));
 
-    coralEndEffector.setDefaultCommand(coralEndEffector.stallCoralOrAlgaeIfDetected());
+    // coralEndEffector.setDefaultCommand(coralEndEffector.stallCoralOrAlgaeIfDetected());
+    coralEndEffector.setDefaultCommand(
+        coralEndEffector.runAtVelocity(
+            () ->
+                isAlgaeSetpoint.getAsBoolean()
+                    ? CoralEndEffectorConstants.kAlgaeStallRPM
+                    : CoralEndEffectorConstants.kCoralStallRPM));
 
     // testing default commands
     algaeRollers.setDefaultCommand(algaeRollers.setMechanismVoltage(() -> Volts.zero()));
