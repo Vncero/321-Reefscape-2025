@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -14,7 +13,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
 
 @Logged
@@ -49,8 +47,6 @@ public class DrivetrainConstants {
   public static final AngularVelocity kMaxAngularVelocity = RadiansPerSecond.of(Math.PI * 6);
   public static final LinearVelocity kMaxLinearVelocity =
       MetersPerSecond.of(5.0); // TunerConstants.kSpeedAt12Volts
-
-  public static final Time kLoopDt = Seconds.of(0.02);
 
   public static final Distance kAlignmentSetpointTranslationTolerance = Meters.of(0.02);
   public static final Angle kAlignmentSetpointRotationTolerance = Degrees.of(2.0);
