@@ -49,11 +49,11 @@ public class RobotContainer {
   private SwerveDrive drivetrain = SwerveDrive.create();
   private AlgaeIntakePivot algaePivot = AlgaeIntakePivot.disable();
   private AlgaeIntakeRollers algaeRollers = AlgaeIntakeRollers.disable();
-  private CoralEndEffector coralEndEffector = CoralEndEffector.create();
+  private CoralEndEffector coralEndEffector = CoralEndEffector.disable();
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
 
-  private Climber climber = Climber.create();
+  private Climber climber = Climber.disable();
 
   private CoralSuperstructure coralSuperstructure =
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
@@ -168,7 +168,7 @@ public class RobotContainer {
     elevator.setDefaultCommand(
         elevator.goToHeight(() -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight()));
     elevatorArm.setDefaultCommand(
-        elevatorArm.goToAnglePID(() -> CoralScorerSetpoint.NEUTRAL.getArmAngle()));
+        elevatorArm.goToAngleProfiled(() -> CoralScorerSetpoint.NEUTRAL.getArmAngle()));
 
     // coralEndEffector.setDefaultCommand(coralEndEffector.stallCoralOrAlgaeIfDetected());
     coralEndEffector.setDefaultCommand(
@@ -199,8 +199,8 @@ public class RobotContainer {
     //             .until(new Trigger(algaePivot::inCollisionZone).negate()));
 
     configureLeds();
-    configureBindings();
-    // configureTuningBindings();
+    // configureBindings();
+    configureTuningBindings();
   }
 
   private double volts = 0;
@@ -209,6 +209,7 @@ public class RobotContainer {
     driver.a().whileTrue(coralSuperstructure.tune());
     driver.b().whileTrue(coralSuperstructure.feedCoral());
     driver.leftBumper().whileTrue(coralEndEffector.intakeCoral());
+    driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
 
     // driver.a().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-2000)));
     // driver.b().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-3000)));
