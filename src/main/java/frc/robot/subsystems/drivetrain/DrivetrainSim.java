@@ -46,6 +46,9 @@ public class DrivetrainSim implements SwerveDrive {
 
   private final SwerveDrivePoseEstimator reefPoseEstimator;
 
+  private final Pose2d kRedTopAutoStart = new Pose2d(10.2, 2.2, Rotation2d.kZero);
+  private final Pose2d kRedBotAutoStart = new Pose2d(10.2, 5.8, Rotation2d.kZero);
+
   public DrivetrainSim() {
     this.simConfig =
         DriveTrainSimulationConfig.Default()
@@ -67,7 +70,7 @@ public class DrivetrainSim implements SwerveDrive {
 
     this.simulatedDrive =
         new SelfControlledSwerveDriveSimulationWrapper(
-            new SwerveDriveSimulation(simConfig, new Pose2d(2, 2, Rotation2d.kZero)));
+            new SwerveDriveSimulation(simConfig, kRedBotAutoStart));
 
     this.headingController =
         new PIDController(
@@ -180,11 +183,12 @@ public class DrivetrainSim implements SwerveDrive {
 
     final Pose2d currentPose = getPose();
 
-    if (currentPose.getTranslation().getDistance(alignmentSetpoint.getTranslation())
+    if (currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
         < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters))
       targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
 
-    if (Math.abs(currentPose.getRotation().minus(alignmentSetpoint.getRotation()).getDegrees())
+    if (Math.abs(
+            currentPose.getRotation().minus(alignmentSetpoint.pose().getRotation()).getDegrees())
         < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees))
       targetSpeeds =
           new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
