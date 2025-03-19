@@ -74,9 +74,9 @@ public class Climber extends SubsystemBase {
 
   // tunes kCurrentRampRate - how much should current be ramping per second
   public Command tuneCurrentRampRate() {
-    TunableConstant climbCurrentRampRate =
+    TunableConstant climbVoltageRampRate =
         new TunableConstant(
-            "/Climber/ClimbCurrentRampRate", ClimberConstants.kClimbVoltageRampRate.in(Volts));
+            "/Climber/ClimbVoltageRampRate", ClimberConstants.kClimbVoltageRampRate.in(Volts));
 
     return runOnce(timer::restart)
         .andThen(() -> io.setLockServoAngle(ClimberConstants.kServoUnlockPosition))
@@ -87,7 +87,7 @@ public class Climber extends SubsystemBase {
                             Amps.of( // Sets the motor to a current control mode, ramping up current
                                 // over time
                                 -Math.min(
-                                    climbCurrentRampRate.get() * timer.get(),
+                                    climbVoltageRampRate.get() * timer.get(),
                                     ClimberConstants.kClimbVoltage.in(Volts)))))
                 .until(
                     () ->

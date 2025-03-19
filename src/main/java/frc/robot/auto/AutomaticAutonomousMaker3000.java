@@ -289,6 +289,7 @@ public class AutomaticAutonomousMaker3000 {
                       coralSuperstructure.goToSetpointPID(
                           () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                           () -> CoralScorerSetpoint.PREALIGN.getArmAngle())));
+
       return new PathsAndAuto(auto, paths);
     } catch (Exception e) {
       pathError = "Path doesn't exist";
@@ -309,17 +310,15 @@ public class AutomaticAutonomousMaker3000 {
         .withDeadline(
             coralSuperstructure
                 .goToSetpointPID(
-                    () -> CoralScorerSetpoint.FEED_CORAL.getElevatorHeight(),
+                    () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                     () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
                 .until(
                     () ->
                         coralSuperstructure.atTargetState(
-                            CoralScorerSetpoint.FEED_CORAL.getElevatorHeight(),
+                            CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                             CoralScorerSetpoint.PREALIGN.getArmAngle()))
                 .andThen(
-                    coralSuperstructure.feedCoral().withTimeout(2)
-                    // .until(() -> coralSuperstructure.hasCoral())
-                    ));
+                    coralSuperstructure.feedCoral().until(() -> coralSuperstructure.hasCoral())));
   }
 
   public Command withScoring(Command path, Pole pole, Level level) {
@@ -339,38 +338,21 @@ public class AutomaticAutonomousMaker3000 {
                 setpoint.getElevatorHeight().in(Meters)));
 
     return path.deadlineFor(
-            coralSuperstructure.goToSetpointPID(
-                () -> preAlignElevatorHeight, () -> CoralScorerSetpoint.PREALIGN.getArmAngle()))
+            coralSuperstructure.goToSetpointProfiled(
+                () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
         .andThen(
             ReefAlign.alignToReef(
-                    drive,
-                    () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT,
-                    () -> setpoint)
+                    drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
                 .alongWith(
                     coralSuperstructure.goToSetpointPID(
-                        () -> preAlignElevatorHeight,
-                        () -> CoralScorerSetpoint.PREALIGN.getArmAngle()))
+                        () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
                 .until(() -> drive.atPoseSetpoint())
-                .andThen(
-                    coralSuperstructure
-                        .goToSetpointProfiled(
-                            () -> setpoint.getElevatorHeight(),
-                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
-                        .until(
-                            () ->
-                                coralSuperstructure.atTargetState(
-                                    setpoint.getElevatorHeight(),
-                                    CoralScorerSetpoint.PREALIGN.getArmAngle())))
-                .andThen(
-                    coralSuperstructure
-                        .goToSetpointProfiled(() -> setpoint)
-                        .until(() -> coralSuperstructure.atTargetState(setpoint)))
+                .andThen(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
+                .until(() -> coralSuperstructure.atTargetState())
                 .withTimeout(2.5))
         .andThen(
             ReefAlign.alignToReef(
-                    drive,
-                    () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT,
-                    () -> setpoint)
+                    drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
                 .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
                 .withDeadline(
                     Commands.waitSeconds(1)

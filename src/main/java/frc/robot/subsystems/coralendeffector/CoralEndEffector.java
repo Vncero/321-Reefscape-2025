@@ -77,25 +77,12 @@ public class CoralEndEffector extends SubsystemBase {
     return runAtVelocity(() -> CoralEndEffectorConstants.kCoralOuttakeRPM);
   }
 
-  public Command intakeAlgae() {
-    return runAtVelocity(() -> CoralEndEffectorConstants.kAlgaeIntakeRPM);
-  }
-
-  public Command outtakeAlgae() {
-    return runAtVelocity(() -> CoralEndEffectorConstants.kAlgaeOuttakeRPM);
-  }
-
   public Command runVolts(Supplier<Voltage> voltage) {
     return run(() -> io.setVoltage(voltage.get()));
   }
 
   public boolean hasCoral() {
-    // return inputs.hasCoral;
-    return false;
-  }
-
-  public boolean hasAlgae() {
-    return inputs.hasAlgae;
+    return inputs.hasCoral;
   }
 
   public boolean isIntaking() {
@@ -109,13 +96,11 @@ public class CoralEndEffector extends SubsystemBase {
   }
 
   // stalls coral if we have a coral; this should be the default command
-  public Command stallCoralOrAlgaeIfDetected() {
+  public Command stallCoralIfDetected() {
     return runAtVelocity(
         () -> {
           if (hasCoral()) {
             return CoralEndEffectorConstants.kCoralStallRPM;
-          } else if (hasAlgae()) {
-            return CoralEndEffectorConstants.kAlgaeStallRPM;
           }
           return RPM.of(0);
         });

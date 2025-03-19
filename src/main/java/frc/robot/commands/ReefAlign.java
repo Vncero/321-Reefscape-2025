@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotConstants;
-import frc.robot.subsystems.CoralSuperstructure.CoralScorerSetpoint;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.subsystems.drivetrain.SwerveDrive.AlignmentSetpoint;
 import frc.robot.subsystems.leds.Leds;
@@ -198,9 +197,7 @@ public class ReefAlign {
   }
 
   public static Command alignToReef(
-      SwerveDrive swerveDrive,
-      Supplier<ReefPosition> targetReefPosition,
-      Supplier<CoralScorerSetpoint> setpoint) {
+      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
     return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)
         .andThen(
             swerveDrive.driveToFieldPose(
@@ -212,13 +209,6 @@ public class ReefAlign {
                         case RIGHT -> rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
                         default -> swerveDrive.getPose(); // more or less a no-op
                       };
-
-                  if (setpoint.get() == CoralScorerSetpoint.L2) {
-                    target =
-                        target.plus(
-                            new Transform2d(
-                                new Translation2d(Inches.of(-5), Meters.zero()), Rotation2d.kZero));
-                  }
 
                   return new AlignmentSetpoint(target, true);
                 }))
