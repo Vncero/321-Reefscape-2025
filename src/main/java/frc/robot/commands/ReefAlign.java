@@ -213,7 +213,7 @@ public class ReefAlign {
                         default -> swerveDrive.getPose(); // more or less a no-op
                       };
 
-                  if (setpoint.get() == CoralScorerSetpoint.L4) {
+                  if (setpoint.get() == CoralScorerSetpoint.L2) {
                     target =
                         target.plus(
                             new Transform2d(

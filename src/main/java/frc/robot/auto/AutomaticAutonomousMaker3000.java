@@ -309,12 +309,12 @@ public class AutomaticAutonomousMaker3000 {
         .withDeadline(
             coralSuperstructure
                 .goToSetpointPID(
-                    () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                    () -> CoralScorerSetpoint.FEED_CORAL.getElevatorHeight(),
                     () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
                 .until(
                     () ->
                         coralSuperstructure.atTargetState(
-                            CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                            CoralScorerSetpoint.FEED_CORAL.getElevatorHeight(),
                             CoralScorerSetpoint.PREALIGN.getArmAngle()))
                 .andThen(
                     coralSuperstructure.feedCoral().withTimeout(2)
@@ -340,7 +340,7 @@ public class AutomaticAutonomousMaker3000 {
 
     return path.deadlineFor(
             coralSuperstructure.goToSetpointPID(
-                () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
+                () -> preAlignElevatorHeight, () -> CoralScorerSetpoint.PREALIGN.getArmAngle()))
         .andThen(
             ReefAlign.alignToReef(
                     drive,
@@ -348,10 +348,23 @@ public class AutomaticAutonomousMaker3000 {
                     () -> setpoint)
                 .alongWith(
                     coralSuperstructure.goToSetpointPID(
-                        () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
+                        () -> preAlignElevatorHeight,
+                        () -> CoralScorerSetpoint.PREALIGN.getArmAngle()))
                 .until(() -> drive.atPoseSetpoint())
-                .andThen(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
-                .until(() -> coralSuperstructure.atTargetState(setpoint))
+                .andThen(
+                    coralSuperstructure
+                        .goToSetpointProfiled(
+                            () -> setpoint.getElevatorHeight(),
+                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
+                        .until(
+                            () ->
+                                coralSuperstructure.atTargetState(
+                                    setpoint.getElevatorHeight(),
+                                    CoralScorerSetpoint.PREALIGN.getArmAngle())))
+                .andThen(
+                    coralSuperstructure
+                        .goToSetpointProfiled(() -> setpoint)
+                        .until(() -> coralSuperstructure.atTargetState(setpoint)))
                 .withTimeout(2.5))
         .andThen(
             ReefAlign.alignToReef(
@@ -360,7 +373,7 @@ public class AutomaticAutonomousMaker3000 {
                     () -> setpoint)
                 .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
                 .withDeadline(
-                    Commands.waitSeconds(1)
+                    Commands.waitSeconds(0)
                         .andThen(
                             coralSuperstructure
                                 .outtakeCoral()
