@@ -22,6 +22,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -172,14 +173,20 @@ public class DrivetrainSim implements SwerveDrive {
     if (pose == null) return;
 
     ChassisSpeeds targetSpeeds =
-        new ChassisSpeeds(
-            xPoseController.calculate(getPose().getX(), pose.getX())
-                + xPoseController.getSetpoint().velocity,
-            yPoseController.calculate(getPose().getY(), pose.getY())
-                + yPoseController.getSetpoint().velocity,
-            thetaController.calculate(
-                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
-                + thetaController.getSetpoint().velocity);
+        DriverStation.isAutonomous()
+            ? new ChassisSpeeds(
+                xPoseController.calculate(getPose().getX(), pose.getX())
+                    + xPoseController.getSetpoint().velocity,
+                yPoseController.calculate(getPose().getY(), pose.getY())
+                    + yPoseController.getSetpoint().velocity,
+                thetaController.calculate(
+                        getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                    + thetaController.getSetpoint().velocity)
+            : new ChassisSpeeds(
+                xPoseController.calculate(getPose().getX(), pose.getX()),
+                yPoseController.calculate(getPose().getY(), pose.getY()),
+                thetaController.calculate(
+                    getPose().getRotation().getRadians(), pose.getRotation().getRadians()));
 
     final Pose2d currentPose = getPose();
 
@@ -317,6 +324,8 @@ public class DrivetrainSim implements SwerveDrive {
     // send simulation data to dashboard for testing
     field2d.setRobotPose(simulatedDrive.getActualPoseInSimulationWorld());
     field2d.getObject("odometry").setPose(getPose());
+
+    SmartDashboard.putBoolean("isAutonomous", DriverStation.isAutonomous());
   }
 
   @Logged(name = "RobotLeftAligned")
