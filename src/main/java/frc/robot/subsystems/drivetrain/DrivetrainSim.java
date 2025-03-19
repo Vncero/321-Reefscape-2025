@@ -324,8 +324,6 @@ public class DrivetrainSim implements SwerveDrive {
     // send simulation data to dashboard for testing
     field2d.setRobotPose(simulatedDrive.getActualPoseInSimulationWorld());
     field2d.getObject("odometry").setPose(getPose());
-
-    SmartDashboard.putBoolean("isAutonomous", DriverStation.isAutonomous());
   }
 
   @Logged(name = "RobotLeftAligned")
