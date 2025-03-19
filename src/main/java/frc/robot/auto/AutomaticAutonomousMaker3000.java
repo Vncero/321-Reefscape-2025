@@ -373,7 +373,7 @@ public class AutomaticAutonomousMaker3000 {
                     () -> setpoint)
                 .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
                 .withDeadline(
-                    Commands.waitSeconds(0)
+                    Commands.waitSeconds(1)
                         .andThen(
                             coralSuperstructure
                                 .outtakeCoral()
