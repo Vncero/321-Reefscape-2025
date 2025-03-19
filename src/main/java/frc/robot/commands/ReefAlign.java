@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotConstants;
+import frc.robot.subsystems.CoralSuperstructure.CoralScorerSetpoint;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
 import frc.robot.subsystems.drivetrain.SwerveDrive.AlignmentSetpoint;
 import frc.robot.subsystems.leds.Leds;
@@ -24,6 +25,7 @@ import frc.robot.util.AprilTagUtil;
 import frc.robot.util.MyAlliance;
 import frc.robot.util.ReefPosition;
 import frc.robot.util.TunableConstant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +103,19 @@ public class ReefAlign {
 
     final List<Pose2d> tagsToCheck =
         alliance.get().equals(Alliance.Red) ? redReefTags : blueReefTags;
+
+    return robotPose.nearest(tagsToCheck);
+  }
+
+  public static Pose2d getNearestReefPoseFullField(Pose2d robotPose) {
+    // `Optional` means the Alliance may not exist yet, which must be handled to proceed
+    final Optional<Alliance> alliance = DriverStation.getAlliance();
+
+    if (alliance.isEmpty()) return null;
+
+    final List<Pose2d> tagsToCheck = new ArrayList<>();
+    tagsToCheck.addAll(redReefTags);
+    tagsToCheck.addAll(blueReefTags);
 
     return robotPose.nearest(tagsToCheck);
   }
@@ -183,18 +198,28 @@ public class ReefAlign {
   }
 
   public static Command alignToReef(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
+      SwerveDrive swerveDrive,
+      Supplier<ReefPosition> targetReefPosition,
+      Supplier<CoralScorerSetpoint> setpoint) {
     return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)
         .andThen(
             swerveDrive.driveToFieldPose(
                 () -> {
-                  final Pose2d target =
+                  Pose2d target =
                       switch (targetReefPosition.get()) {
                         case ALGAE -> centerAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
                         case LEFT -> leftAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
                         case RIGHT -> rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
                         default -> swerveDrive.getPose(); // more or less a no-op
                       };
+
+                  if (setpoint.get() == CoralScorerSetpoint.L4) {
+                    target =
+                        target.plus(
+                            new Transform2d(
+                                new Translation2d(Inches.of(-5), Meters.zero()), Rotation2d.kZero));
+                  }
+
                   return new AlignmentSetpoint(target, true);
                 }))
         .finallyDo(() -> Leds.getInstance().isReefAligning = false);
@@ -271,6 +296,20 @@ public class ReefAlign {
                 y,
                 () ->
                     getNearestReefPose(swerveDrive.getPose())
+                        .getRotation()
+                        .plus(kReefAlignmentRotation)))
+        .finallyDo(() -> Leds.getInstance().isRotateAligning = false);
+  }
+
+  public static Command rotateToNearestReefTagFullField(
+      SwerveDrive swerveDrive, DoubleSupplier x, DoubleSupplier y) {
+    return Commands.runOnce(() -> Leds.getInstance().isRotateAligning = true)
+        .andThen(
+            swerveDrive.driveFixedHeading(
+                x,
+                y,
+                () ->
+                    getNearestReefPoseFullField(swerveDrive.getPose())
                         .getRotation()
                         .plus(kReefAlignmentRotation)))
         .finallyDo(() -> Leds.getInstance().isRotateAligning = false);

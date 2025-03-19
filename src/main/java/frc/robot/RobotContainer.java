@@ -53,7 +53,7 @@ public class RobotContainer {
   private ElevatorArm elevatorArm = ElevatorArm.create();
   private Elevator elevator = Elevator.create();
 
-  private Climber climber = Climber.disable();
+  private Climber climber = Climber.create();
 
   private CoralSuperstructure coralSuperstructure =
       new CoralSuperstructure(elevator, elevatorArm, coralEndEffector);
@@ -185,7 +185,10 @@ public class RobotContainer {
     // elevatorArm.setDefaultCommand(elevatorArm.runVolts(() -> Volts.zero()));
     // coralEndEffector.setDefaultCommand(coralEndEffector.runVolts(() -> Volts.of(1)));
 
-    climber.setDefaultCommand(climber.goToAngle(() -> ClimberConstants.kDefaultAngle));
+    climber.setDefaultCommand(
+        climber.setMechanismVoltage(() -> Volts.zero())
+        // climber.goToAngle(() -> ClimberConstants.kDefaultAngle)
+        );
 
     leds.setDefaultCommand(leds.updateLeds());
 
@@ -319,8 +322,15 @@ public class RobotContainer {
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
-    driver.y().toggleOnTrue(climber.goToAngle(() -> ClimberConstants.kClimbPrepAngle));
+    driver
+        .y()
+        .toggleOnTrue(
+            climber
+                .goToAngle(() -> ClimberConstants.kClimbPrepAngle)
+                .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)));
     driver.a().onTrue(climber.climb());
+    driver.b().whileTrue(climber.setMechanismVoltage(() -> Volts.of(-2)));
+    driver.x().onTrue(climber.zero());
 
     // --- CORAL AUTOMATED CONTROLS ---
     // RIGHT BUMPER + CORAL MODE = INTAKE CORAL
@@ -385,7 +395,8 @@ public class RobotContainer {
                                                             queuedSetpoint.getArmAngle())),
                                     Commands.waitUntil(
                                         () -> coralSuperstructure.atTargetState(queuedSetpoint)),
-                                    ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition))
+                                    ReefAlign.alignToReef(
+                                        drivetrain, () -> queuedReefPosition, () -> queuedSetpoint))
                                 .onlyWhile(
                                     () ->
                                         ReefAlign.isWithinReefRange(
@@ -530,7 +541,8 @@ public class RobotContainer {
                 .goToSetpointPID(() -> queuedSetpoint)
                 .alongWith(coralSuperstructure.intakeAlgae())
                 .alongWith(
-                    ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)));
+                    ReefAlign.rotateToNearestReefTagFullField(
+                        drivetrain, driverForward, driverStrafe)));
 
     // RIGHT TRIGGER + ALGAE MODE (PROCESSOR) = GO TO PROCESSOR POSITION + ALIGN
     // // algae outtake
@@ -616,7 +628,17 @@ public class RobotContainer {
                 .onlyIf(
                     isAlgaeSetpoint
                         .and(() -> queuedSetpoint == CoralScorerSetpoint.BARGE)
-                        .and(driver.povLeft().negate())));
+                        .and(driver.povLeft().negate()))
+                .andThen(
+                    coralSuperstructure
+                        .goToSetpointPID(
+                            () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                            () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
+                        .until(
+                            () ->
+                                coralSuperstructure.atTargetState(
+                                    CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
+                                    CoralScorerSetpoint.PREALIGN.getArmAngle()))));
 
     // toggle driver override
     driver.povUp().onTrue(Commands.runOnce(() -> isDriverOverride = !isDriverOverride));

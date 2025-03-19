@@ -343,7 +343,9 @@ public class AutomaticAutonomousMaker3000 {
                 () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
         .andThen(
             ReefAlign.alignToReef(
-                    drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
+                    drive,
+                    () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT,
+                    () -> setpoint)
                 .alongWith(
                     coralSuperstructure.goToSetpointPID(
                         () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
@@ -353,7 +355,9 @@ public class AutomaticAutonomousMaker3000 {
                 .withTimeout(2.5))
         .andThen(
             ReefAlign.alignToReef(
-                    drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
+                    drive,
+                    () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT,
+                    () -> setpoint)
                 .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
                 .withDeadline(
                     Commands.waitSeconds(1)

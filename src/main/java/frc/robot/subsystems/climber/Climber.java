@@ -76,7 +76,7 @@ public class Climber extends SubsystemBase {
   public Command tuneCurrentRampRate() {
     TunableConstant climbCurrentRampRate =
         new TunableConstant(
-            "/Climber/ClimbCurrentRampRate", ClimberConstants.kClimbCurrentRampRate.in(Amps));
+            "/Climber/ClimbCurrentRampRate", ClimberConstants.kClimbVoltageRampRate.in(Volts));
 
     return runOnce(timer::restart)
         .andThen(() -> io.setLockServoAngle(ClimberConstants.kServoUnlockPosition))
@@ -88,7 +88,7 @@ public class Climber extends SubsystemBase {
                                 // over time
                                 -Math.min(
                                     climbCurrentRampRate.get() * timer.get(),
-                                    ClimberConstants.kClimbCurrent.in(Amps)))))
+                                    ClimberConstants.kClimbVoltage.in(Volts)))))
                 .until(
                     () ->
                         inputs.climbAngle.in(Degrees)
@@ -112,18 +112,20 @@ public class Climber extends SubsystemBase {
         .andThen(
             Commands.run(
                     () ->
-                        io.setClimbCurrent(
-                            Amps.of( // Sets the motor to a current control mode, ramping up current
-                                // over time
-                                -Math.min(
-                                    ClimberConstants.kClimbCurrentRampRate.in(Amps) * timer.get(),
-                                    ClimberConstants.kClimbCurrent.in(Amps)))))
+                        io.setClimbVoltage(
+                            Volts
+                                .of( // Sets the motor to a current control mode, ramping up current
+                                    // over time
+                                    -Math.min(
+                                        ClimberConstants.kClimbVoltageRampRate.in(Volts)
+                                            * timer.get(),
+                                        ClimberConstants.kClimbVoltage.in(Volts)))))
                 .until(
                     () ->
                         inputs.climbAngle.in(Degrees)
                             <= ClimberConstants.kClimbThreshold.in(Degrees)))
         .andThen(() -> io.setLockServoAngle(ClimberConstants.kServoLockPosition))
-        .andThen(Commands.run(() -> io.setClimbCurrent(Amps.of(0))));
+        .andThen(Commands.run(() -> io.setClimbVoltage(Volts.of(0))));
   }
 
   // get to a desired angle by setting pivot voltage to sum of calculated pid and feedforward
@@ -169,6 +171,13 @@ public class Climber extends SubsystemBase {
               io.setClimbVoltage(Volts.zero());
               climbHomed = true;
             });
+  }
+
+  public Command zero() {
+    return runOnce(
+        () -> {
+          io.resetEncoder(ClimberConstants.kStartingAngle);
+        });
   }
 
   public boolean climbIsHomed() {

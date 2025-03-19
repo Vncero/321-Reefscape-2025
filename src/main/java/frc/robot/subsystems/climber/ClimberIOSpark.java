@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.Servo;
 @Logged
 public class ClimberIOSpark implements ClimberIO {
 
-  public static final ClimberConfig config = new ClimberConfig(0, 0, 0, 0);
+  public static final ClimberConfig config = new ClimberConfig(2, 0, 0, 0);
 
   private SparkMax climbMotor = new SparkMax(ClimberConstants.kMotorId, MotorType.kBrushless);
 

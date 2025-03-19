@@ -92,7 +92,7 @@ public class CoralSuperstructure {
   }
 
   public Command feedCoral() {
-    return goToSetpointPID(() -> CoralScorerSetpoint.FEED_CORAL)
+    return goToSetpointProfiled(() -> CoralScorerSetpoint.FEED_CORAL)
         .alongWith(endEffector.intakeCoral());
   }
 
@@ -149,16 +149,16 @@ public class CoralSuperstructure {
         ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)),
         Degrees.of(-40)), // TODO: make
     FEED_CORAL(Meters.of(0.965).plus(Inches.of(7)), Degrees.of(-87)),
-    L1(Inches.of(45), Degrees.of(30)), // TODO: actually tune
-    L2(Meters.of(0.95).minus(Inches.of(0.5)), Degrees.of(45)),
+    L1(Meters.of(0.95).minus(Inches.of(0.5)), Degrees.of(45)), // TODO: actually tune
+    L2(Meters.of(0.95).minus(Inches.of(0.0)), Degrees.of(45)),
     // 45, 0.95
     L3(Meters.of(1.15).plus(Inches.of(0)), Degrees.of(75)),
     L4(Meters.of(2.15).plus(Inches.of(0)), Degrees.of(32)),
-    ALGAE_LOW(Meters.of(1.1), Degrees.of(-35)), // TODO: actually tune
-    ALGAE_HIGH(Meters.of(1.45), Degrees.of(-35)), // TODO: actually tune
+    ALGAE_LOW(Meters.of(1.20), Degrees.of(-35)), // TODO: actually tune
+    ALGAE_HIGH(Meters.of(1.55), Degrees.of(-35)), // TODO: actually tune
     PREALIGN(Inches.of(50), Degrees.of(120)),
-    CLIMB(Meters.of(1.4), Degrees.of(0)),
-    BARGE(Meters.of(2), Degrees.of(115));
+    CLIMB(Meters.of(1.1), Degrees.of(0)),
+    BARGE(Meters.of(2.15), Degrees.of(30));
 
     private Distance elevatorHeight; // the height of the elevator to got
     private Angle armAngle; // the angle the arm should go to
