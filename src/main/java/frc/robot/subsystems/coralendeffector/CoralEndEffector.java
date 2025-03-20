@@ -72,14 +72,14 @@ public class CoralEndEffector extends SubsystemBase {
   // shortcut to intake coral
   public Command intakeCoral() {
     return Commands.runOnce(() -> Leds.getInstance().isIntaking = true)
-        .andThen(runAtVelocity(() -> CoralEndEffectorConstants.kIntakeRPM))
+        .andThen(runAtVelocity(() -> CoralEndEffectorConstants.kCoralIntakeRPM))
         .finallyDo(() -> Leds.getInstance().isIntaking = false);
   }
 
   // shortcut to outtake coral
   public Command outtakeCoral() {
     return Commands.runOnce(() -> Leds.getInstance().isOuttaking = true)
-        .andThen(runAtVelocity(() -> CoralEndEffectorConstants.kOuttakeRPM))
+        .andThen(runAtVelocity(() -> CoralEndEffectorConstants.kCoralIntakeRPM))
         .finallyDo(() -> Leds.getInstance().isOuttaking = false);
   }
 
@@ -97,8 +97,6 @@ public class CoralEndEffector extends SubsystemBase {
         () -> {
           if (hasCoral()) {
             return CoralEndEffectorConstants.kCoralStallRPM;
-          } else if (hasAlgae()) {
-            return CoralEndEffectorConstants.kAlgaeStallRPM;
           }
           return RPM.of(0);
         });

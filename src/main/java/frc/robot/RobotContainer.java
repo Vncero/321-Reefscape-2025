@@ -264,7 +264,6 @@ public class RobotContainer {
   private void configureLeds() {
     // Driving LED signals
     leds.registerSignal(0, () -> true, () -> LedsConstants.kDefault);
-    leds.registerSignal(1, () -> coralSuperstructure.hasAlgae(), () -> LedsConstants.kHasAlgae);
     leds.registerSignal(2, () -> coralSuperstructure.hasCoral(), () -> LedsConstants.kHasCoral);
     leds.registerSignal(
         3,
@@ -511,7 +510,7 @@ public class RobotContainer {
         .whileTrue(
             coralSuperstructure
                 .goToSetpointPID(() -> queuedSetpoint)
-                .alongWith(coralSuperstructure.intakeAlgae())
+                .alongWith(coralSuperstructure.knockAlgae())
                 .alongWith(
                     ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)));
 
@@ -593,7 +592,7 @@ public class RobotContainer {
         .and(() -> queuedSetpoint == CoralScorerSetpoint.BARGE)
         .onFalse(
             coralSuperstructure
-                .outtakeAlgae()
+                .knockAlgae()
                 .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.BARGE))
                 .withTimeout(0.5)
                 .onlyIf(

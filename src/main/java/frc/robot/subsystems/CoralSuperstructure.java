@@ -12,6 +12,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.coralendeffector.CoralEndEffector;
+import frc.robot.subsystems.coralendeffector.CoralEndEffectorConstants;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
@@ -100,14 +101,6 @@ public class CoralSuperstructure {
     return endEffector.outtakeCoral();
   }
 
-  public Command intakeAlgae() {
-    return endEffector.intakeAlgae();
-  }
-
-  public Command outtakeAlgae() {
-    return endEffector.outtakeAlgae();
-  }
-
   public Distance getTargetHeight() {
     return targetHeight;
   }
@@ -120,8 +113,8 @@ public class CoralSuperstructure {
     return endEffector.hasCoral();
   }
 
-  public boolean hasAlgae() {
-    return endEffector.hasAlgae();
+  public Command knockAlgae() {
+    return endEffector.runAtVelocity(() -> CoralEndEffectorConstants.kAlgaeOuttakeRPM);
   }
 
   public Command tune() {
