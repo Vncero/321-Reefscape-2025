@@ -109,7 +109,7 @@ public class RobotContainer {
       () -> -MathUtil.applyDeadband(driver.getRightX(), DrivetrainConstants.kRotationDeadband) * 5;
 
   // robot queued states
-  private ReefPosition queuedReefPosition = ReefPosition.ALGAE;
+  private ReefPosition queuedReefPosition = ReefPosition.RIGHT;
   private CoralScorerSetpoint queuedSetpoint = CoralScorerSetpoint.L4;
 
   private SuperstructureVisualizer stateVisualizer =
@@ -429,15 +429,6 @@ public class RobotContainer {
                                                     .in(Meters))),
                                     () -> queuedSetpoint.getArmAngle())
                                 .until(drivetrain::atFinalPoseSetpoint)
-                                .andThen(
-                                    coralSuperstructure.goToSetpointProfiled(
-                                        () -> queuedSetpoint.getElevatorHeight(),
-                                        () -> queuedSetpoint.getArmAngle()))
-                                .until(
-                                    () ->
-                                        coralSuperstructure.atTargetState(
-                                            queuedSetpoint.getElevatorHeight(),
-                                            queuedSetpoint.getArmAngle()))
                                 .andThen(
                                     coralSuperstructure.goToSetpointProfiled(() -> queuedSetpoint))
                                 .onlyWhile(

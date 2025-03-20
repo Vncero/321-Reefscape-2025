@@ -29,7 +29,7 @@ import edu.wpi.first.units.measure.Voltage;
 // For when Elevator is real
 public class ElevatorIOTalon implements ElevatorIO {
   // Creates config record w/ values
-  public static final ElevatorConfig config = new ElevatorConfig(50, 0, 0, 0.4, 0, 0.25, 0.01);
+  public static final ElevatorConfig config = new ElevatorConfig(50, 0, 0, 0, 0, 0.25, 0.01);
 
   // Creates motor objects
 
