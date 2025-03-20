@@ -17,7 +17,7 @@ import frc.robot.subsystems.leds.Leds;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
 
-// coral end effector subsystem
+// coral end effector subsystem (now a coral / algae end effector mechanism)
 @Logged
 public class CoralEndEffector extends SubsystemBase {
   private CoralEndEffectorInputs inputs;
@@ -92,11 +92,13 @@ public class CoralEndEffector extends SubsystemBase {
   }
 
   // stalls coral if we have a coral; this should be the default command
-  public Command stallCoralIfDetected() {
+  public Command stallCoralOrAlgaeIfDetected() {
     return runAtVelocity(
         () -> {
           if (hasCoral()) {
-            return CoralEndEffectorConstants.kStallRPM;
+            return CoralEndEffectorConstants.kCoralStallRPM;
+          } else if (hasAlgae()) {
+            return CoralEndEffectorConstants.kAlgaeStallRPM;
           }
           return RPM.of(0);
         });

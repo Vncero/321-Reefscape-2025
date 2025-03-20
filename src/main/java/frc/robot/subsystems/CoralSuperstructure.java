@@ -12,7 +12,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.coralendeffector.CoralEndEffector;
-import frc.robot.subsystems.coralendeffector.CoralEndEffectorConstants;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
@@ -101,8 +100,12 @@ public class CoralSuperstructure {
     return endEffector.outtakeCoral();
   }
 
-  public Command knockAlgae() {
-    return endEffector.runAtVelocity(() -> CoralEndEffectorConstants.kAlgaeKnockRPM);
+  public Command intakeAlgae() {
+    return endEffector.intakeAlgae();
+  }
+
+  public Command outtakeAlgae() {
+    return endEffector.outtakeAlgae();
   }
 
   public Distance getTargetHeight() {
@@ -115,6 +118,10 @@ public class CoralSuperstructure {
 
   public boolean hasCoral() {
     return endEffector.hasCoral();
+  }
+
+  public boolean hasAlgae() {
+    return endEffector.hasAlgae();
   }
 
   public Command tune() {
@@ -147,10 +154,11 @@ public class CoralSuperstructure {
     L2(Meters.of(0.95).minus(Inches.of(0.5)), Degrees.of(95)),
     L3(Meters.of(1.3).plus(Inches.of(1.25)), Degrees.of(95)),
     L4(Meters.of(2.06).plus(Inches.of(1)), Degrees.of(85)),
-    ALGAE_LOW(Meters.of(1), Degrees.of(40)), // TODO: actually tune
-    ALGAE_HIGH(Meters.of(1.4), Degrees.of(40)), // TODO: actually tune
+    ALGAE_LOW(Meters.of(0.9), Degrees.of(-20)), // TODO: actually tune
+    ALGAE_HIGH(Meters.of(1.3), Degrees.of(-20)), // TODO: actually tune
     PREALIGN(Inches.of(50), Degrees.of(120)),
-    CLIMB(Meters.of(1.4), Degrees.of(0));
+    CLIMB(Meters.of(1.4), Degrees.of(0)),
+    BARGE(Meters.of(2), Degrees.of(40));
 
     private Distance elevatorHeight; // the height of the elevator to got
     private Angle armAngle; // the angle the arm should go to
