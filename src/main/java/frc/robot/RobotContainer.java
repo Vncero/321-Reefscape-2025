@@ -81,10 +81,18 @@ public class RobotContainer {
   private CommandXboxController driver = new CommandXboxController(0);
   private XboxController manipulator = new XboxController(1);
 
+  private boolean isDriverOverride = false;
+  private boolean isClimbing = false;
+
   private Trigger isSlowMode =
       driver
           .leftBumper()
-          .or(() -> elevator.getHeight().in(Meters) > ElevatorConstants.kSlowedHeight.in(Meters));
+          .or(() -> elevator.getHeight().in(Meters) > ElevatorConstants.kSlowedHeight.in(Meters))
+          .or(
+              () ->
+                  isClimbing
+                      && ClimberConstants.kBargeZone.contains(
+                          drivetrain.getPose().getTranslation()));
 
   private DoubleSupplier driverForward =
       () ->
@@ -119,8 +127,6 @@ public class RobotContainer {
 
   private Leds leds = Leds.getInstance();
   private AddressableLEDSim ledSim = new AddressableLEDSim(leds.strip);
-  private boolean isDriverOverride = false;
-  private boolean isClimbing = false;
 
   private Trigger isAlgaeSetpoint =
       new Trigger(
