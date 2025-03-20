@@ -539,6 +539,7 @@ public class RobotContainer {
     driver
         .rightBumper()
         .and(isAlgaeSetpoint)
+        .and(() -> !coralSuperstructure.hasCoral())
         .whileTrue(
             coralSuperstructure
                 .goToSetpointPID(() -> queuedSetpoint)
