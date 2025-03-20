@@ -264,15 +264,13 @@ public class RobotContainer {
   private void configureLeds() {
     // Driving LED signals
     leds.registerSignal(0, () -> true, () -> LedsConstants.kDefault);
-    leds.registerSignal(1, () -> coralSuperstructure.hasAlgae(), () -> LedsConstants.kHasAlgae);
     leds.registerSignal(2, () -> coralSuperstructure.hasCoral(), () -> LedsConstants.kHasCoral);
     leds.registerSignal(
         3,
         () -> algaeSuperstructure.hasAlgae() && coralSuperstructure.hasCoral(),
         () -> LedsConstants.kHasCoralAndAlgae);
-    leds.registerSignal(4, () -> coralEndEffector.isIntaking(), () -> LedsConstants.kIntaking);
-    leds.registerSignal(5, () -> coralEndEffector.isOuttaking(), () -> LedsConstants.kOuttaking);
-
+    leds.registerSignal(4, () -> leds.isIntaking, () -> LedsConstants.kIntaking);
+    leds.registerSignal(5, () -> leds.isOuttaking, () -> LedsConstants.kOuttaking);
     leds.registerSignal(6, () -> leds.isRotateAligning, () -> LedsConstants.kRotationAligning);
 
     leds.registerSignal(
@@ -300,7 +298,13 @@ public class RobotContainer {
   private void configureBindings() {
     // driver controls
     // score coral / flip off algae
-    driver.y().toggleOnTrue(climber.goToAngle(() -> ClimberConstants.kClimbPrepAngle));
+    driver
+        .y()
+        .toggleOnTrue(
+            climber
+                .goToAngle(() -> ClimberConstants.kClimbPrepAngle)
+                .beforeStarting(() -> isClimbing = true)
+                .finallyDo(() -> isClimbing = false));
     driver.a().onTrue(climber.climb());
 
     // --- CORAL AUTOMATED CONTROLS ---
@@ -506,7 +510,7 @@ public class RobotContainer {
         .whileTrue(
             coralSuperstructure
                 .goToSetpointPID(() -> queuedSetpoint)
-                .alongWith(coralSuperstructure.intakeAlgae())
+                .alongWith(coralSuperstructure.knockAlgae())
                 .alongWith(
                     ReefAlign.rotateToNearestReefTag(drivetrain, driverForward, driverStrafe)));
 
@@ -588,7 +592,7 @@ public class RobotContainer {
         .and(() -> queuedSetpoint == CoralScorerSetpoint.BARGE)
         .onFalse(
             coralSuperstructure
-                .outtakeAlgae()
+                .knockAlgae()
                 .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.BARGE))
                 .withTimeout(0.5)
                 .onlyIf(
