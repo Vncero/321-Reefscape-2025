@@ -282,7 +282,8 @@ public class AutomaticAutonomousMaker3000 {
                   .alongWith(
                       coralSuperstructure.goToSetpointPID(
                           () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
-                          () -> CoralScorerSetpoint.PREALIGN.getArmAngle())));
+                          () -> CoralScorerSetpoint.PREALIGN.getArmAngle()),
+                      coralSuperstructure.stopIntake()));
 
       return new PathsAndAuto(auto, paths);
     } catch (Exception e) {
@@ -306,6 +307,7 @@ public class AutomaticAutonomousMaker3000 {
                 .goToSetpointPID(
                     () -> CoralScorerSetpoint.NEUTRAL.getElevatorHeight(),
                     () -> CoralScorerSetpoint.PREALIGN.getArmAngle())
+                .alongWith(coralSuperstructure.stopIntake())
                 .until(
                     () ->
                         coralSuperstructure.atTargetState(
@@ -332,17 +334,22 @@ public class AutomaticAutonomousMaker3000 {
                 setpoint.getElevatorHeight().in(Meters)));
 
     return path.deadlineFor(
-            coralSuperstructure.goToSetpointProfiled(
-                () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
+            coralSuperstructure
+                .goToSetpointProfiled(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected()))
         .andThen(
             ReefAlign.alignToReef(
                     drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
                 .alongWith(
                     coralSuperstructure.goToSetpointPID(
-                        () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()))
+                        () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()),
+                    coralSuperstructure.getEndEffector().stallCoralIfDetected())
                 .until(() -> drive.atPoseSetpoint())
-                .andThen(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
-                .until(() -> coralSuperstructure.atTargetState())
+                .andThen(
+                    coralSuperstructure
+                        .goToSetpointProfiled(() -> setpoint)
+                        .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
+                        .until(() -> coralSuperstructure.atTargetState(setpoint)))
                 .withTimeout(2.5))
         .andThen(
             ReefAlign.alignToReef(

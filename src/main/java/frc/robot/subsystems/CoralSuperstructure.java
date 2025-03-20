@@ -4,6 +4,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
@@ -71,6 +72,10 @@ public class CoralSuperstructure {
                 }));
   }
 
+  public Command stopIntake() {
+    return endEffector.runAtVelocity(() -> RPM.zero());
+  }
+
   public void goToSetpoint(CoralScorerSetpoint setpoint) {
     goToSetpoint(setpoint.getElevatorHeight(), setpoint.getArmAngle());
   }
@@ -132,8 +137,14 @@ public class CoralSuperstructure {
         .andThen(arm.goToAngleProfiled(() -> Degrees.of(armAngle.get())));
   }
 
+  @NotLogged
   public Elevator getElevator() {
     return elevator;
+  }
+
+  @NotLogged
+  public CoralEndEffector getEndEffector() {
+    return endEffector;
   }
 
   public enum CoralScorerSetpoint {

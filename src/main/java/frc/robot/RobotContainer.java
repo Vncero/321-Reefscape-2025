@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.auto.AutomaticAutonomousMaker3000;
 import frc.robot.commands.ControllerCommands;
+import frc.robot.commands.HomingCommands;
 import frc.robot.commands.ReefAlign;
 import frc.robot.commands.StationAlign;
 import frc.robot.subsystems.AlgaeSuperstructure;
@@ -153,6 +154,8 @@ public class RobotContainer {
     RobotModeTriggers.disabled()
         .negate()
         .onTrue(elevator.homeEncoder().onlyIf(() -> !elevator.elevatorIsHomed()));
+
+    RobotModeTriggers.disabled().negate().onTrue(HomingCommands.homeClimber(climber));
 
     // drive
     drivetrain.setDefaultCommand(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn));
@@ -326,8 +329,6 @@ public class RobotContainer {
             climber
                 .climb()
                 .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)));
-    driver.b().whileTrue(climber.setMechanismVoltage(() -> Volts.of(-2)));
-    driver.x().onTrue(climber.zero());
 
     // driver.a().whileTrue(elevator.setVoltage(() -> Volts.of(2)));
     // driver.b().whileTrue(elevator.setVoltage(() -> Volts.of(-2)));
