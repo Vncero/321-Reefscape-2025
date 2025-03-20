@@ -170,12 +170,6 @@ public class AutomaticAutonomousMaker3000 {
     return storedAuto;
   }
 
-  // public void PathPlannerTrajectory(PathPlannerPath path, ChassisSpeeds startingSpeeds,
-  // Rotation2d startingRotation, RobotConfig config){
-  //     .getTotalTime()
-  //      return TotalTime;
-  // }
-
   private PathsAndAuto runPath(String pathName) {
     try {
       PathPlannerPath path = getPath(pathName);

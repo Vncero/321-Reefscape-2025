@@ -317,9 +317,17 @@ public class RobotContainer {
             climber
                 .goToAngle(() -> ClimberConstants.kClimbPrepAngle)
                 .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)));
-    driver.a().onTrue(climber.climb());
+    driver
+        .a()
+        .onTrue(
+            climber
+                .climb()
+                .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)));
     driver.b().whileTrue(climber.setMechanismVoltage(() -> Volts.of(-2)));
     driver.x().onTrue(climber.zero());
+
+    // driver.a().whileTrue(elevator.setVoltage(() -> Volts.of(2)));
+    // driver.b().whileTrue(elevator.setVoltage(() -> Volts.of(-2)));
 
     // --- CORAL AUTOMATED CONTROLS ---
     // RIGHT BUMPER + CORAL MODE = INTAKE CORAL

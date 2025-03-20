@@ -164,7 +164,7 @@ public class Climber extends SubsystemBase {
     return run(() -> {
           io.setClimbVoltage(ClimberConstants.kClimbHomeVoltage);
         })
-        .until(() -> inputs.limitSwitchHit)
+        .until(() -> inputs.climbCurrent.in(Amps) >= ClimberConstants.kClimbHomeCurrent.in(Amps))
         .andThen(
             () -> {
               io.resetEncoder(ClimberConstants.kStartingAngle);

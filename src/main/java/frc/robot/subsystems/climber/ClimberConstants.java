@@ -1,12 +1,14 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.climber;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
 
@@ -14,7 +16,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class ClimberConstants {
   // climb motor IDs
   public static final int kMotorId = 20; // placeholder id
-  public static final int kServoPort = 2;
+  public static final int kServoPort = 0;
   public static final int kLimitSwitchPort = 0;
 
   // climb physical constants
@@ -33,17 +35,19 @@ public class ClimberConstants {
 
   // climb motor config
   public static final boolean kClimbInverted = false;
-  public static final int kSmartCurrentLimit = 40;
+  public static final int kSmartCurrentLimit = 60;
   public static final double kClimbPositionConversionFactor = 360 / kClimbGearing;
   public static final double kClimbVelocityConversionFactor = kClimbPositionConversionFactor / 60;
   public static final Voltage kClimbHomeVoltage = Volts.of(-4);
 
+  public static final Current kClimbHomeCurrent = Amps.of(30);
+
   public static final Voltage kNominalVoltage = Volts.of(12);
-  public static final Angle kClimbThreshold = Degrees.of(-25); // to be tuned
+  public static final Angle kClimbThreshold = Degrees.of(0); // to be tuned
 
   public static final Voltage kClimbVoltageRampRate =
       Volts.of(1); // placeholder, will need to tune this
-  public static final Voltage kClimbVoltage = Volts.of(9); // placeholder
+  public static final Voltage kClimbVoltage = Volts.of(12); // placeholder
 
   public static final Angle kControllerTolerance = Degrees.of(1);
 }

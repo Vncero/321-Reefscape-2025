@@ -21,7 +21,7 @@ public class LedsConstants {
 
   // DRIVING PATTERNS
   // default mode - meteor yellow. TODO: add meteor pattern or something cool like that
-  public static final LEDPattern kDefault = LEDPattern.kOff;
+  public static final LEDPattern kDefault = LEDPattern.rainbow(255, 255);
 
   // climb mode - solid blue
   public static final LEDPattern kClimbing = LEDPattern.solid(Color.kBlue);
