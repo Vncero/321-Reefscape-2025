@@ -281,9 +281,8 @@ public class RobotContainer {
         3,
         () -> algaeSuperstructure.hasAlgae() && coralSuperstructure.hasCoral(),
         () -> LedsConstants.kHasCoralAndAlgae);
-    leds.registerSignal(4, () -> coralEndEffector.isIntaking(), () -> LedsConstants.kIntaking);
-    leds.registerSignal(5, () -> coralEndEffector.isOuttaking(), () -> LedsConstants.kOuttaking);
-
+    leds.registerSignal(4, () -> leds.isIntaking, () -> LedsConstants.kIntaking);
+    leds.registerSignal(5, () -> leds.isOuttaking, () -> LedsConstants.kOuttaking);
     leds.registerSignal(6, () -> leds.isRotateAligning, () -> LedsConstants.kRotationAligning);
 
     leds.registerSignal(
@@ -316,7 +315,11 @@ public class RobotContainer {
         .toggleOnTrue(
             climber
                 .goToAngle(() -> ClimberConstants.kClimbPrepAngle)
-                .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)));
+                .alongWith(
+                    coralSuperstructure
+                        .goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)
+                        .beforeStarting(() -> isClimbing = true)
+                        .finallyDo(() -> isClimbing = false)));
     driver
         .a()
         .onTrue(
