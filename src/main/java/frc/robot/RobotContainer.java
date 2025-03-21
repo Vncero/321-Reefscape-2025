@@ -159,6 +159,7 @@ public class RobotContainer {
     // home everything on robot start
     RobotModeTriggers.disabled()
         .negate()
+        .and(RobotModeTriggers.teleop())
         .onTrue(elevator.homeEncoder().onlyIf(() -> !elevator.elevatorIsHomed()));
 
     RobotModeTriggers.disabled().negate().onTrue(HomingCommands.homeClimber(climber));
