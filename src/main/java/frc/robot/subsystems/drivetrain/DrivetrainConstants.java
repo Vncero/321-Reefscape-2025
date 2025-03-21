@@ -44,7 +44,7 @@ public class DrivetrainConstants {
 
   public static final double kDriveDeadband = 0.05;
   public static final double kRotationDeadband = 0.05;
-  public static final AngularVelocity kMaxAngularVelocity = RadiansPerSecond.of(Math.PI * 15);
+  public static final AngularVelocity kMaxAngularVelocity = RadiansPerSecond.of(5);
   public static final LinearVelocity kMaxLinearVelocity =
       MetersPerSecond.of(5.0); // TunerConstants.kSpeedAt12Volts
 

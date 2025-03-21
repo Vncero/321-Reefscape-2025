@@ -3,6 +3,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -115,7 +116,9 @@ public class RobotContainer {
                   : DrivetrainConstants.kMaxLinearVelocity.in(MetersPerSecond));
 
   private DoubleSupplier driverTurn =
-      () -> -MathUtil.applyDeadband(driver.getRightX(), DrivetrainConstants.kRotationDeadband) * 5;
+      () ->
+          -MathUtil.applyDeadband(driver.getRightX(), DrivetrainConstants.kRotationDeadband)
+              * DrivetrainConstants.kMaxAngularVelocity.in(RadiansPerSecond);
 
   // robot queued states
   private ReefPosition queuedReefPosition = ReefPosition.RIGHT;
