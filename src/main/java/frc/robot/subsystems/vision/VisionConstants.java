@@ -130,10 +130,9 @@ public class VisionConstants {
           kOV9281);
 
   public static final CameraConfig[] kCameraConfigs = {
-    kElevatorTopCameraConfig,
-    kElevatorBottomCameraConfig,
+    kElevatorTopCameraConfig, kElevatorBottomCameraConfig
     // kFrontSwerveCameraConfig,
-    kBackLeftSwerveCameraConfig
+    // kBackLeftSwerveCameraConfig
   };
 
   // camera data filtering

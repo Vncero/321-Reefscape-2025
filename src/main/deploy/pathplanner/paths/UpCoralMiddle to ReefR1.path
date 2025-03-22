@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.7981557377049182,
-        "y": 6.896055327868853
+        "x": 2.757172131147541,
+        "y": 7.423514344262295
       },
       "isLocked": false,
       "linkedName": "UpCoralMiddle"
@@ -20,8 +20,8 @@
         "y": 5.529456967213114
       },
       "prevControl": {
-        "x": 4.950922131147539,
-        "y": 5.68529713114754
+        "x": 5.46639344262295,
+        "y": 6.008965163934425
       },
       "nextControl": null,
       "isLocked": false,
@@ -40,7 +40,7 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
+    "maxVelocity": 4.5,
     "maxAcceleration": 3.5,
     "maxAngularVelocity": 720.0,
     "maxAngularAcceleration": 1200.0,

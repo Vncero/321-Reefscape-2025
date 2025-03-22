@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.auto.AutomaticAutonomousMaker3000;
 import frc.robot.commands.ControllerCommands;
-import frc.robot.commands.HomingCommands;
 import frc.robot.commands.ReefAlign;
 import frc.robot.commands.StationAlign;
 import frc.robot.subsystems.AlgaeSuperstructure;
@@ -165,7 +164,7 @@ public class RobotContainer {
         .and(RobotModeTriggers.teleop())
         .onTrue(elevator.homeEncoder().onlyIf(() -> !elevator.elevatorIsHomed()));
 
-    RobotModeTriggers.disabled().negate().onTrue(HomingCommands.homeClimber(climber));
+    // RobotModeTriggers.disabled().negate().onTrue(HomingCommands.homeClimber(climber));
 
     // drive
     drivetrain.setDefaultCommand(drivetrain.teleopDrive(driverForward, driverStrafe, driverTurn));
@@ -189,9 +188,8 @@ public class RobotContainer {
     // coralEndEffector.setDefaultCommand(coralEndEffector.runVolts(() -> Volts.of(1)));
 
     climber.setDefaultCommand(
-        climber.setMechanismVoltage(() -> Volts.zero())
-        // climber.goToAngle(() -> ClimberConstants.kDefaultAngle)
-        );
+        // climber.setMechanismVoltage(() -> Volts.zero())
+        climber.goToAngle(() -> ClimberConstants.kDefaultAngle));
 
     leds.setDefaultCommand(leds.updateLeds());
 
@@ -255,7 +253,7 @@ public class RobotContainer {
     //               System.out.println("Changing volts to: " + volts);
     //             }));
 
-    // driver.a().whileTrue(ReefAlign.tuneAlignment(drivetrain));
+    driver.y().whileTrue(ReefAlign.tuneAlignment(drivetrain));
 
     // driver.b().whileTrue(coralSuperstructure.feedCoral());
 
@@ -309,9 +307,14 @@ public class RobotContainer {
     leds.registerSignal(
         8, () -> leds.isReefAligning, () -> LedsConstants.kReefAligning(reefAlignProgressPercent));
 
+    leds.registerSignal(
+        9,
+        () -> leds.isReefAligning && drivetrain.atFinalPoseSetpoint(),
+        () -> LedsConstants.kReefAligned);
+
     // when we are aligned, also works when manually aligning
-    leds.registerSignal(9, () -> isDriverOverride, () -> LedsConstants.kAlignOverride);
-    leds.registerSignal(10, () -> isClimbing, () -> LedsConstants.kClimbing);
+    leds.registerSignal(10, () -> isDriverOverride, () -> LedsConstants.kAlignOverride);
+    leds.registerSignal(11, () -> isClimbing, () -> LedsConstants.kClimbing);
 
     // Error State LED Signals
     leds.registerSignal(
