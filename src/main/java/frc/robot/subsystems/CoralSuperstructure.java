@@ -158,7 +158,7 @@ public class CoralSuperstructure {
     ALGAE_LOW(Meters.of(1), Degrees.of(40)),
     ALGAE_HIGH(Meters.of(1.4), Degrees.of(40)),
     PREALIGN(Inches.of(55), Degrees.of(120)),
-    CLIMB(Meters.of(1.1), Degrees.of(150));
+    CLIMB(Meters.of(1.1), Degrees.of(0));
 
     private Distance elevatorHeight; // the height of the elevator to got
     private Angle armAngle; // the angle the arm should go to
