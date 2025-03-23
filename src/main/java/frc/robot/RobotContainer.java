@@ -543,7 +543,7 @@ public class RobotContainer {
 
     // RIGHT BUMPER + ALGAE MODE = INTAKE ALGAE
     driver
-        .rightBumper()
+        .rightTrigger()
         .and(isAlgaeSetpoint)
         .and(() -> !coralSuperstructure.hasCoral())
         .whileTrue(

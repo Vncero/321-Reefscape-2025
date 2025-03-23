@@ -359,7 +359,7 @@ public class AutomaticAutonomousMaker3000 {
                     drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
                 .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
                 .withDeadline(
-                    Commands.waitSeconds(0.2)
+                    Commands.waitSeconds(0.5)
                         .andThen(
                             coralSuperstructure
                                 .outtakeCoral()
