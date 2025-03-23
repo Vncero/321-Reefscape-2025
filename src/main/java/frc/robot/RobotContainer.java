@@ -153,7 +153,9 @@ public class RobotContainer {
   public RobotContainer() {
 
     // reset elevator arm encoder on robot enable
-    RobotModeTriggers.disabled().negate().onTrue(elevatorArm.seedEncoder());
+    RobotModeTriggers.disabled()
+        .negate()
+        .onTrue(elevatorArm.seedEncoder().onlyIf(() -> !elevatorArm.hasSeeded()));
 
     // home everything on robot start
     RobotModeTriggers.disabled()
@@ -339,6 +341,8 @@ public class RobotContainer {
             climber
                 .climb()
                 .alongWith(coralSuperstructure.goToSetpointPID(() -> CoralScorerSetpoint.CLIMB)));
+
+    driver.b().onTrue(elevatorArm.seedEncoder());
 
     // driver.a().whileTrue(elevator.setVoltage(() -> Volts.of(2)));
     // driver.b().whileTrue(elevator.setVoltage(() -> Volts.of(-2)));

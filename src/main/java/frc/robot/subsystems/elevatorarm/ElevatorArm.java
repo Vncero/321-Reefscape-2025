@@ -42,6 +42,7 @@ public class ElevatorArm extends SubsystemBase {
   private TrapezoidProfile profile;
   private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
   private double goalAngle;
+  private boolean hasSeeded = false;
 
   // config for the arm
   private ElevatorArmConfig config;
@@ -164,7 +165,16 @@ public class ElevatorArm extends SubsystemBase {
   }
 
   public Command seedEncoder() {
-    return Commands.runOnce(() -> io.seedEncoderValues());
+    return Commands.runOnce(
+        () -> {
+          io.seedEncoderValues();
+          System.out.println("Seeded.");
+          this.hasSeeded = true;
+        });
+  }
+
+  public boolean hasSeeded() {
+    return hasSeeded;
   }
 
   /**
