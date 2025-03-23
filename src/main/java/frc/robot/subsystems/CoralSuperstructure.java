@@ -152,7 +152,7 @@ public class CoralSuperstructure {
     NEUTRAL(ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40)),
     FEED_CORAL(Meters.of(0.885), Degrees.of(-87)),
     L1(Inches.of(45), Degrees.of(30)),
-    L2(Meters.of(0.95).plus(Inches.of(0.5)), Degrees.of(95)),
+    L2(Meters.of(0.96), Degrees.of(95)),
     L3(Meters.of(1.3).plus(Inches.of(1.25)), Degrees.of(95)),
     L4(Meters.of(2.06).plus(Inches.of(0.5)), Degrees.of(85)),
     ALGAE_LOW(Meters.of(1), Degrees.of(40)),
