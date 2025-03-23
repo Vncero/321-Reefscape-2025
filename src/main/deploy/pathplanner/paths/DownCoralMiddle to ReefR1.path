@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 4.878995901639344,
-        "y": 0.4586577868852467
+        "y": 0.45865778688524683
       },
       "isLocked": false,
       "linkedName": "DownCoralMiddle"
@@ -40,7 +40,7 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.5,
+    "maxVelocity": 3.5,
     "maxAcceleration": 3.5,
     "maxAngularVelocity": 720.0,
     "maxAngularAcceleration": 1200.0,

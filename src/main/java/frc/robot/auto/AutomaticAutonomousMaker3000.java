@@ -31,7 +31,7 @@ import org.json.simple.parser.ParseException;
 @Logged
 public class AutomaticAutonomousMaker3000 {
 
-  private static final LinearVelocity kScorePathEndVelocity = MetersPerSecond.of(1.0);
+  private static final LinearVelocity kScorePathEndVelocity = MetersPerSecond.of(0);
 
   private CycleAutoChooser autoChooser = new CycleAutoChooser(5);
 
