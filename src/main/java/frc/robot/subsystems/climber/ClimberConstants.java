@@ -40,7 +40,7 @@ public class ClimberConstants {
   public static final int kSmartCurrentLimit = 60;
   public static final double kClimbPositionConversionFactor = 360 / kClimbGearing;
   public static final double kClimbVelocityConversionFactor = kClimbPositionConversionFactor / 60;
-  public static final Voltage kClimbHomeVoltage = Volts.of(-4);
+  public static final Voltage kClimbHomeVoltage = Volts.of(-3);
 
   public static final Current kClimbHomeCurrent = Amps.of(30);
 
@@ -48,7 +48,7 @@ public class ClimberConstants {
   public static final Angle kClimbThreshold = Degrees.of(0); // to be tuned
 
   public static final Voltage kClimbVoltageRampRate =
-      Volts.of(1); // placeholder, will need to tune this
+      Volts.of(3); // placeholder, will need to tune this
   public static final Voltage kClimbVoltage = Volts.of(12); // placeholder
 
   public static final Angle kControllerTolerance = Degrees.of(1);
