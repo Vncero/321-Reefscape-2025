@@ -215,7 +215,7 @@ public class RobotContainer {
     driver.a().whileTrue(coralSuperstructure.tune());
     // driver.b().whileTrue(coralSuperstructure.feedCoral());
     driver.leftBumper().whileTrue(coralEndEffector.intakeCoral());
-    driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral());
+    driver.rightBumper().whileTrue(coralEndEffector.outtakeCoral(()-> queuedSetpoint));
 
     // driver.a().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-2000)));
     // driver.b().whileTrue(coralEndEffector.runAtVelocity(() -> RPM.of(-3000)));
@@ -464,7 +464,7 @@ public class RobotContainer {
         .onFalse( // for coral scoring
             coralSuperstructure
                 .goToSetpointPID(() -> queuedSetpoint) // ensure we're at the setpoint
-                .alongWith(coralSuperstructure.outtakeCoral())
+                .alongWith(coralSuperstructure.outtakeCoral(()-> queuedSetpoint))
                 .onlyIf(
                     () ->
                         coralSuperstructure.atTargetState(queuedSetpoint)
@@ -509,7 +509,7 @@ public class RobotContainer {
         .onFalse(
             coralSuperstructure
                 .goToSetpointPID(() -> queuedSetpoint) // ensure we're at the setpoint
-                .alongWith(coralSuperstructure.outtakeCoral())
+                .alongWith(coralSuperstructure.outtakeCoral(()-> queuedSetpoint))
                 .onlyIf(
                     () ->
                         coralSuperstructure.atTargetState(queuedSetpoint)
