@@ -362,7 +362,7 @@ public class AutomaticAutonomousMaker3000 {
                     Commands.waitSeconds(0.5)
                         .andThen(
                             coralSuperstructure
-                                .outtakeCoral()
+                                .outtakeCoral(() -> setpoint)
                                 // .until(() -> !coralSuperstructure.hasCoral())
                                 .withTimeout(0.5))));
   }
