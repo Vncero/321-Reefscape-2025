@@ -77,14 +77,12 @@ public class CoralEndEffector extends SubsystemBase {
         .finallyDo(() -> Leds.getInstance().isIntaking = false);
   }
 
-    // shortcut to outtake coral
-    public Command outtakeCoral(Supplier<CoralScorerSetpoint> setpoint) {
-      return Commands.runOnce(() -> Leds.getInstance().isOuttaking = true)
-          .andThen(
-            runAtVelocity(() -> setpoint.get().getOuttakeVelocity())
-          )
-          .finallyDo(() -> Leds.getInstance().isOuttaking = false);
-    }
+  // shortcut to outtake coral
+  public Command outtakeCoral(Supplier<CoralScorerSetpoint> setpoint) {
+    return Commands.runOnce(() -> Leds.getInstance().isOuttaking = true)
+        .andThen(runAtVelocity(() -> setpoint.get().getOuttakeVelocity()))
+        .finallyDo(() -> Leds.getInstance().isOuttaking = false);
+  }
 
   public Command runVolts(Supplier<Voltage> voltage) {
     return run(() -> io.setVoltage(voltage.get()));

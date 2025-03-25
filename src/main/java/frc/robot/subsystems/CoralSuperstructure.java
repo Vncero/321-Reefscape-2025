@@ -6,8 +6,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.units.measure.Angle;
@@ -21,6 +19,7 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevatorarm.ElevatorArm;
 import frc.robot.util.TunableConstant;
+import java.util.function.Supplier;
 
 @Logged
 public class CoralSuperstructure {
@@ -151,15 +150,22 @@ public class CoralSuperstructure {
 
   public enum CoralScorerSetpoint {
     // TODO: determine angles empirically
-    NEUTRAL(ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40), RPM.of(0)),
+    NEUTRAL(
+        ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40), RPM.of(0)),
     FEED_CORAL(Meters.of(0.885), Degrees.of(-87), CoralEndEffectorConstants.kCoralIntakeRPM),
     L1(Inches.of(45), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM),
     L2(Meters.of(0.96), Degrees.of(95), CoralEndEffectorConstants.kL2OuttakeRPM),
-    L3(Meters.of(1.3).plus(Inches.of(1.25)), Degrees.of(95), CoralEndEffectorConstants.kL3OuttakeRPM),
-    L4(Meters.of(2.06).plus(Inches.of(0.5)), Degrees.of(85), CoralEndEffectorConstants.kL4OuttakeRPM),
+    L3(
+        Meters.of(1.3).plus(Inches.of(1.25)),
+        Degrees.of(95),
+        CoralEndEffectorConstants.kL3OuttakeRPM),
+    L4(
+        Meters.of(2.06).plus(Inches.of(0.5)),
+        Degrees.of(85),
+        CoralEndEffectorConstants.kL4OuttakeRPM),
     ALGAE_LOW(Meters.of(1), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
     ALGAE_HIGH(Meters.of(1.4), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
-    PREALIGN(Inches.of(55), Degrees.of(120),RPM.of(0)),
+    PREALIGN(Inches.of(55), Degrees.of(120), RPM.of(0)),
     CLIMB(Meters.of(1.1), Degrees.of(0), RPM.of(0));
 
     private Distance elevatorHeight; // the height of the elevator to got
