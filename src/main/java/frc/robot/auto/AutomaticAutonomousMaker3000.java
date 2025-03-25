@@ -5,18 +5,13 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -44,7 +39,6 @@ public class AutomaticAutonomousMaker3000 {
   private String pathError = "";
   private List<Pose2d> visualizePath = new ArrayList<>();
   private SendableChooser<PreBuiltAuto> preBuiltAuto = new SendableChooser<>();
-  private List<PathPlannerPath> paths = new ArrayList<>();
 
   private static CycleAutoConfig kTopLaneAuto =
       new CycleAutoConfig(
@@ -125,7 +119,6 @@ public class AutomaticAutonomousMaker3000 {
 
     SmartDashboard.putData("Autos/PreBuiltAuto", preBuiltAuto);
     SmartDashboard.putData("Autos/AutoVisualizerField", field);
-    SmartDashboard.putNumber("Autos/TotalTime", getTotalTime());
 
     // Driver has to click submit to make and view the autonomous path
     SmartDashboard.putData(
@@ -152,7 +145,6 @@ public class AutomaticAutonomousMaker3000 {
                   if (selectedAuto != null) {
                     storedAuto = selectedAuto.getAuto();
                     visualizeAuto(selectedAuto.getPaths());
-                    paths = selectedAuto.getPaths();
                   }
                   // Clears the simulated field path
                   else {
@@ -163,26 +155,6 @@ public class AutomaticAutonomousMaker3000 {
                 })
             .ignoringDisable(true)
             .withName("Submit Auto"));
-  }
-
-  private double getTotalTime() {
-    double totalTime = 0;
-
-    try {
-      RobotConfig config = RobotConfig.fromGUISettings();
-
-      for (int i = 0; i < paths.size(); i++) {
-        PathPlannerTrajectory trajectory =
-            new PathPlannerTrajectory(paths.get(i), new ChassisSpeeds(), Rotation2d.kZero, config);
-        totalTime += trajectory.getTotalTimeSeconds();
-      }
-
-    } catch (Exception ex) {
-      DriverStation.reportError(
-          "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
-    }
-
-    return totalTime;
   }
 
   private void UpdateFieldVisualization() {
