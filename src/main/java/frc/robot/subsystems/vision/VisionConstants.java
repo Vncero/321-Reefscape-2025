@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.RobotConstants;
-import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class VisionConstants {
@@ -86,7 +85,7 @@ public class VisionConstants {
           Meters.of(0.2280412),
           Meters.of(-0.1723644),
           Meters.of(0.2151634),
-          new Rotation3d(Degrees.zero(), Degrees.of(-20), Degrees.of(-10)));
+          new Rotation3d(Degrees.zero(), Degrees.of(-18), Degrees.of(-10)));
 
   private static final Transform3d k321FrontSwerveModuleCameraMountTransform =
       new Transform3d(
@@ -97,14 +96,21 @@ public class VisionConstants {
   // new Transform3d(Meters.of(0.322326), Meters.of(0.2290318), Meters.of(0.1966722), new
   // Rotation3d(Degrees.zero(), Degrees.of(-15), Degrees.zero()));
 
-  private static final Transform3d k321BackLeftSwerveModuleCameraMountTransform =
-      new Transform3d(
-          Meters.of(-0.2275078),
-          Meters.of(-0.1823466),
-          Meters.of(0.2745486),
-          new Rotation3d(Degrees.zero(), Degrees.of(-12), Degrees.of(225)));
+  //   private static final Transform3d k321BackLeftSwerveModuleCameraMountTransform =
+  //       new Transform3d(
+  //           Meters.of(-0.2275078),
+  //           Meters.of(-0.1823466),
+  //           Meters.of(0.2745486),
+  //           new Rotation3d(Degrees.zero(), Degrees.of(-12), Degrees.of(225)));
   //  new Transform3d(Meters.of(-0.2278126), Meters.of(0.3010408), Meters.of(0.1971802), new
   // Rotation3d(Degrees.zero(), Degrees.of(-15), Degrees.of(135)));
+
+  private static final Transform3d k321BackLeftSwerveModuleCameraMountTransform =
+      new Transform3d(
+          Inches.of(-8.882276),
+          Inches.of(9.2765),
+          Inches.of(6.8565),
+          new Rotation3d(Degrees.zero(), Degrees.of(-5), Degrees.of(-20)));
 
   private static final Transform3d k321FrontLeftSwerveModuleCameraMountTransform =
       new Transform3d(
@@ -134,7 +140,7 @@ public class VisionConstants {
   public static final CameraConfig kBackLeftSwerveCameraConfig =
       new CameraConfig(
           "Back Left Swerve Module Camera",
-          CameraUsage.GENERAL,
+          CameraUsage.REEF,
           k321BackLeftSwerveModuleCameraMountTransform,
           kOV9281);
 
@@ -149,8 +155,8 @@ public class VisionConstants {
     kElevatorTopCameraConfig,
     kElevatorBottomCameraConfig,
     // kFrontSwerveCameraConfig,
-    kBackLeftSwerveCameraConfig,
-    k321FrontLeftSwerveModuleCameraConfig
+    kBackLeftSwerveCameraConfig
+    // k321FrontLeftSwerveModuleCameraConfig
   };
 
   // camera data filtering

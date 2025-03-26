@@ -23,10 +23,10 @@
             "name": "backLeftSwervePod",
             "rotations": [
                 {"axis" : "x", "degrees": 0},
-                {"axis" : "y", "degrees": -12},
-                {"axis" : "z", "degrees": 225}
+                {"axis" : "y", "degrees": -5},
+                {"axis" : "z", "degrees": -20}
             ],
-            "position": [-0.2275078, -0.1823466, 0.2745486],
+            "position": [-0.22560981, 0.2356231, 0.1741551],
             "resolution": [1280, 720],
             "fov":70
         },
@@ -47,21 +47,10 @@
             "name": "bottomElevatorCamera",
             "rotations": [
                 {"axis" : "x", "degrees": 0},
-                {"axis" : "y", "degrees": -20},
+                {"axis" : "y", "degrees": -18},
                 {"axis" : "z", "degrees": -10}
             ],
             "position": [0.2280412, -0.1723644, 0.2151634],
-            "resolution": [1280, 720],
-            "fov":70
-        }, 
-        {
-            "name": "frontLeftSwervePod",
-            "rotations": [
-                {"axis" : "x", "degrees": 0},
-                {"axis" : "y", "degrees": -14},
-                {"axis" : "z", "degrees": -56}
-            ],
-            "position": [0.30135068, 0.22928834, 0.1982724],
             "resolution": [1280, 720],
             "fov":70
         }
@@ -85,12 +74,12 @@
         },
         {
             "zeroedRotations": [
-                {"axis" : "x", "degrees": 0},
-                {"axis" : "z", "degrees": -90},
+                {"axis" : "x", "degrees": 90},
+                {"axis" : "z", "degrees": 270},
                 {"axis" : "y", "degrees": 0}
             ],
-            "zeroedPosition": [-0.23, 0.20, -0.97]
-        }, 
+            "zeroedPosition": [-0.23, 0.31, -0.97]
+        },
         {
             "zeroedRotations": [
                 {"axis" : "x", "degrees": 0},
