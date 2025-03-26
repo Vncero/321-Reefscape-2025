@@ -151,8 +151,13 @@ public class CoralSuperstructure {
   public enum CoralScorerSetpoint {
     // TODO: determine angles empirically
     NEUTRAL(
-        ElevatorConstants.kElevatorStartingHeight.plus(Inches.of(3.93701)), Degrees.of(-40), RPM.of(0)), // 0.1 meters
-    FEED_CORAL(Inches.of(34.84252), Degrees.of(-87), CoralEndEffectorConstants.kCoralIntakeRPM), // 0.885 meters
+        ElevatorConstants.kElevatorStartingHeight.plus(Inches.of(3.93701)),
+        Degrees.of(-40),
+        RPM.of(0)), // 0.1 meters
+    FEED_CORAL(
+        Inches.of(34.84252),
+        Degrees.of(-87),
+        CoralEndEffectorConstants.kCoralIntakeRPM), // 0.885 meters
     L1(Inches.of(45), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM),
     L2(Inches.of(37.79528), Degrees.of(95), CoralEndEffectorConstants.kL2OuttakeRPM), // 0.96 meters
     L3(
@@ -163,8 +168,10 @@ public class CoralSuperstructure {
         Inches.of(81.10236).plus(Inches.of(0.5)), // 2.06 meters
         Degrees.of(85),
         CoralEndEffectorConstants.kL4OuttakeRPM),
-    ALGAE_LOW(Inches.of(39.3701), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM), // 1 meter
-    ALGAE_HIGH(Inches.of(55.1181), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM), // 1.4 meters
+    ALGAE_LOW(
+        Inches.of(39.3701), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM), // 1 meter
+    ALGAE_HIGH(
+        Inches.of(55.1181), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM), // 1.4 meters
     PREALIGN(Inches.of(55), Degrees.of(120), RPM.of(0)),
     CLIMB(Inches.of(43.3071), Degrees.of(0), RPM.of(0)); // 1.1 meters
 
