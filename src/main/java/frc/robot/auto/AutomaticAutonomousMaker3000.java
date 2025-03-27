@@ -357,7 +357,10 @@ public class AutomaticAutonomousMaker3000 {
                                 .until(() -> coralSuperstructure.atTargetState(setpoint)))
                         .andThen(
                             Commands.waitSeconds(0.5)
-                                .andThen(coralSuperstructure.outtakeCoral(() -> setpoint).withTimeout(0.5)))));
+                                .andThen(
+                                    coralSuperstructure
+                                        .outtakeCoral(() -> setpoint)
+                                        .withTimeout(0.5)))));
   }
 
   private Command toPathCommand(PathPlannerPath path, boolean zero) {
