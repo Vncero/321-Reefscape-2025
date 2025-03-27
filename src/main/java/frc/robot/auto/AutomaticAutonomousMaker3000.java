@@ -354,41 +354,13 @@ public class AutomaticAutonomousMaker3000 {
                                 .goToSetpointProfiled(() -> setpoint)
                                 .alongWith(
                                     coralSuperstructure.getEndEffector().stallCoralIfDetected())
-                                .until(() -> coralSuperstructure.atTargetState()))
+                                .until(() -> coralSuperstructure.atTargetState(setpoint)))
                         .andThen(
                             Commands.waitSeconds(0.5)
-                                .andThen(coralSuperstructure.outtakeCoral().withTimeout(0.5)))));
-    // .withDeadline(
-    //     coralSuperstructure.goToSetpointPID(
-    //         () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()),
-    //     coralSuperstructure.getEndEffector().stallCoralIfDetected()
-    //     .until(() -> drive.atPoseSetpoint())
-    //     .withTimeout(2.5)
-    // .andThen(
-    //   coralSuperstructure.goToSetpointProfiled(() -> setpoint)
-    //   .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
-    //   .until(() -> coralSuperstructure.atTargetState(setpoint))
-    //   )
-
-    // )
-    // .until(() -> drive.atPoseSetpoint())
-    // .withTimeout(2.5)
-    // .andThen(
-    //     coralSuperstructure
-    //         .goToSetpointProfiled(() -> setpoint)
-    //         .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
-    //         .until(() -> coralSuperstructure.atTargetState(setpoint))))
-    // .andThen(
-    //     ReefAlign.alignToReef(
-    //             drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
-    //         .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
-    //         .withDeadline(
-    //             Commands.waitSeconds(0.5)
-    //                 .andThen(
-    //                     coralSuperstructure
-    //                         .outtakeCoral()
-    //                         // .until(() -> !coralSuperstructure.hasCoral())
-    //                         .withTimeout(0.5))));
+                                .andThen(
+                                    coralSuperstructure
+                                        .outtakeCoral(() -> setpoint)
+                                        .withTimeout(0.5)))));
   }
 
   private Command toPathCommand(PathPlannerPath path, boolean zero) {

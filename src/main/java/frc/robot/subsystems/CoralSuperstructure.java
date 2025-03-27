@@ -2,13 +2,13 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -102,8 +102,8 @@ public class CoralSuperstructure {
         .alongWith(endEffector.intakeCoral());
   }
 
-  public Command outtakeCoral() {
-    return endEffector.outtakeCoral();
+  public Command outtakeCoral(Supplier<CoralScorerSetpoint> setpoint) {
+    return endEffector.outtakeCoral(setpoint);
   }
 
   public Command knockAlgae() {
@@ -149,23 +149,32 @@ public class CoralSuperstructure {
 
   public enum CoralScorerSetpoint {
     // TODO: determine angles empirically
-    NEUTRAL(ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40)),
-    FEED_CORAL(Meters.of(0.885), Degrees.of(-87)),
-    L1(Inches.of(45), Degrees.of(30)),
-    L2(Meters.of(0.96), Degrees.of(95)),
-    L3(Meters.of(1.3).plus(Inches.of(1.25)), Degrees.of(95)),
-    L4(Meters.of(2.06).plus(Inches.of(0.5)), Degrees.of(85)),
-    ALGAE_LOW(Meters.of(1), Degrees.of(40)),
-    ALGAE_HIGH(Meters.of(1.4), Degrees.of(40)),
-    PREALIGN(Inches.of(55), Degrees.of(120)),
-    CLIMB(Meters.of(1.1), Degrees.of(0));
+    NEUTRAL(
+        ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40), RPM.of(0)),
+    FEED_CORAL(Meters.of(0.885), Degrees.of(-87), CoralEndEffectorConstants.kCoralIntakeRPM),
+    L1(Meters.of(1.143), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM),
+    L2(Meters.of(0.96), Degrees.of(95), CoralEndEffectorConstants.kL2OuttakeRPM),
+    L3(
+        Meters.of(1.33175), // 1.3 + 0.03175
+        Degrees.of(95),
+        CoralEndEffectorConstants.kL3OuttakeRPM),
+    L4(
+        Meters.of(2.0727), // 2.06 + 0.0127
+        Degrees.of(85),
+        CoralEndEffectorConstants.kL4OuttakeRPM),
+    ALGAE_LOW(Meters.of(1), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
+    ALGAE_HIGH(Meters.of(1.4), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
+    PREALIGN(Meters.of(1.397), Degrees.of(120), RPM.of(0)),
+    CLIMB(Meters.of(1.1), Degrees.of(0), RPM.of(0));
 
     private Distance elevatorHeight; // the height of the elevator to got
     private Angle armAngle; // the angle the arm should go to
+    private AngularVelocity outtakeVelocity;
 
-    CoralScorerSetpoint(Distance elevatorHeight, Angle armAngle) {
+    CoralScorerSetpoint(Distance elevatorHeight, Angle armAngle, AngularVelocity outtakeVelocity) {
       this.armAngle = armAngle;
       this.elevatorHeight = elevatorHeight;
+      this.outtakeVelocity = outtakeVelocity;
     }
 
     public Distance getElevatorHeight() {
@@ -174,6 +183,10 @@ public class CoralSuperstructure {
 
     public Angle getArmAngle() {
       return armAngle;
+    }
+
+    public AngularVelocity getOuttakeVelocity() {
+      return outtakeVelocity;
     }
   }
 }
