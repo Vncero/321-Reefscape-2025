@@ -53,10 +53,9 @@ public class DrivetrainConstants {
 
   public static final Distance kAlignmentVelocityRadius =
       Meters.of(
-          0.1); // distance at which to start changing weights from velocity control to PID when
+          0.45); // distance at which to start changing weights from velocity control to PID when
   // aligning
   public static final Distance kAlignmentPIDRadius =
-      Meters.of(
-          0.03); // distance at which to end changing weights from velocity control to PID when
+      Meters.of(0.1); // distance at which to end changing weights from velocity control to PID when
   // aligning
 }
