@@ -205,16 +205,17 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
     double distance =
         currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation());
 
-    double ffFactor =
-        DriverStation.isAutonomous()
-            ? (MathUtil.clamp(
-                        distance,
-                        DrivetrainConstants.kAlignmentPIDRadius.in(Meters),
-                        DrivetrainConstants.kAlignmentVelocityRadius.in(Meters))
-                    - DrivetrainConstants.kAlignmentPIDRadius.in(Meters))
-                / (DrivetrainConstants.kAlignmentVelocityRadius.in(Meters)
-                    - DrivetrainConstants.kAlignmentPIDRadius.in(Meters))
-            : 0;
+    // increase weighting of velocity from PID radius (weight = 0) to velocity radius (weight = 1)
+    double autoFfFactor =
+        (MathUtil.clamp(
+                    distance,
+                    DrivetrainConstants.kAlignmentPIDRadius.in(Meters),
+                    DrivetrainConstants.kAlignmentVelocityRadius.in(Meters))
+                - DrivetrainConstants.kAlignmentPIDRadius.in(Meters))
+            / (DrivetrainConstants.kAlignmentVelocityRadius.in(Meters)
+                - DrivetrainConstants.kAlignmentPIDRadius.in(Meters));
+
+    double ffFactor = DriverStation.isAutonomous() ? autoFfFactor : 0;
 
     ChassisSpeeds targetSpeeds =
         ChassisSpeeds.discretize(
