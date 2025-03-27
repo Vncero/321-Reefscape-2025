@@ -20,6 +20,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -198,25 +199,33 @@ public class DrivetrainReal extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
 
   @Override
   public void driveToFieldPose(Pose2d pose) {
-    ChassisSpeeds targetSpeeds =
-        DriverStation.isAutonomous()
-            ? ChassisSpeeds.discretize(
-                xPoseController.calculate(getPose().getX(), pose.getX())
-                    + xPoseController.getSetpoint().velocity,
-                yPoseController.calculate(getPose().getY(), pose.getY())
-                    + yPoseController.getSetpoint().velocity,
-                thetaController.calculate(
-                        getPose().getRotation().getRadians(), pose.getRotation().getRadians())
-                    + thetaController.getSetpoint().velocity,
-                RobotConstants.kRobotLoopPeriod.in(Seconds))
-            : ChassisSpeeds.discretize(
-                xPoseController.calculate(getPose().getX(), pose.getX()),
-                yPoseController.calculate(getPose().getY(), pose.getY()),
-                thetaController.calculate(
-                    getPose().getRotation().getRadians(), pose.getRotation().getRadians()),
-                RobotConstants.kRobotLoopPeriod.in(Seconds));
 
     final var currentPose = getPose();
+
+    double distance =
+        currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation());
+
+    double ffFactor =
+        DriverStation.isAutonomous()
+            ? (MathUtil.clamp(
+                        distance,
+                        DrivetrainConstants.kAlignmentPIDRadius.in(Meters),
+                        DrivetrainConstants.kAlignmentVelocityRadius.in(Meters))
+                    - DrivetrainConstants.kAlignmentPIDRadius.in(Meters))
+                / (DrivetrainConstants.kAlignmentVelocityRadius.in(Meters)
+                    - DrivetrainConstants.kAlignmentPIDRadius.in(Meters))
+            : 0;
+
+    ChassisSpeeds targetSpeeds =
+        ChassisSpeeds.discretize(
+            xPoseController.calculate(getPose().getX(), pose.getX())
+                + xPoseController.getSetpoint().velocity * ffFactor,
+            yPoseController.calculate(getPose().getY(), pose.getY())
+                + yPoseController.getSetpoint().velocity * ffFactor,
+            thetaController.calculate(
+                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                + thetaController.getSetpoint().velocity * ffFactor,
+            RobotConstants.kRobotLoopPeriod.in(Seconds));
 
     if (currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
         < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters))
