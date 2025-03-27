@@ -1,7 +1,7 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.coralendeffector;
 
-import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -29,7 +29,7 @@ public class CoralEndEffectorConstants {
   public static final AngularVelocity kAlgaeKnockRPM = RPM.of(-3000);
 
   // Tuned constants
-  public static final Distance kDetectionRange = Inches.of(3.93701); // 100 mm
+  public static final Distance kDetectionRange = Millimeters.of(100);
 
   // for detecting if the end effector is intaking
   public static final AngularVelocity kRPMTolerance = RPM.of(240);

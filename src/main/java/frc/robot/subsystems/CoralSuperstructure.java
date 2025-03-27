@@ -151,29 +151,22 @@ public class CoralSuperstructure {
   public enum CoralScorerSetpoint {
     // TODO: determine angles empirically
     NEUTRAL(
-        ElevatorConstants.kElevatorStartingHeight.plus(Inches.of(3.93701)),
-        Degrees.of(-40),
-        RPM.of(0)), // 0.1 meters
-    FEED_CORAL(
-        Inches.of(34.84252),
-        Degrees.of(-87),
-        CoralEndEffectorConstants.kCoralIntakeRPM), // 0.885 meters
-    L1(Inches.of(45), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM),
-    L2(Inches.of(37.79528), Degrees.of(95), CoralEndEffectorConstants.kL2OuttakeRPM), // 0.96 meters
+        ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40), RPM.of(0)),
+    FEED_CORAL(Meters.of(0.885), Degrees.of(-87), CoralEndEffectorConstants.kCoralIntakeRPM),
+    L1(Meters.of(1.143), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM), // 45 in
+    L2(Meters.of(0.96), Degrees.of(95), CoralEndEffectorConstants.kL2OuttakeRPM),
     L3(
-        Inches.of(51.1811).plus(Inches.of(1.25)), // 1.3 meters
+        Meters.of(1.3).plus(Meters.of(0.03175)),
         Degrees.of(95),
-        CoralEndEffectorConstants.kL3OuttakeRPM),
+        CoralEndEffectorConstants.kL3OuttakeRPM), // plus 1.25 inches
     L4(
-        Inches.of(81.10236).plus(Inches.of(0.5)), // 2.06 meters
+        Meters.of(2.06).plus(Meters.of(0.0127)),
         Degrees.of(85),
-        CoralEndEffectorConstants.kL4OuttakeRPM),
-    ALGAE_LOW(
-        Inches.of(39.3701), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM), // 1 meter
-    ALGAE_HIGH(
-        Inches.of(55.1181), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM), // 1.4 meters
+        CoralEndEffectorConstants.kL4OuttakeRPM), // plus 0.5 inches
+    ALGAE_LOW(Meters.of(1), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
+    ALGAE_HIGH(Meters.of(1.4), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
     PREALIGN(Inches.of(55), Degrees.of(120), RPM.of(0)),
-    CLIMB(Inches.of(43.3071), Degrees.of(0), RPM.of(0)); // 1.1 meters
+    CLIMB(Meters.of(1.1), Degrees.of(0), RPM.of(0));
 
     private Distance elevatorHeight; // the height of the elevator to got
     private Angle armAngle; // the angle the arm should go to
