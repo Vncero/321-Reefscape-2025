@@ -50,4 +50,12 @@ public class DrivetrainConstants {
 
   public static final Distance kAlignmentSetpointTranslationTolerance = Meters.of(0.01);
   public static final Angle kAlignmentSetpointRotationTolerance = Degrees.of(2.0);
+
+  public static final Distance kAlignmentVelocityRadius =
+      Meters.of(
+          0.45); // distance at which to start changing weights from velocity control to PID when
+  // aligning
+  public static final Distance kAlignmentPIDRadius =
+      Meters.of(0.1); // distance at which to end changing weights from velocity control to PID when
+  // aligning
 }
