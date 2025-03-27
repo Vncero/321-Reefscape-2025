@@ -153,19 +153,19 @@ public class CoralSuperstructure {
     NEUTRAL(
         ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40), RPM.of(0)),
     FEED_CORAL(Meters.of(0.885), Degrees.of(-87), CoralEndEffectorConstants.kCoralIntakeRPM),
-    L1(Meters.of(1.143), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM), // 45 in
+    L1(Meters.of(1.143), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM), 
     L2(Meters.of(0.96), Degrees.of(95), CoralEndEffectorConstants.kL2OuttakeRPM),
     L3(
-        Meters.of(1.3).plus(Meters.of(0.03175)),
+        Meters.of(1.33175), // 1.3 + 0.03175
         Degrees.of(95),
-        CoralEndEffectorConstants.kL3OuttakeRPM), // plus 1.25 inches
+        CoralEndEffectorConstants.kL3OuttakeRPM), 
     L4(
-        Meters.of(2.06).plus(Meters.of(0.0127)),
+        Meters.of(2.0727), // 2.06 + 0.0127
         Degrees.of(85),
-        CoralEndEffectorConstants.kL4OuttakeRPM), // plus 0.5 inches
+        CoralEndEffectorConstants.kL4OuttakeRPM), 
     ALGAE_LOW(Meters.of(1), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
     ALGAE_HIGH(Meters.of(1.4), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
-    PREALIGN(Inches.of(55), Degrees.of(120), RPM.of(0)),
+    PREALIGN(Meters.of(1.397), Degrees.of(120), RPM.of(0)),
     CLIMB(Meters.of(1.1), Degrees.of(0), RPM.of(0));
 
     private Distance elevatorHeight; // the height of the elevator to got
