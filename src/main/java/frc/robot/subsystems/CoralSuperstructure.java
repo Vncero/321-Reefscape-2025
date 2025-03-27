@@ -2,7 +2,6 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -153,16 +152,16 @@ public class CoralSuperstructure {
     NEUTRAL(
         ElevatorConstants.kElevatorStartingHeight.plus(Meters.of(0.1)), Degrees.of(-40), RPM.of(0)),
     FEED_CORAL(Meters.of(0.885), Degrees.of(-87), CoralEndEffectorConstants.kCoralIntakeRPM),
-    L1(Meters.of(1.143), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM), 
+    L1(Meters.of(1.143), Degrees.of(30), CoralEndEffectorConstants.kL1OuttakeRPM),
     L2(Meters.of(0.96), Degrees.of(95), CoralEndEffectorConstants.kL2OuttakeRPM),
     L3(
         Meters.of(1.33175), // 1.3 + 0.03175
         Degrees.of(95),
-        CoralEndEffectorConstants.kL3OuttakeRPM), 
+        CoralEndEffectorConstants.kL3OuttakeRPM),
     L4(
         Meters.of(2.0727), // 2.06 + 0.0127
         Degrees.of(85),
-        CoralEndEffectorConstants.kL4OuttakeRPM), 
+        CoralEndEffectorConstants.kL4OuttakeRPM),
     ALGAE_LOW(Meters.of(1), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
     ALGAE_HIGH(Meters.of(1.4), Degrees.of(40), CoralEndEffectorConstants.kAlgaeKnockRPM),
     PREALIGN(Meters.of(1.397), Degrees.of(120), RPM.of(0)),
