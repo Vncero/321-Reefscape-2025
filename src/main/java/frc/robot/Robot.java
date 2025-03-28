@@ -1,6 +1,7 @@
 /* (C) Robolancers 2025 */
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -31,6 +32,7 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog());
+    CameraServer.startAutomaticCapture(); 
     Epilogue.bind(this);
 
     /*

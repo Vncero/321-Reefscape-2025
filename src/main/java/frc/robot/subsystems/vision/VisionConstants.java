@@ -111,10 +111,10 @@ public class VisionConstants {
 
   private static final Transform3d k321BackLeftSwerveModuleCameraMountTransform =
       new Transform3d(
-          Inches.of(-8.882276),
-          Inches.of(9.2765),
-          Inches.of(6.8565),
-          new Rotation3d(Degrees.zero(), Degrees.of(-5), Degrees.of(-20)));
+          Inches.of(-11.1),
+          Inches.of(8.7),
+          Inches.of(7.82),
+          new Rotation3d(Degrees.of(0), Degrees.of(-5), Degrees.of(-20)));
 
   private static final Transform3d k321FrontLeftSwerveModuleCameraMountTransform =
       new Transform3d(
@@ -149,7 +149,7 @@ public class VisionConstants {
           CameraUsage.REEF,
           k321BackLeftSwerveModuleCameraMountTransform,
           kOV9281,
-          1e2);
+          10);
 
   public static final CameraConfig k321FrontLeftSwerveModuleCameraConfig =
       new CameraConfig(
