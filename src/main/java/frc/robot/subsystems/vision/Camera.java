@@ -1,6 +1,8 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.Matrix;
@@ -110,7 +112,11 @@ public class Camera {
             .filter(
                 poseEst ->
                     VisionConstants.kAllowedFieldArea.contains(
-                        poseEst.estimatedPose.getTranslation().toTranslation2d()))
+                        poseEst.estimatedPose.getTranslation().toTranslation2d())
+                        && poseEst
+                        .estimatedPose
+                        .getMeasureZ()
+                        .isNear(Meters.zero(), VisionConstants.kAllowedFieldHeight))
             .map(
                 photonEst -> {
                   final var visionEst =
@@ -133,7 +139,11 @@ public class Camera {
             .filter(
                 poseEst ->
                     VisionConstants.kAllowedFieldArea.contains(
-                        poseEst.estimatedPose.getTranslation().toTranslation2d()))
+                            poseEst.estimatedPose.getTranslation().toTranslation2d())
+                    && poseEst
+                        .estimatedPose
+                        .getMeasureZ()
+                        .isNear(Meters.zero(), VisionConstants.kAllowedFieldHeight))
             .map(
                 photonEst -> {
                   final var visionEst =
@@ -212,5 +222,9 @@ public class Camera {
             / Math.pow(visionPoseEstimate.targetsUsed.size(), 3);
 
     return VecBuilder.fill(translationStdDev, translationStdDev, rotationStdDev);
+  }
+
+  public boolean isConnected() {
+    return camera.isConnected();
   }
 }

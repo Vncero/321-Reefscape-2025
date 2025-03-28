@@ -12,7 +12,7 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -20,6 +20,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -35,23 +37,26 @@ import frc.robot.util.MyAlliance;
 public interface SwerveDrive extends Subsystem {
 
   // driveToPose PID controllers
-  PIDController xPoseController =
-      new PIDController(
+  ProfiledPIDController xPoseController =
+      new ProfiledPIDController(
           DrivetrainConstants.kTranslationGains.kP(),
           DrivetrainConstants.kTranslationGains.kI(),
-          DrivetrainConstants.kTranslationGains.kD());
+          DrivetrainConstants.kTranslationGains.kD(),
+          DrivetrainConstants.kTranslationConstraints);
 
-  PIDController yPoseController =
-      new PIDController(
+  ProfiledPIDController yPoseController =
+      new ProfiledPIDController(
           DrivetrainConstants.kTranslationGains.kP(),
           DrivetrainConstants.kTranslationGains.kI(),
-          DrivetrainConstants.kTranslationGains.kD());
+          DrivetrainConstants.kTranslationGains.kD(),
+          DrivetrainConstants.kTranslationConstraints);
 
-  PIDController thetaController =
-      new PIDController(
+  ProfiledPIDController thetaController =
+      new ProfiledPIDController(
           DrivetrainConstants.kHeadingGains.kP(),
           DrivetrainConstants.kHeadingGains.kI(),
-          DrivetrainConstants.kHeadingGains.kD());
+          DrivetrainConstants.kHeadingGains.kD(),
+          DrivetrainConstants.kHeadingConstraints);
 
   public static SwerveDrive create() {
     return RobotBase.isReal()
@@ -112,7 +117,7 @@ public interface SwerveDrive extends Subsystem {
     return MyAlliance.isRed() ? rotation.plus(Rotation2d.k180deg) : rotation;
   }
 
-  void setAlignmentSetpoint(Pose2d setpoint);
+  void setAlignmentSetpoint(AlignmentSetpoint setpoint);
 
   /**
    * Checks whether the translation components and rotation are within 1e-9, the WPILib default
@@ -120,7 +125,18 @@ public interface SwerveDrive extends Subsystem {
    *
    * @return whether the SwerveDrive is at the target alignment pose
    */
-  boolean atPoseSetpoint();
+  boolean atPoseSetpoint(Distance translationTolerance, Angle rotationTolerance);
+
+  default boolean atPoseSetpoint() {
+    return atPoseSetpoint(
+        DrivetrainConstants.kAlignmentSetpointTranslationTolerance,
+        DrivetrainConstants.kAlignmentSetpointRotationTolerance);
+  }
+
+  default boolean atFinalPoseSetpoint() {
+    if (!getAlignmentSetpoint().isFinalSetpoint()) return false;
+    return atPoseSetpoint();
+  }
 
   Command teleopDrive(
       DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier rotation);
@@ -152,25 +168,33 @@ public interface SwerveDrive extends Subsystem {
                 translationX.getAsDouble(), translationY.getAsDouble(), rotation.get()));
   }
 
-  // robot relative auto drive w/ external pid controllers
-  Command driveToRobotPose(Supplier<Pose2d> pose);
-
   // field relative auto drive w/ external pid controllers
   void driveToFieldPose(Pose2d target, Pose2d current);
 
   default Command driveToFieldPose(Supplier<Pose2d> pose) {
-    return driveToFieldPose(pose, this::getPose);
+    return driveToFieldPose(() -> new AlignmentSetpoint(pose.get(), true), this::getPose);
   }
 
-  default Command driveToFieldPose(Supplier<Pose2d> pose, Supplier<Pose2d> robotPose) {
+  default Command driveToFieldPose(Supplier<AlignmentSetpoint> pose, Supplier<Pose2d> robotPose) {
     return runOnce(
             () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-              setAlignmentSetpoint(pose.get());
+              ChassisSpeeds speeds =
+                  ChassisSpeeds.fromRobotRelativeSpeeds(
+                      getChassisSpeeds(), getPose().getRotation());
+
+              xPoseController.reset(getPose().getTranslation().getX(), speeds.vxMetersPerSecond);
+
+              yPoseController.reset(getPose().getTranslation().getY(), speeds.vyMetersPerSecond);
+
+              thetaController.reset(
+                  getPose().getRotation().getRadians(), speeds.omegaRadiansPerSecond);
             })
-        .andThen(run(() -> driveToFieldPose(pose.get(), robotPose.get())));
+        .andThen(
+            run(
+                () -> {
+                  setAlignmentSetpoint(pose.get());
+                  driveToFieldPose(pose.get().pose, robotPose.get());
+                }));
   }
 
   void resetPose(Pose2d pose);
@@ -190,6 +214,8 @@ public interface SwerveDrive extends Subsystem {
   ChassisSpeeds getChassisSpeeds();
 
   Rotation2d getHeading();
+
+  AlignmentSetpoint getAlignmentSetpoint();
 
   /**
    * Add vision measurement to the main Swerve Drive pose estimator
@@ -221,4 +247,7 @@ public interface SwerveDrive extends Subsystem {
    */
   void addReefVisionMeasurement(
       Pose2d visionRobotPose, double timeStampSeconds, Matrix<N3, N1> standardDeviations);
+
+  @Logged
+  public record AlignmentSetpoint(Pose2d pose, boolean isFinalSetpoint) {}
 }

@@ -2,16 +2,16 @@
 package frc.robot.subsystems.coralendeffector;
 
 import static edu.wpi.first.units.Units.Millimeters;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.RPM;
 
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Voltage;
 
 // list of constants for the coral end effector
 public class CoralEndEffectorConstants {
   // Motor configuration
   public static final int kMotorPort = 16;
-  public static final int kTimeOfFlightId = 21;
+  public static final int kCoralSensorId = 21;
   public static final boolean kInvertedMotor = true;
   public static final int kCurrentLimit = 40;
 
@@ -20,11 +20,17 @@ public class CoralEndEffectorConstants {
   public static final double kGearing = 1;
 
   // Setpoints
-  public static final Voltage kIntakeVoltage = Volts.of(8);
-  public static final Voltage kOuttakeVoltage = Volts.of(-2.5);
-  public static final Voltage kStallVoltage = Volts.of(1.2);
-  public static final Voltage kAlgaeKnockVoltage = Volts.of(-8);
+  public static final AngularVelocity kCoralIntakeRPM = RPM.of(3000);
+  public static final AngularVelocity kL1OuttakeRPM = RPM.of(-1500);
+  public static final AngularVelocity kL2OuttakeRPM = RPM.of(-1000);
+  public static final AngularVelocity kL3OuttakeRPM = RPM.of(-1000);
+  public static final AngularVelocity kL4OuttakeRPM = RPM.of(-1500);
+  public static final AngularVelocity kCoralStallRPM = RPM.of(500);
+  public static final AngularVelocity kAlgaeKnockRPM = RPM.of(-3000);
 
   // Tuned constants
   public static final Distance kDetectionRange = Millimeters.of(100);
+
+  // for detecting if the end effector is intaking
+  public static final AngularVelocity kRPMTolerance = RPM.of(240);
 }

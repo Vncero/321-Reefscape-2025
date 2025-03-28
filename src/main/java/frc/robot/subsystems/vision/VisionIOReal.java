@@ -45,4 +45,16 @@ public class VisionIOReal implements VisionIO {
 
     return false;
   }
+
+  @Override
+  public boolean areCamerasConnected() {
+    boolean isConnected = false;
+
+    for (Camera camera : cameras) {
+      isConnected = camera.isConnected();
+      if (!isConnected) break;
+    }
+
+    return isConnected;
+  }
 }

@@ -1,8 +1,16 @@
 /* (C) Robolancers 2025 */
 package frc.robot.subsystems.leds;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.AddressableLEDBufferView;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,19 +20,37 @@ import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+@Logged
 public class Leds extends SubsystemBase {
   // priority (greater # means more important), condition for pattern to apply, pattern to apply
   public record Signal(int priority, BooleanSupplier condition, Supplier<LEDPattern> pattern) {}
 
+  private static Leds instance = new Leds();
+
+  public static Leds getInstance() {
+    return instance;
+  }
+
   // LED
   public final AddressableLED strip;
   private final AddressableLEDBuffer buffer;
+  private final AddressableLEDBufferView leftBuffer;
+  private final AddressableLEDBufferView rightBuffer;
   private static TreeSet<Signal> signals;
   private LEDPattern currentPattern = LedsConstants.kDefault;
+
+  public boolean isRotateAligning = false;
+  public boolean isReefAligning = false;
+  public boolean isIntaking = false;
+  public boolean isOuttaking = false;
+  public boolean isTagAligning = false;
 
   public Leds() {
     this.strip = new AddressableLED(LedsConstants.kPort);
     this.buffer = new AddressableLEDBuffer(LedsConstants.kLength);
+    this.leftBuffer = buffer.createView(0, LedsConstants.kLength / 2);
+    this.rightBuffer =
+        buffer.createView(LedsConstants.kLength / 2, LedsConstants.kLength - 1).reversed();
     this.strip.setLength(buffer.getLength());
     this.strip.setData(buffer);
     this.strip.start();
@@ -69,8 +95,32 @@ public class Leds extends SubsystemBase {
           }
 
           // apply the pattern to the led strip
-          currentPattern.applyTo(buffer);
+          currentPattern.applyTo(leftBuffer);
+          currentPattern.applyTo(rightBuffer);
           strip.setData(buffer);
         });
+  }
+
+  public double calculateProgressBar(
+      Distance elevatorCurrentHeight,
+      Distance elevatorSetpoint,
+      Angle armCurrentAngle,
+      Angle armSetpoint,
+      Pose2d driveCurrentPose,
+      Pose2d driveSetpointPose) {
+
+    double elevatorError =
+        calculateError(elevatorCurrentHeight.in(Meters), elevatorSetpoint.in(Meters));
+    double armError = calculateError(armCurrentAngle.in(Radians), armSetpoint.in(Radians));
+    double driveTranslationError =
+        driveCurrentPose.getTranslation().getDistance(driveSetpointPose.getTranslation());
+    double driveRotationError =
+        driveCurrentPose.getRotation().minus(driveSetpointPose.getRotation()).getRadians();
+
+    return 1 / (1 + elevatorError + armError + driveTranslationError + driveRotationError);
+  }
+
+  private double calculateError(double currentMeasurement, double setpoint) {
+    return Math.abs(currentMeasurement - setpoint);
   }
 }

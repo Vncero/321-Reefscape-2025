@@ -7,4 +7,6 @@ import edu.wpi.first.epilogue.Logged;
 public interface VisionIO {
   VisionEstimate[] getLatestEstimates();
   boolean reefCameraCanSeeReefTag(int tagID); 
+
+  boolean areCamerasConnected();
 }

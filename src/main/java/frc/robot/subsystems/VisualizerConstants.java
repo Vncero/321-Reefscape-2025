@@ -15,8 +15,7 @@ public class VisualizerConstants {
       new Translation2d(Inches.of(15), Inches.of(1));
 
   // elevator base in 3d
-  public static final Translation3d kElevatorRoot3d =
-      new Translation3d(0, 0, kElevatorRoot2d.getY());
+  public static final Translation3d kElevatorRoot3d = new Translation3d(0, 0, 0);
 
   // middle of elevator (side view) to middle of shoulder joint
   public static final Distance shoulderToElevatorOffset = Inches.of(11.5);
@@ -32,5 +31,6 @@ public class VisualizerConstants {
   public static final Translation3d armRoot3d = new Translation3d(0.074, -0.085, 0.866);
 
   // rotating joint of the algae intake
-  public static final Translation3d algaeRoot3d = new Translation3d(0, 0.3287, 0.2181606);
+  public static final Translation3d climbRoot3d =
+      new Translation3d(Inches.of(4.13200), Inches.of(12.507), Inches.of(17.545));
 }

@@ -89,10 +89,10 @@ public class VisionConstants {
 
   private static final Transform3d k321BottomElevatorCameraMountTransform =
       new Transform3d(
-          Meters.of(0.2288286),
+          Meters.of(0.2280412),
           Meters.of(-0.1723644),
-          Meters.of(0.2612136),
-          new Rotation3d(Degrees.zero(), Degrees.of(-10), Degrees.of(-10)));
+          Meters.of(0.2151634),
+          new Rotation3d(Degrees.zero(), Degrees.of(-18), Degrees.of(-10)));
 
   private static final Transform3d k321FrontSwerveModuleCameraMountTransform =
       new Transform3d(
@@ -146,6 +146,9 @@ public class VisionConstants {
   // camera data filtering
   public static final Distance kAllowedFieldDistance =
       Meters.of(2.5); // allow field estimates 2.5 meters outside field
+  public static final Distance kAllowedFieldHeight =
+      Meters.of(0.75); // Vision estimates can be at maximum 0.75 meters off the floor before being
+  // rejected
   public static final Rectangle2d kAllowedFieldArea =
       new Rectangle2d(
           new Translation2d(-kAllowedFieldDistance.in(Meters), -kAllowedFieldDistance.in(Meters)),

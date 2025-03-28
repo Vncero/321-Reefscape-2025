@@ -62,4 +62,8 @@ public class Vision extends VirtualSubsystem {
       }
     }
   }
+
+  public boolean areCamerasConnected() {
+    return io.areCamerasConnected();
+  }
 }

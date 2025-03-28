@@ -5,9 +5,13 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Seconds;
+
+import java.util.function.Supplier;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -20,13 +24,16 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotConstants;
 import frc.robot.commands.ReefAlign;
 import frc.robot.util.SelfControlledSwerveDriveSimulationWrapper;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -39,11 +46,14 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 public class DrivetrainSim implements SwerveDrive {
   private final SelfControlledSwerveDriveSimulationWrapper simulatedDrive;
   private final Field2d field2d;
-  private Pose2d alignmentSetpoint = Pose2d.kZero;
+  private AlignmentSetpoint alignmentSetpoint = new AlignmentSetpoint(Pose2d.kZero, true);
   final DriveTrainSimulationConfig simConfig;
   PIDController headingController;
 
   private final SwerveDrivePoseEstimator reefPoseEstimator;
+
+  private final Pose2d kRedTopAutoStart = new Pose2d(10.2, 2.2, Rotation2d.kZero);
+  private final Pose2d kRedBotAutoStart = new Pose2d(10.2, 5.8, Rotation2d.kZero);
 
   public DrivetrainSim() {
     this.simConfig =
@@ -66,7 +76,7 @@ public class DrivetrainSim implements SwerveDrive {
 
     this.simulatedDrive =
         new SelfControlledSwerveDriveSimulationWrapper(
-            new SwerveDriveSimulation(simConfig, new Pose2d(2, 2, new Rotation2d())));
+            new SwerveDriveSimulation(simConfig, kRedBotAutoStart));
 
     this.headingController =
         new PIDController(
@@ -164,50 +174,44 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public Command driveToRobotPose(Supplier<Pose2d> pose) {
-    return runOnce(
-            () -> {
-              xPoseController.reset();
-              yPoseController.reset();
-              thetaController.reset();
-            })
-        .andThen(
-            run(
-                () -> {
-                  ChassisSpeeds targetSpeeds =
-                      new ChassisSpeeds(
-                          xPoseController.calculate(getPose().getX(), pose.get().getX()),
-                          yPoseController.calculate(getPose().getY(), pose.get().getY()),
-                          thetaController.calculate(
-                              getPose().getRotation().getRadians(),
-                              pose.get().getRotation().getRadians()));
-
-                  driveRobotCentric(
-                      targetSpeeds.vxMetersPerSecond,
-                      targetSpeeds.vyMetersPerSecond,
-                      targetSpeeds.omegaRadiansPerSecond,
-                      DriveFeedforwards.zeros(4));
-                }));
-  }
-
-  @Override
   public void driveToFieldPose(Pose2d pose, Pose2d current) {
     if (pose == null) return;
 
+    double distance =
+        current.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation());
+
+    // increase weighting of velocity from PID radius (weight = 0) to velocity radius (weight = 1)
+    double autoFfFactor =
+        (MathUtil.clamp(
+                    distance,
+                    DrivetrainConstants.kAlignmentPIDRadius.in(Meters),
+                    DrivetrainConstants.kAlignmentVelocityRadius.in(Meters))
+                - DrivetrainConstants.kAlignmentPIDRadius.in(Meters))
+            / (DrivetrainConstants.kAlignmentVelocityRadius.in(Meters)
+                - DrivetrainConstants.kAlignmentPIDRadius.in(Meters));
+
+    double ffFactor = DriverStation.isAutonomous() ? autoFfFactor : 0;
+
     ChassisSpeeds targetSpeeds =
-        new ChassisSpeeds(
-            xPoseController.calculate(current.getX(), pose.getX()),
-            yPoseController.calculate(current.getY(), pose.getY()),
+        ChassisSpeeds.discretize(
+            xPoseController.calculate(current.getX(), pose.getX())
+                + xPoseController.getSetpoint().velocity * ffFactor,
+            yPoseController.calculate(current.getY(), pose.getY())
+                + yPoseController.getSetpoint().velocity * ffFactor,
             thetaController.calculate(
-                current.getRotation().getRadians(), pose.getRotation().getRadians()));
+                    current.getRotation().getRadians(), pose.getRotation().getRadians())
+                + thetaController.getSetpoint().velocity * ffFactor,
+            RobotConstants.kRobotLoopPeriod.in(Seconds));
 
-    if (atPoseSetpoint()) targetSpeeds = new ChassisSpeeds();
+    if (current.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
+        < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters))
+      targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
 
-    // if (Math.hypot(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond) < 0.1)
-    //   targetSpeeds = new ChassisSpeeds(0, 0, targetSpeeds.omegaRadiansPerSecond);
-    // if (targetSpeeds.omegaRadiansPerSecond < 0.1)
-    //   targetSpeeds =
-    //       new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
+    if (Math.abs(
+            current.getRotation().minus(alignmentSetpoint.pose().getRotation()).getDegrees())
+        < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees))
+      targetSpeeds =
+          new ChassisSpeeds(targetSpeeds.vxMetersPerSecond, targetSpeeds.vyMetersPerSecond, 0);
 
     simulatedDrive.runChassisSpeeds(targetSpeeds, Translation2d.kZero, true, false);
   }
@@ -231,17 +235,21 @@ public class DrivetrainSim implements SwerveDrive {
   }
 
   @Override
-  public void setAlignmentSetpoint(Pose2d setpoint) {
+  public void setAlignmentSetpoint(AlignmentSetpoint setpoint) {
     alignmentSetpoint = setpoint;
   }
 
   @Override
-  public boolean atPoseSetpoint() {
+  public boolean atPoseSetpoint(Distance tranTol, Angle rotTol) {
     final var currentPose = getPose();
-    return currentPose.getTranslation().getDistance(alignmentSetpoint.getTranslation())
-            < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters)
-        && Math.abs(currentPose.getRotation().minus(alignmentSetpoint.getRotation()).getDegrees())
-            < DrivetrainConstants.kAlignmentSetpointRotationTolerance.in(Degrees);
+    return currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
+            < tranTol.in(Meters)
+        && Math.abs(
+                currentPose
+                    .getRotation()
+                    .minus(alignmentSetpoint.pose().getRotation())
+                    .getDegrees())
+            < rotTol.in(Degrees);
   }
 
   @Override
@@ -294,6 +302,11 @@ public class DrivetrainSim implements SwerveDrive {
   @Override
   public Rotation2d getHeading() {
     return simulatedDrive.getDriveTrainSimulation().getGyroSimulation().getGyroReading();
+  }
+
+  @Override
+  public AlignmentSetpoint getAlignmentSetpoint() {
+    return alignmentSetpoint;
   }
 
   @Override
