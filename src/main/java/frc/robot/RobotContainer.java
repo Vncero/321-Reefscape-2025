@@ -49,9 +49,6 @@ public class RobotContainer {
   private AlgaeSuperstructure algaeSuperstructure =
       new AlgaeSuperstructure(algaePivot, algaeRollers);
 
-  private AutomaticAutonomousMaker3000 automaker =
-      new AutomaticAutonomousMaker3000(drivetrain, coralSuperstructure);
-
   private Vision vision =
       Vision.create(
           // Java 21 pattern matching switch would be nice
@@ -69,6 +66,8 @@ public class RobotContainer {
                   reefVisionEst.estimate().estimatedPose.toPose2d(),
                   reefVisionEst.estimate().timestampSeconds,
                   reefVisionEst.stdDevs()));
+  private AutomaticAutonomousMaker3000 automaker =
+      new AutomaticAutonomousMaker3000(drivetrain, coralSuperstructure, vision::canSeeReefTag);
 
   private CommandXboxController driver = new CommandXboxController(0);
   private XboxController manipulator = new XboxController(1);
@@ -191,7 +190,7 @@ public class RobotContainer {
     //               System.out.println("Changing volts to: " + volts);
     //             }));
 
-    driver.a().whileTrue(ReefAlign.tuneAlignment(drivetrain));
+    driver.a().whileTrue(ReefAlign.tuneAlignment(drivetrain, vision::canSeeReefTag));
 
     driver.b().whileTrue(coralSuperstructure.feedCoral());
 
@@ -266,7 +265,7 @@ public class RobotContainer {
                         .andThen(
                             // when we get close enough, align to reef, but only while we're
                             // close enough
-                            ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition)
+                            ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition, vision::canSeeReefTag)
                                 // .until(drivetrain::atPoseSetpoint)
                                 // .andThen(
                                 //     ReefAlign.rotateToNearestReefTag(drivetrain, driverForward,

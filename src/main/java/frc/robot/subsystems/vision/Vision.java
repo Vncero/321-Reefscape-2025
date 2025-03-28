@@ -42,18 +42,24 @@ public class Vision extends VirtualSubsystem {
     this.reefVisionDataConsumer = reefVisionDataConsumer;
   }
 
+  public boolean canSeeReefTag(int tagID) {
+    return io.reefCameraCanSeeReefTag(tagID);
+  }  
+
   @Override
   public void periodic() {
     final var latestEstimates = io.getLatestEstimates();
 
     for (final var est : latestEstimates) {
       switch (est.estimateType()) {
-        case MULTI_TAG -> visionDataConsumer.accept(est);
+        case MULTI_TAG -> {
+          visionDataConsumer.accept(est);
+          reefVisionDataConsumer.accept(est);
+        }
         case SINGLE_TAG -> { // Java 21 when clauses would be nice
           if (est.sourceType() == CameraUsage.REEF) reefVisionDataConsumer.accept(est);
         }
       }
-      ;
     }
   }
 }

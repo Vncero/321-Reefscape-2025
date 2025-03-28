@@ -61,6 +61,22 @@ public class Camera {
             config.robotToCamera());
   }
 
+  public boolean isReefCamera() {
+    return usage == CameraUsage.REEF;
+  }
+
+  public boolean canSeeTag(int id) {
+    final var unreadResults = camera.getAllUnreadResults();
+
+    if (unreadResults.isEmpty()) return false;
+
+    final var latestResult = unreadResults.get(unreadResults.size() - 1);
+
+    if (!latestResult.hasTargets()) return false;
+
+    return latestResult.targets.stream().anyMatch(target -> target.fiducialId == id);
+  }
+
   public VisionEstimate getLatestMultiTagEstimate() {
     return latestMultiTagEstimate;
   }
@@ -158,15 +174,20 @@ public class Camera {
     final double estimateTypeMultiplier =
         (estimateType == EstimateType.SINGLE_TAG) ? VisionConstants.kSingleTagStdDevMultiplier : 1;
 
+    final double targetDistancePower = 
+        (estimateType == EstimateType.SINGLE_TAG) ?  VisionConstants.kSingleTagTargetDistancePower : VisionConstants.kMultiTagTargetDistancePower;
+    
+
     final double translationStdDev =
-        estimateTypeMultiplier
+            estimateTypeMultiplier
             * VisionConstants.kTranslationStdDevCoeff
-            * Math.pow(avgTargetDistance, 3)
+            * Math.pow(avgTargetDistance, targetDistancePower)
             / Math.pow(visionPoseEstimate.targetsUsed.size(), 3);
+    
     final double rotationStdDev =
         estimateTypeMultiplier
             * VisionConstants.kRotationStdDevCoeff
-            * Math.pow(avgTargetDistance, 3)
+            * Math.pow(avgTargetDistance, targetDistancePower)
             / Math.pow(visionPoseEstimate.targetsUsed.size(), 3);
 
     return VecBuilder.fill(translationStdDev, translationStdDev, rotationStdDev);

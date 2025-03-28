@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
+import frc.robot.subsystems.vision.EstimateType;
 import frc.robot.util.AprilTagUtil;
 import frc.robot.util.MyAlliance;
 import frc.robot.util.ReefPosition;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 
 public class ReefAlign {
@@ -178,22 +180,31 @@ public class ReefAlign {
   }
 
   public static Command alignToReef(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition) {
-    return swerveDrive.driveToFieldPose(
+      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition, IntPredicate useReefPoseEstimate) {
+      return swerveDrive.driveToFieldPose(
         () -> {
-          final Pose2d target =
-              switch (targetReefPosition.get()) {
-                case ALGAE -> centerAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
-                case LEFT -> leftAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
-                case RIGHT -> rightAlignPoses.get(getNearestReefID(swerveDrive.getPose()));
-                default -> swerveDrive.getPose(); // more or less a no-op
-              };
+          final int nearestReefID = getNearestReefID(swerveDrive.getPose());
+          final Pose2d target = switch (targetReefPosition.get()) {
+            case ALGAE -> centerAlignPoses.get(nearestReefID);
+            case LEFT -> centerAlignPoses.get(nearestReefID);
+            case RIGHT -> rightAlignPoses.get(nearestReefID);
+            default -> swerveDrive.getPose();
+          };
+  
           swerveDrive.setAlignmentSetpoint(target);
+  
           return target;
+        }, () -> {
+          final int nearestReefID = getNearestReefID(swerveDrive.getPose());
+          if (useReefPoseEstimate.test(nearestReefID)) {
+            return swerveDrive.getReefVisionPose();
+          } else {
+            return swerveDrive.getPose();
+          }
         });
   }
 
-  public static Command tuneAlignment(SwerveDrive swerveDrive) {
+  public static Command tuneAlignment(SwerveDrive swerveDrive, IntPredicate useReefPoseEstimate) {
     TunableConstant depth = new TunableConstant("/ReefAlign/Depth", kReefDistance.in(Inch));
     TunableConstant side = new TunableConstant("/ReefAlign/Side", kRightAlignDistance.in(Inch));
 
@@ -206,6 +217,13 @@ public class ReefAlign {
                           Inches.of(depth.get()), Inches.of(side.get()), kReefAlignmentRotation));
           swerveDrive.setAlignmentSetpoint(pose);
           return pose;
+        }, () -> {
+          final int nearestReefID = getNearestReefID(swerveDrive.getPose());
+          if (useReefPoseEstimate.test(nearestReefID)) {
+            return swerveDrive.getReefVisionPose();
+          } else {
+            return swerveDrive.getPose();
+          }
         });
   }
 

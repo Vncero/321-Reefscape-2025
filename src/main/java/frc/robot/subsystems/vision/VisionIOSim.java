@@ -59,4 +59,17 @@ public class VisionIOSim implements VisionIO {
         .filter(Objects::nonNull)
         .toArray(VisionEstimate[]::new);
   }
+
+  @Override
+  public boolean reefCameraCanSeeReefTag(int tagID) {
+    for (Camera camera : cameras) {
+      if (!camera.isReefCamera()) continue;
+
+      if (!camera.canSeeTag(tagID)) continue;
+
+      return true;
+    }
+
+    return false;
+  }
 }

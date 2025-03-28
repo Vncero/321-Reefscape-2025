@@ -21,8 +21,13 @@ public class VisionConstants {
   public static final double kTranslationStdDevCoeff = 1e-1;
   public static final double kRotationStdDevCoeff = 1e-1;
 
-  // TODO: tune in sim, represents (to some extent) how much more single tag estimates are trusted
-  public static final double kSingleTagStdDevMultiplier = 1e-2;
+  // TODO: tune more in sim, represents (to some extent) how much more single tag estimates are trusted
+  public static final double kSingleTagStdDevMultiplier = 1;
+  
+  public static final int kMultiTagTargetDistancePower = 3;
+
+  // TODO: tune more
+  public static final int kSingleTagTargetDistancePower = 5;
 
   public static record CameraCalibration(
       int resolutionWidth,
