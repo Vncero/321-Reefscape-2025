@@ -64,7 +64,11 @@ public class VisionConstants {
           Milliseconds.of(5));
 
   public static record CameraConfig(
-      String cameraName, CameraUsage usage, Transform3d robotToCamera, CameraCalibration calib) {}
+      String cameraName,
+      CameraUsage usage,
+      Transform3d robotToCamera,
+      CameraCalibration calib,
+      double relativeStdDevMultiplier) {}
 
   private static final Transform3d k427CameraMountTransform =
       new Transform3d(
@@ -121,35 +125,39 @@ public class VisionConstants {
 
   public static final CameraConfig kElevatorTopCameraConfig =
       new CameraConfig(
-          "Top Elevator Camera", CameraUsage.REEF, k321TopElevatorCameraMountTransform, kOV9281);
+          "Top Elevator Camera", CameraUsage.REEF, k321TopElevatorCameraMountTransform, kOV9281, 1);
 
   public static final CameraConfig kElevatorBottomCameraConfig =
       new CameraConfig(
           "Bottom Elevator Camera",
           CameraUsage.REEF,
           k321BottomElevatorCameraMountTransform,
-          kOV9281);
+          kOV9281,
+          1);
 
   public static final CameraConfig kFrontSwerveCameraConfig =
       new CameraConfig(
           "Front Swerve Module Camera",
           CameraUsage.GENERAL,
           k321FrontSwerveModuleCameraMountTransform,
-          kOV9281);
+          kOV9281,
+          1);
 
   public static final CameraConfig kBackLeftSwerveCameraConfig =
       new CameraConfig(
           "Back Left Swerve Module Camera",
           CameraUsage.REEF,
           k321BackLeftSwerveModuleCameraMountTransform,
-          kOV9281);
+          kOV9281,
+          1e2);
 
   public static final CameraConfig k321FrontLeftSwerveModuleCameraConfig =
       new CameraConfig(
           "Front Left Swerve Module Camera",
           CameraUsage.REEF,
           k321FrontLeftSwerveModuleCameraMountTransform,
-          kOV9281);
+          kOV9281,
+          1);
 
   public static final CameraConfig[] kCameraConfigs = {
     kElevatorTopCameraConfig,
