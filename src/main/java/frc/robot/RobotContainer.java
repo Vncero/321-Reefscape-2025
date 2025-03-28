@@ -410,7 +410,10 @@ public class RobotContainer {
                                     //                     .getTargetAngle()
                                     //                     .isEquivalent(
                                     //                         queuedSetpoint.getArmAngle())),
-                                    ReefAlign.alignToReef(drivetrain, () -> queuedReefPosition, vision::canSeeReefTag))
+                                    ReefAlign.alignToReef(
+                                        drivetrain,
+                                        () -> queuedReefPosition,
+                                        vision::canSeeReefTag))
                                 .onlyWhile(
                                     () ->
                                         ReefAlign.isWithinReefRange(

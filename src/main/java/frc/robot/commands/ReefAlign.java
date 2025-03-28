@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.drivetrain.SwerveDrive;
-import frc.robot.subsystems.vision.EstimateType;
 import frc.robot.subsystems.drivetrain.SwerveDrive.AlignmentSetpoint;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.util.AprilTagUtil;
@@ -199,7 +198,9 @@ public class ReefAlign {
   }
 
   public static Command alignToReef(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition, IntPredicate useReefPoseEstimate) {
+      SwerveDrive swerveDrive,
+      Supplier<ReefPosition> targetReefPosition,
+      IntPredicate useReefPoseEstimate) {
     return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)
         .andThen(
             swerveDrive.driveToFieldPose(
@@ -213,7 +214,8 @@ public class ReefAlign {
                       };
 
                   return new AlignmentSetpoint(target, true);
-                }, () -> {
+                },
+                () -> {
                   final int nearestReefID = getNearestReefID(swerveDrive.getPose());
                   if (useReefPoseEstimate.test(nearestReefID)) {
                     return swerveDrive.getReefVisionPose();
@@ -225,7 +227,9 @@ public class ReefAlign {
   }
 
   public static Command alignToPrealignReef(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition, IntPredicate useReefPoseEstimate) {
+      SwerveDrive swerveDrive,
+      Supplier<ReefPosition> targetReefPosition,
+      IntPredicate useReefPoseEstimate) {
     return Commands.runOnce(() -> Leds.getInstance().isReefAligning = true)
         .andThen(
             swerveDrive.driveToFieldPose(
@@ -244,7 +248,8 @@ public class ReefAlign {
                               new Translation2d(kIntermediateDistance, Meters.zero()),
                               Rotation2d.kZero));
                   return new AlignmentSetpoint(target, false);
-                }, () -> {
+                },
+                () -> {
                   final int nearestReefID = getNearestReefID(swerveDrive.getPose());
                   if (useReefPoseEstimate.test(nearestReefID)) {
                     return swerveDrive.getReefVisionPose();
@@ -256,8 +261,10 @@ public class ReefAlign {
   }
 
   public static Command alignToTag(
-      SwerveDrive swerveDrive, Supplier<ReefPosition> targetReefPosition, IntPredicate useReefPoseEstimate) {
-      return swerveDrive.driveToFieldPose(
+      SwerveDrive swerveDrive,
+      Supplier<ReefPosition> targetReefPosition,
+      IntPredicate useReefPoseEstimate) {
+    return swerveDrive.driveToFieldPose(
         () -> {
           Pose2d target =
               switch (targetReefPosition.get()) {
@@ -274,7 +281,8 @@ public class ReefAlign {
               target.plus(new Transform2d(translationError.getX(), 0, Rotation2d.kZero));
 
           return new AlignmentSetpoint(newTarget, false);
-        }, () -> {
+        },
+        () -> {
           final int nearestReefID = getNearestReefID(swerveDrive.getPose());
           if (useReefPoseEstimate.test(nearestReefID)) {
             return swerveDrive.getReefVisionPose();
@@ -296,7 +304,8 @@ public class ReefAlign {
                       new Transform2d(
                           Inches.of(depth.get()), Inches.of(side.get()), kReefAlignmentRotation));
           return new AlignmentSetpoint(pose, true);
-        }, () -> {
+        },
+        () -> {
           final int nearestReefID = getNearestReefID(swerveDrive.getPose());
           if (useReefPoseEstimate.test(nearestReefID)) {
             return swerveDrive.getReefVisionPose();

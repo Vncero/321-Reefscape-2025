@@ -44,7 +44,7 @@ public class Vision extends VirtualSubsystem {
 
   public boolean canSeeReefTag(int tagID) {
     return io.reefCameraCanSeeReefTag(tagID);
-  }  
+  }
 
   @Override
   public void periodic() {

@@ -112,11 +112,11 @@ public class Camera {
             .filter(
                 poseEst ->
                     VisionConstants.kAllowedFieldArea.contains(
-                        poseEst.estimatedPose.getTranslation().toTranslation2d())
+                            poseEst.estimatedPose.getTranslation().toTranslation2d())
                         && poseEst
-                        .estimatedPose
-                        .getMeasureZ()
-                        .isNear(Meters.zero(), VisionConstants.kAllowedFieldHeight))
+                            .estimatedPose
+                            .getMeasureZ()
+                            .isNear(Meters.zero(), VisionConstants.kAllowedFieldHeight))
             .map(
                 photonEst -> {
                   final var visionEst =
@@ -140,10 +140,10 @@ public class Camera {
                 poseEst ->
                     VisionConstants.kAllowedFieldArea.contains(
                             poseEst.estimatedPose.getTranslation().toTranslation2d())
-                    && poseEst
-                        .estimatedPose
-                        .getMeasureZ()
-                        .isNear(Meters.zero(), VisionConstants.kAllowedFieldHeight))
+                        && poseEst
+                            .estimatedPose
+                            .getMeasureZ()
+                            .isNear(Meters.zero(), VisionConstants.kAllowedFieldHeight))
             .map(
                 photonEst -> {
                   final var visionEst =
@@ -189,9 +189,10 @@ public class Camera {
     final double estimateTypeMultiplier =
         (estimateType == EstimateType.SINGLE_TAG) ? VisionConstants.kSingleTagStdDevMultiplier : 1;
 
-    final double targetDistancePower = 
-        (estimateType == EstimateType.SINGLE_TAG) ?  VisionConstants.kSingleTagTargetDistancePower : VisionConstants.kMultiTagTargetDistancePower;
-    
+    final double targetDistancePower =
+        (estimateType == EstimateType.SINGLE_TAG)
+            ? VisionConstants.kSingleTagTargetDistancePower
+            : VisionConstants.kMultiTagTargetDistancePower;
 
     if (visionPoseEstimate.targetsUsed.get(0).poseAmbiguity > VisionConstants.kAmbiguityThreshold
         && estimateType == EstimateType.SINGLE_TAG) {
@@ -208,12 +209,12 @@ public class Camera {
                     * VisionConstants.kAmbiguityScalar);
 
     final double translationStdDev =
-            estimateTypeMultiplier
+        estimateTypeMultiplier
             * VisionConstants.kTranslationStdDevCoeff
             * Math.pow(avgTargetDistance, targetDistancePower)
             * poseAmbiguityMultiplier
             / Math.pow(visionPoseEstimate.targetsUsed.size(), 3);
-    
+
     final double rotationStdDev =
         estimateTypeMultiplier
             * VisionConstants.kRotationStdDevCoeff

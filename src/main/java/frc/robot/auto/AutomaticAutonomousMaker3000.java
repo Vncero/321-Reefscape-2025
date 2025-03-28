@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntPredicate;
-
 import org.json.simple.parser.ParseException;
 
 @Logged
@@ -105,7 +104,10 @@ public class AutomaticAutonomousMaker3000 {
 
   private Command storedAuto;
 
-  public AutomaticAutonomousMaker3000(SwerveDrive drive, CoralSuperstructure coralSuperstructure, IntPredicate useReefPoseEstimate) {
+  public AutomaticAutonomousMaker3000(
+      SwerveDrive drive,
+      CoralSuperstructure coralSuperstructure,
+      IntPredicate useReefPoseEstimate) {
     this.drive = drive;
     this.coralSuperstructure = coralSuperstructure;
 
@@ -137,9 +139,12 @@ public class AutomaticAutonomousMaker3000 {
                         case MIDTOPAUTO -> buildAuto(kMidLaneTopAuto, useReefPoseEstimate);
                         case MIDBOTAUTO -> buildAuto(kMidLaneBotAuto, useReefPoseEstimate);
                         case BOTAUTO -> buildAuto(kBotLaneAuto, useReefPoseEstimate);
-                        case MIDPRELOADAUTO -> buildAuto(kMidLaneBotPreloadAuto, useReefPoseEstimate); // test auto again
+                        case MIDPRELOADAUTO ->
+                            buildAuto(
+                                kMidLaneBotPreloadAuto, useReefPoseEstimate); // test auto again
                         case MIDOPPOSITESIDEAUTO ->
-                            buildAuto(kMidLaneOppositeSideAuto, useReefPoseEstimate); // test auto x2
+                            buildAuto(
+                                kMidLaneOppositeSideAuto, useReefPoseEstimate); // test auto x2
                         case CUSTOM -> buildAuto(autoChooser.build(), useReefPoseEstimate);
                         default -> new PathsAndAuto(Commands.none(), new ArrayList<>());
                       };
@@ -237,7 +242,8 @@ public class AutomaticAutonomousMaker3000 {
                   withScoring(
                       toPathCommand(pathNewGoalEndState, true),
                       config.scoringGroup.get(i).pole,
-                      config.scoringGroup.get(i).level, useReefPoseEstimate));
+                      config.scoringGroup.get(i).level,
+                      useReefPoseEstimate));
           paths.add(path);
         } else {
 
@@ -271,7 +277,8 @@ public class AutomaticAutonomousMaker3000 {
                       withScoring(
                           toPathCommand(scorePathNewGoalEndState),
                           config.scoringGroup.get(i).pole,
-                          config.scoringGroup.get(i).level, useReefPoseEstimate));
+                          config.scoringGroup.get(i).level,
+                          useReefPoseEstimate));
           lastReefSide = config.scoringGroup.get(i).reefSide;
 
           paths.add(intakePath);
@@ -322,7 +329,8 @@ public class AutomaticAutonomousMaker3000 {
                     coralSuperstructure.feedCoral().until(() -> coralSuperstructure.hasCoral())));
   }
 
-  public Command withScoring(Command path, Pole pole, Level level, IntPredicate useReefPoseEstimate) {
+  public Command withScoring(
+      Command path, Pole pole, Level level, IntPredicate useReefPoseEstimate) {
     CoralScorerSetpoint setpoint =
         switch (level) {
           default -> CoralScorerSetpoint.L1;
@@ -342,30 +350,32 @@ public class AutomaticAutonomousMaker3000 {
             coralSuperstructure
                 .goToSetpointProfiled(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
                 .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected()))
-            .andThen(
+        .andThen(
             ReefAlign.alignToReef(
-                    drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT, useReefPoseEstimate))
-                .asProxy()
-                .alongWith(coralSuperstructure.goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle()).asProxy())
-                .asProxy()
-                .withDeadline(
+                drive,
+                () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT,
+                useReefPoseEstimate))
+        .asProxy()
+        .alongWith(
+            coralSuperstructure
+                .goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                .asProxy())
+        .asProxy()
+        .withDeadline(
+            coralSuperstructure
+                .goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
+                .until(() -> drive.atPoseSetpoint())
+                .withTimeout(2.5)
+                .andThen(
                     coralSuperstructure
-                        .goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                        .goToSetpointProfiled(() -> setpoint)
                         .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
-                        .until(() -> drive.atPoseSetpoint())
-                        .withTimeout(2.5)
+                        .until(() -> coralSuperstructure.atTargetState(setpoint)))
+                .andThen(
+                    Commands.waitSeconds(0.5)
                         .andThen(
-                            coralSuperstructure
-                                .goToSetpointProfiled(() -> setpoint)
-                                .alongWith(
-                                    coralSuperstructure.getEndEffector().stallCoralIfDetected())
-                                .until(() -> coralSuperstructure.atTargetState(setpoint)))
-                        .andThen(
-                            Commands.waitSeconds(0.5)
-                                .andThen(
-                                    coralSuperstructure
-                                        .outtakeCoral(() -> setpoint)
-                                        .withTimeout(0.5))));
+                            coralSuperstructure.outtakeCoral(() -> setpoint).withTimeout(0.5))));
   }
 
   private Command toPathCommand(PathPlannerPath path, boolean zero) {
