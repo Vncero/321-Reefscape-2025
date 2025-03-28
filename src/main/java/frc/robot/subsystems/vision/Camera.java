@@ -33,6 +33,8 @@ public class Camera {
 
   private final PhotonPoseEstimator singleTagEstimator;
 
+  private final CameraConfig config;
+
   // for logging
   private VisionEstimate latestMultiTagEstimate;
 
@@ -40,6 +42,9 @@ public class Camera {
 
   public Camera(
       CameraConfig config, PhotonCamera camera, Supplier<Rotation2d> robotHeadingSupplier) {
+
+    this.config = config;
+
     this.name = config.cameraName();
 
     this.usage = config.usage();
@@ -178,16 +183,32 @@ public class Camera {
         (estimateType == EstimateType.SINGLE_TAG) ?  VisionConstants.kSingleTagTargetDistancePower : VisionConstants.kMultiTagTargetDistancePower;
     
 
+    if (visionPoseEstimate.targetsUsed.get(0).poseAmbiguity > VisionConstants.kAmbiguityThreshold
+        && estimateType == EstimateType.SINGLE_TAG) {
+      return null;
+    }
+
+    double poseAmbiguityMultiplier =
+        estimateType != EstimateType.SINGLE_TAG
+            ? 1
+            : Math.max(
+                1,
+                (visionPoseEstimate.targetsUsed.get(0).poseAmbiguity
+                        + VisionConstants.kAmbiguityShifter)
+                    * VisionConstants.kAmbiguityScalar);
+
     final double translationStdDev =
             estimateTypeMultiplier
             * VisionConstants.kTranslationStdDevCoeff
             * Math.pow(avgTargetDistance, targetDistancePower)
+            * poseAmbiguityMultiplier
             / Math.pow(visionPoseEstimate.targetsUsed.size(), 3);
     
     final double rotationStdDev =
         estimateTypeMultiplier
             * VisionConstants.kRotationStdDevCoeff
             * Math.pow(avgTargetDistance, targetDistancePower)
+            * poseAmbiguityMultiplier
             / Math.pow(visionPoseEstimate.targetsUsed.size(), 3);
 
     return VecBuilder.fill(translationStdDev, translationStdDev, rotationStdDev);
