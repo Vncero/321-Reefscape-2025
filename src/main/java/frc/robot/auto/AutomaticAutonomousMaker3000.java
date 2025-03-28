@@ -31,7 +31,7 @@ import org.json.simple.parser.ParseException;
 @Logged
 public class AutomaticAutonomousMaker3000 {
 
-  private static final LinearVelocity kScorePathEndVelocity = MetersPerSecond.of(0);
+  private static final LinearVelocity kScorePathEndVelocity = MetersPerSecond.of(1.5);
 
   private CycleAutoChooser autoChooser = new CycleAutoChooser(5);
 
@@ -119,7 +119,6 @@ public class AutomaticAutonomousMaker3000 {
 
     SmartDashboard.putData("Autos/PreBuiltAuto", preBuiltAuto);
     SmartDashboard.putData("Autos/AutoVisualizerField", field);
-    // SmartDashboard.putData("Autos/TotalTime", totalTime);
 
     // Driver has to click submit to make and view the autonomous path
     SmartDashboard.putData(
@@ -289,6 +288,7 @@ public class AutomaticAutonomousMaker3000 {
                       coralSuperstructure.stopIntake()));
 
       return new PathsAndAuto(auto, paths);
+
     } catch (Exception e) {
       pathError = "Path doesn't exist";
       return null;
@@ -343,28 +343,24 @@ public class AutomaticAutonomousMaker3000 {
         .andThen(
             ReefAlign.alignToReef(
                     drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
-                .alongWith(
-                    coralSuperstructure.goToSetpointPID(
-                        () -> preAlignElevatorHeight, () -> setpoint.getArmAngle()),
-                    coralSuperstructure.getEndEffector().stallCoralIfDetected())
-                .until(() -> drive.atPoseSetpoint())
-                .withTimeout(2.5)
-                .andThen(
-                    coralSuperstructure
-                        .goToSetpointProfiled(() -> setpoint)
-                        .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
-                        .until(() -> coralSuperstructure.atTargetState(setpoint))))
-        .andThen(
-            ReefAlign.alignToReef(
-                    drive, () -> pole == Pole.LEFTPOLE ? ReefPosition.LEFT : ReefPosition.RIGHT)
-                .alongWith(coralSuperstructure.goToSetpointProfiled(() -> setpoint))
                 .withDeadline(
-                    Commands.waitSeconds(0.5)
+                    coralSuperstructure
+                        .goToSetpointPID(() -> preAlignElevatorHeight, () -> setpoint.getArmAngle())
+                        .alongWith(coralSuperstructure.getEndEffector().stallCoralIfDetected())
+                        .until(() -> drive.atPoseSetpoint())
+                        .withTimeout(2.5)
                         .andThen(
                             coralSuperstructure
-                                .outtakeCoral()
-                                // .until(() -> !coralSuperstructure.hasCoral())
-                                .withTimeout(0.5))));
+                                .goToSetpointProfiled(() -> setpoint)
+                                .alongWith(
+                                    coralSuperstructure.getEndEffector().stallCoralIfDetected())
+                                .until(() -> coralSuperstructure.atTargetState(setpoint)))
+                        .andThen(
+                            Commands.waitSeconds(0.5)
+                                .andThen(
+                                    coralSuperstructure
+                                        .outtakeCoral(() -> setpoint)
+                                        .withTimeout(0.5)))));
   }
 
   private Command toPathCommand(PathPlannerPath path, boolean zero) {
