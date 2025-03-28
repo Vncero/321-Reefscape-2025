@@ -5,9 +5,11 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -26,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotConstants;
 import frc.robot.commands.ReefAlign;
 import frc.robot.util.SelfControlledSwerveDriveSimulationWrapper;
 import java.util.function.DoubleSupplier;
@@ -172,23 +175,33 @@ public class DrivetrainSim implements SwerveDrive {
   public void driveToFieldPose(Pose2d pose) {
     if (pose == null) return;
 
-    ChassisSpeeds targetSpeeds =
-        DriverStation.isAutonomous()
-            ? new ChassisSpeeds(
-                xPoseController.calculate(getPose().getX(), pose.getX())
-                    + xPoseController.getSetpoint().velocity,
-                yPoseController.calculate(getPose().getY(), pose.getY())
-                    + yPoseController.getSetpoint().velocity,
-                thetaController.calculate(
-                        getPose().getRotation().getRadians(), pose.getRotation().getRadians())
-                    + thetaController.getSetpoint().velocity)
-            : new ChassisSpeeds(
-                xPoseController.calculate(getPose().getX(), pose.getX()),
-                yPoseController.calculate(getPose().getY(), pose.getY()),
-                thetaController.calculate(
-                    getPose().getRotation().getRadians(), pose.getRotation().getRadians()));
-
     final Pose2d currentPose = getPose();
+
+    double distance =
+        currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation());
+
+    // increase weighting of velocity from PID radius (weight = 0) to velocity radius (weight = 1)
+    double autoFfFactor =
+        (MathUtil.clamp(
+                    distance,
+                    DrivetrainConstants.kAlignmentPIDRadius.in(Meters),
+                    DrivetrainConstants.kAlignmentVelocityRadius.in(Meters))
+                - DrivetrainConstants.kAlignmentPIDRadius.in(Meters))
+            / (DrivetrainConstants.kAlignmentVelocityRadius.in(Meters)
+                - DrivetrainConstants.kAlignmentPIDRadius.in(Meters));
+
+    double ffFactor = DriverStation.isAutonomous() ? autoFfFactor : 0;
+
+    ChassisSpeeds targetSpeeds =
+        ChassisSpeeds.discretize(
+            xPoseController.calculate(getPose().getX(), pose.getX())
+                + xPoseController.getSetpoint().velocity * ffFactor,
+            yPoseController.calculate(getPose().getY(), pose.getY())
+                + yPoseController.getSetpoint().velocity * ffFactor,
+            thetaController.calculate(
+                    getPose().getRotation().getRadians(), pose.getRotation().getRadians())
+                + thetaController.getSetpoint().velocity * ffFactor,
+            RobotConstants.kRobotLoopPeriod.in(Seconds));
 
     if (currentPose.getTranslation().getDistance(alignmentSetpoint.pose().getTranslation())
         < DrivetrainConstants.kAlignmentSetpointTranslationTolerance.in(Meters))

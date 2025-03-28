@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.CoralSuperstructure.CoralScorerSetpoint;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.util.TunableConstant;
 import java.util.function.Supplier;
@@ -77,9 +78,9 @@ public class CoralEndEffector extends SubsystemBase {
   }
 
   // shortcut to outtake coral
-  public Command outtakeCoral() {
+  public Command outtakeCoral(Supplier<CoralScorerSetpoint> setpoint) {
     return Commands.runOnce(() -> Leds.getInstance().isOuttaking = true)
-        .andThen(runAtVelocity(() -> CoralEndEffectorConstants.kCoralOuttakeRPM))
+        .andThen(runAtVelocity(() -> setpoint.get().getOuttakeVelocity()))
         .finallyDo(() -> Leds.getInstance().isOuttaking = false);
   }
 
